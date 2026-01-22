@@ -3,11 +3,11 @@
  - @LastEditor: Ronnie Zhang
  - @LastEditTime: 2023/12/12 09:03:32
  - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
+ - Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
  --------------------------------->
 
 <template>
-  <MeModal ref="modalRef" title="请选择角色" width="360px" class="p-12">
+  <MeModal ref="modalRef" title="請選擇角色" width="360px" class="p-12">
     <n-radio-group v-model:value="roleCode" class="cus-scroll-y max-h-420 w-full py-16">
       <n-space vertical :size="24" class="mx-12">
         <n-radio-button
@@ -25,7 +25,7 @@
     <template #footer>
       <div class="flex">
         <n-button class="flex-1" size="large" @click="logout()">
-          退出登录
+          登出
         </n-button>
         <n-button
           :loading="okLoading"
@@ -35,7 +35,7 @@
           :disabled="userStore.currentRole?.code === roleCode"
           @click="setCurrentRole"
         >
-          确认
+          確定
         </n-button>
       </div>
     </template>
@@ -67,7 +67,7 @@ async function setCurrentRole() {
     const { data } = await api.switchCurrentRole(roleCode.value)
     await authStore.switchCurrentRole(data)
     okLoading.value = false
-    $message.success('切换成功')
+    $message.success('切換成功')
     modalRef.value?.handleOk()
   }
   catch (error) {
@@ -81,7 +81,7 @@ async function logout() {
   await api.logout()
   authStore.logout()
   modalRef.value?.close()
-  $message.success('已退出登录')
+  $message.success('已登出')
 }
 
 defineExpose({

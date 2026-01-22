@@ -49,7 +49,8 @@ function handleMenuSelect(key, item) {
         window.open(item.originPath)
       },
       cancel: () => {
-        router.push(item.path)
+        if (item.path && !isExternal(item.path))
+          router.push(item.path)
       },
     })
   }

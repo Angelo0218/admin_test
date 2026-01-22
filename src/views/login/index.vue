@@ -3,7 +3,7 @@
  - @LastEditor: Ronnie Zhang
  - @LastEditTime: 2023/12/05 21:28:36
  - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
+ - Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
  --------------------------------->
 
 <template>
@@ -24,7 +24,7 @@
           v-model:value="loginInfo.username"
           autofocus
           class="mt-32 h-40 items-center"
-          placeholder="请输入用户名"
+          placeholder="請輸入帳號"
           :maxlength="20"
         >
           <template #prefix>
@@ -36,7 +36,7 @@
           class="mt-20 h-40 items-center"
           type="password"
           show-password-on="mousedown"
-          placeholder="请输入密码"
+          placeholder="請輸入密碼"
           :maxlength="20"
           @keydown.enter="handleLogin()"
         >
@@ -45,52 +45,21 @@
           </template>
         </n-input>
 
-        <div class="mt-20 flex items-center">
-          <n-input
-            v-model:value="loginInfo.captcha"
-            class="h-40 items-center"
-            palceholder="请输入验证码"
-            :maxlength="4"
-            @keydown.enter="handleLogin()"
-          >
-            <template #prefix>
-              <i class="i-fe:key mr-12 opacity-20" />
-            </template>
-          </n-input>
-          <img
-            v-if="captchaUrl"
-            :src="captchaUrl"
-            alt="验证码"
-            height="40"
-            class="ml-12 w-80 cursor-pointer"
-            @click="initCaptcha"
-          >
-        </div>
-
         <n-checkbox
           class="mt-20"
           :checked="isRemember"
-          label="记住我"
+          label="記住帳號密碼"
           :on-update:checked="(val) => (isRemember = val)"
         />
 
-        <div class="mt-20 flex items-center">
+        <div class="mt-20">
           <n-button
-            class="h-40 flex-1 rounded-5 text-16"
-            type="primary"
-            ghost
-            @click="quickLogin()"
-          >
-            一键体验
-          </n-button>
-
-          <n-button
-            class="ml-32 h-40 flex-1 rounded-5 text-16"
+            class="h-40 w-full rounded-5 text-16"
             type="primary"
             :loading="loading"
             @click="handleLogin()"
           >
-            登录
+            登入
           </n-button>
         </div>
       </div>
@@ -103,7 +72,7 @@
 <script setup>
 import { useStorage } from '@vueuse/core'
 import { useAuthStore } from '@/store'
-import { lStorage, throttle } from '@/utils'
+import { lStorage } from '@/utils'
 import api from './api'
 
 const authStore = useAuthStore()
@@ -116,36 +85,22 @@ const loginInfo = ref({
   password: '',
 })
 
-const captchaUrl = ref('')
-const initCaptcha = throttle(() => {
-  captchaUrl.value = `${import.meta.env.VITE_AXIOS_BASE_URL}/auth/captcha?${Date.now()}`
-}, 500)
-
 const localLoginInfo = lStorage.get('loginInfo')
 if (localLoginInfo) {
   loginInfo.value.username = localLoginInfo.username || ''
   loginInfo.value.password = localLoginInfo.password || ''
 }
-initCaptcha()
-
-function quickLogin() {
-  loginInfo.value.username = 'admin'
-  loginInfo.value.password = '123456'
-  handleLogin(true)
-}
 
 const isRemember = useStorage('isRemember', true)
 const loading = ref(false)
-async function handleLogin(isQuick) {
-  const { username, password, captcha } = loginInfo.value
+async function handleLogin() {
+  const { username, password } = loginInfo.value
   if (!username || !password)
-    return $message.warning('请输入用户名和密码')
-  if (!isQuick && !captcha)
-    return $message.warning('请输入验证码')
+    return $message.warning('請輸入帳號與密碼')
   try {
     loading.value = true
-    $message.loading('正在验证，请稍后...', { key: 'login' })
-    const { data } = await api.login({ username, password: password.toString(), captcha, isQuick })
+    $message.loading('登入中，請稍候...', { key: 'login' })
+    const { data } = await api.login({ username, password: password.toString() })
     if (isRemember.value) {
       lStorage.set('loginInfo', { username, password })
     }
@@ -155,11 +110,6 @@ async function handleLogin(isQuick) {
     onLoginSuccess(data)
   }
   catch (error) {
-    // 10003为验证码错误专属业务码
-    if (error?.code === 10003) {
-      // 为防止爆破，验证码错误则刷新验证码
-      initCaptcha()
-    }
     $message.destroy('login')
     console.error(error)
   }
@@ -168,9 +118,9 @@ async function handleLogin(isQuick) {
 
 async function onLoginSuccess(data = {}) {
   authStore.setToken(data)
-  $message.loading('登录中...', { key: 'login' })
+  $message.loading('登入成功，正在跳轉...', { key: 'login' })
   try {
-    $message.success('登录成功', { key: 'login' })
+    $message.success('登入成功', { key: 'login' })
     if (route.query.redirect) {
       const path = route.query.redirect
       delete route.query.redirect

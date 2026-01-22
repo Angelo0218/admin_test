@@ -8,16 +8,20 @@
  * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
  **********************************/
 
+import dayjs from 'dayjs'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { setupDirectives } from './directives'
-
 import { setupRouter } from './router'
+
 import { setupStore } from './store'
 import { setupNaiveDiscreteApi } from './utils'
+import 'dayjs/locale/zh-tw'
 import '@/styles/reset.css'
 import '@/styles/global.css'
 import 'uno.css'
+
+dayjs.locale('zh-tw')
 
 async function bootstrap() {
   const app = createApp(App)

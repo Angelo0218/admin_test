@@ -4,36 +4,30 @@ export const basicRoutes = [
     path: '/login',
     component: () => import('@/views/login/index.vue'),
     meta: {
-      title: '登录页',
+      title: '登入',
       layout: 'empty',
     },
   },
-
   {
-    name: 'Home',
+    name: 'Root',
     path: '/',
-    component: () => import('@/views/home/index.vue'),
-    meta: {
-      title: '首页',
-    },
+    redirect: '/kyc/pending',
   },
-
-  {
-    name: '404',
-    path: '/404',
-    component: () => import('@/views/error-page/404.vue'),
-    meta: {
-      title: '页面飞走了',
-      layout: 'empty',
-    },
-  },
-
   {
     name: '403',
     path: '/403',
     component: () => import('@/views/error-page/403.vue'),
     meta: {
-      title: '没有权限',
+      title: '403',
+      layout: 'empty',
+    },
+  },
+  {
+    name: '404',
+    path: '/404',
+    component: () => import('@/views/error-page/404.vue'),
+    meta: {
+      title: '404',
       layout: 'empty',
     },
   },

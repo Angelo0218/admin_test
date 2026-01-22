@@ -1,0 +1,943 @@
+openapi: 3.0.3
+info:
+  title: KYC Admin API
+  version: 1.0.0
+servers:
+  - url: https://mock.apidog.com/m1/1182812-1177228-default
+    description: apidog mock default
+  - url: https://mock.apidog.com/m1/1182812-1177228-1050889
+    description: apidog mock server
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              default:
+                value:
+                  username: admin
+                  password: '123456'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseToken'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      accessToken: mock-access-token
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: Logout
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBoolean'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data: true
+  /api/v1/auth/refresh/token:
+    post:
+      tags: [auth]
+      summary: Refresh token
+      parameters:
+        - name: refreshToken
+          in: cookie
+          required: true
+          description: HttpOnly refresh token cookie
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseToken'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      accessToken: mock-access-token-refreshed
+  /api/v1/auth/role/toggle:
+    post:
+      tags: [auth]
+      summary: Toggle role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleToggleRequest'
+            examples:
+              default:
+                value:
+                  role: AUDITOR
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseToken'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      accessToken: mock-access-token-auditor
+  /api/v1/user/detail:
+    get:
+      tags: [user]
+      summary: Get user detail
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUser'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      id: U_2001
+                      username: admin
+                      profile:
+                        avatar: ''
+                        nickName: Admin
+                      roles:
+                        - id: R_1
+                          code: SUPER_ADMIN
+                          name: Super Admin
+                        - id: R_2
+                          code: AUDITOR
+                          name: Auditor
+                      currentRole:
+                        id: R_1
+                        code: SUPER_ADMIN
+                        name: Super Admin
+  /api/v1/role/permissions/tree:
+    get:
+      tags: [permission]
+      summary: Get permission tree
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePermissions'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      - code: Kyc
+                        name: KYC 審核
+                        type: MENU
+                        icon: i-fe:shield
+                        order: 1
+                        enable: true
+                        show: true
+                        path: /kyc
+                        redirect: /kyc/pending
+                        children:
+                          - code: KycPending
+                            name: 待審核列表
+                            type: MENU
+                            path: /kyc/pending
+                            component: /src/views/kyc/pending/index.vue
+                            layout: normal
+                            keepAlive: true
+                            icon: i-fe:list
+                            order: 1
+                            enable: true
+                            show: true
+                            children:
+                              - code: KycAssign
+                                name: 分配案件
+                                type: BUTTON
+                                enable: true
+                                show: false
+                          - code: KycDetail
+                            name: 審核詳情
+                            type: MENU
+                            path: /kyc/detail/:id
+                            component: /src/views/kyc/detail/index.vue
+                            layout: normal
+                            keepAlive: false
+                            icon: i-fe:search
+                            order: 2
+                            enable: true
+                            show: false
+                            children:
+                              - code: KycApprove
+                                name: 通過
+                                type: BUTTON
+                                enable: true
+                                show: false
+                              - code: KycReject
+                                name: 拒絕
+                                type: BUTTON
+                                enable: true
+                                show: false
+                              - code: KycReset
+                                name: 重置狀態
+                                type: BUTTON
+                                enable: true
+                                show: false
+                          - code: KycHistory
+                            name: 歷史記錄與歸檔
+                            type: MENU
+                            path: /kyc/history
+                            component: /src/views/kyc/history/index.vue
+                            layout: normal
+                            keepAlive: true
+                            icon: i-fe:archive
+                            order: 3
+                            enable: true
+                            show: true
+  /api/v1/permission/menu/validate:
+    post:
+      tags: [permission]
+      summary: Validate menu path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionValidateRequest'
+            examples:
+              default:
+                value:
+                  path: /kyc/pending
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBoolean'
+              examples:
+                allowed:
+                  value:
+                    code: 0
+                    message: ok
+                    data: true
+                denied:
+                  value:
+                    code: 0
+                    message: ok
+                    data: false
+  /api/v1/kyc/applications:
+    get:
+      tags: [kyc]
+      summary: Get pending list
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED, RESET]
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+            enum: [me]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseKycList'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      items:
+                        - id: KYC_1001
+                          fullName: Wang XiaoMing
+                          idNumber: A123456789
+                          status: PENDING
+                          submittedAt: '2024-01-10T08:30:00Z'
+                          assignedAuditorId: U_2001
+                          assignedAuditorName: Auditor A
+                        - id: KYC_1002
+                          fullName: Chen YuLing
+                          idNumber: B223456789
+                          status: PENDING
+                          submittedAt: '2024-01-11T10:12:00Z'
+                          assignedAuditorId: U_2002
+                          assignedAuditorName: Auditor B
+                      page: 1
+                      pageSize: 20
+                      total: 2
+  /api/v1/kyc/applications/{id}:
+    get:
+      tags: [kyc]
+      summary: Get application detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseKycDetail'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      application:
+                        id: KYC_1001
+                        userId: U_3001
+                        fullName: Wang XiaoMing
+                        idNumber: A123456789
+                        status: PENDING
+                        submittedAt: '2024-01-10T08:30:00Z'
+                        assignedAuditorId: U_2001
+                        assignedAuditorName: Auditor A
+                        documents:
+                          - id: D1
+                            type: ID_FRONT
+                            url: https://cdn.example.com/kyc/front.jpg
+                          - id: D2
+                            type: ID_BACK
+                            url: https://cdn.example.com/kyc/back.jpg
+                          - id: D3
+                            type: SELFIE
+                            url: https://cdn.example.com/kyc/selfie.jpg
+                      auditHistory:
+                        - id: AR_1001
+                          action: APPROVED
+                          auditorId: U_2001
+                          auditorName: Auditor A
+                          comment: Looks good
+                          createdAt: '2024-01-10T09:10:00Z'
+  /api/v1/kyc/applications/{id}/audit:
+    post:
+      tags: [kyc]
+      summary: Audit application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditRequest'
+            examples:
+              approve:
+                value:
+                  decision: APPROVED
+                  comment: Looks good
+              reject:
+                value:
+                  decision: REJECTED
+                  comment: Photo too blurry
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuditResult'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      id: KYC_1001
+                      status: APPROVED
+                      auditedAt: '2024-01-10T09:20:00Z'
+  /api/v1/kyc/applications/{id}/assign:
+    post:
+      tags: [kyc]
+      summary: Assign auditor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRequest'
+            examples:
+              default:
+                value:
+                  auditorId: U_2002
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAssignResult'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      id: KYC_1001
+                      assignedAuditorId: U_2002
+                      assignedAuditorName: Auditor B
+  /api/v1/kyc/applications/{id}/reset:
+    post:
+      tags: [kyc]
+      summary: Reset status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetRequest'
+            examples:
+              default:
+                value:
+                  reason: Recheck required
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseResetResult'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      id: KYC_1001
+                      status: RESET
+  /api/v1/kyc/applications/history:
+    get:
+      tags: [kyc]
+      summary: Get history
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [APPROVED, REJECTED, RESET]
+        - name: auditorId
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseKycHistory'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      items:
+                        - id: KYC_1000
+                          fullName: Lee ZiHan
+                          idNumber: C323456789
+                          status: APPROVED
+                          auditorName: Auditor A
+                          updatedAt: '2024-01-08T12:00:00Z'
+                      page: 1
+                      pageSize: 20
+                      total: 1
+  /api/v1/kyc/auditors:
+    get:
+      tags: [kyc]
+      summary: Get auditors
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuditors'
+              examples:
+                default:
+                  value:
+                    code: 0
+                    message: ok
+                    data:
+                      - id: U_2001
+                        name: Auditor A
+                      - id: U_2002
+                        name: Auditor B
+components:
+  schemas:
+    ApiResponseBase:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: ok
+      required: [code, message]
+    ApiResponseToken:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/TokenData'
+          required: [data]
+    ApiResponseBoolean:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: boolean
+          required: [data]
+    ApiResponseUser:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+          required: [data]
+    ApiResponsePermissions:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PermissionItem'
+          required: [data]
+    ApiResponseKycList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/KycListResponse'
+          required: [data]
+    ApiResponseKycDetail:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/KycDetailResponse'
+          required: [data]
+    ApiResponseKycHistory:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/KycHistoryResponse'
+          required: [data]
+    ApiResponseAuditors:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Auditor'
+          required: [data]
+    ApiResponseAuditResult:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AuditResult'
+          required: [data]
+    ApiResponseAssignResult:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AssignResult'
+          required: [data]
+    ApiResponseResetResult:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ResetResult'
+          required: [data]
+    TokenData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required: [accessToken]
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required: [username, password]
+    RoleToggleRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [SUPER_ADMIN, AUDITOR]
+      required: [role]
+    PermissionValidateRequest:
+      type: object
+      properties:
+        path:
+          type: string
+      required: [path]
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        profile:
+          $ref: '#/components/schemas/Profile'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        currentRole:
+          $ref: '#/components/schemas/Role'
+      required: [id, username, roles, currentRole]
+    Profile:
+      type: object
+      properties:
+        avatar:
+          type: string
+        nickName:
+          type: string
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          enum: [SUPER_ADMIN, AUDITOR]
+        name:
+          type: string
+      required: [id, code, name]
+    PermissionItem:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [MENU, BUTTON]
+        icon:
+          type: string
+        order:
+          type: integer
+        enable:
+          type: boolean
+        show:
+          type: boolean
+        path:
+          type: string
+        redirect:
+          type: string
+        component:
+          type: string
+        layout:
+          type: string
+        keepAlive:
+          type: boolean
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionItem'
+    KycListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycApplicationListItem'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      required: [items, page, pageSize, total]
+    KycHistoryResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycHistoryItem'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      required: [items, page, pageSize, total]
+    KycDetailResponse:
+      type: object
+      properties:
+        application:
+          $ref: '#/components/schemas/KycApplicationDetail'
+        auditHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditRecord'
+      required: [application, auditHistory]
+    KycApplicationListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        idNumber:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, RESET]
+        submittedAt:
+          type: string
+          format: date-time
+        assignedAuditorId:
+          type: string
+        assignedAuditorName:
+          type: string
+      required: [id, fullName, idNumber, status, submittedAt]
+    KycApplicationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        fullName:
+          type: string
+        idNumber:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, RESET]
+        submittedAt:
+          type: string
+          format: date-time
+        assignedAuditorId:
+          type: string
+        assignedAuditorName:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycDocument'
+      required: [id, userId, fullName, idNumber, status, submittedAt, documents]
+    KycDocument:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [ID_FRONT, ID_BACK, SELFIE]
+        url:
+          type: string
+      required: [id, type, url]
+    AuditRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+          enum: [APPROVED, REJECTED, RESET]
+        auditorId:
+          type: string
+        auditorName:
+          type: string
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, action, auditorId, auditorName, createdAt]
+    AuditRequest:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED]
+        comment:
+          type: string
+      required: [decision]
+    AssignRequest:
+      type: object
+      properties:
+        auditorId:
+          type: string
+      required: [auditorId]
+    ResetRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+      required: [reason]
+    AuditResult:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [APPROVED, REJECTED]
+        auditedAt:
+          type: string
+          format: date-time
+      required: [id, status, auditedAt]
+    AssignResult:
+      type: object
+      properties:
+        id:
+          type: string
+        assignedAuditorId:
+          type: string
+        assignedAuditorName:
+          type: string
+      required: [id, assignedAuditorId]
+    ResetResult:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [RESET]
+      required: [id, status]
+    KycHistoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        idNumber:
+          type: string
+        status:
+          type: string
+          enum: [APPROVED, REJECTED, RESET]
+        auditorName:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, fullName, idNumber, status, updatedAt]
+    Auditor:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required: [id, name]

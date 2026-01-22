@@ -6,7 +6,6 @@
  * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
  **********************************/
 
-import { hyphenate } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { isExternal } from '@/utils'
 
@@ -18,6 +17,7 @@ export const usePermissionStore = defineStore('permission', {
   }),
   actions: {
     setPermissions(permissions) {
+      this.accessRoutes = []
       this.permissions = permissions
       this.menus = this.permissions
         .filter(item => item.type === 'MENU')
@@ -54,8 +54,6 @@ export const usePermissionStore = defineStore('permission', {
       let originPath
       if (isExternal(item.path)) {
         originPath = item.path
-        item.component = '/src/views/iframe/index.vue'
-        item.path = `/iframe/${hyphenate(item.code)}`
       }
       return {
         name: item.code,

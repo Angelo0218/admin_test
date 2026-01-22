@@ -3,7 +3,7 @@
  - @LastEditor: Ronnie Zhang
  - @LastEditTime: 2023/12/05 21:28:09
  - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
+ - Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
  --------------------------------->
 
 <template>
@@ -12,16 +12,16 @@
       <n-result
         class="m-auto"
         status="403"
-        title="403 禁止访问"
-        description="抱歉，您暂无权限访问，请联系管理员开通权限。"
+        title="403 權限不足"
+        description="您沒有權限存取此頁面"
         size="large"
       >
         <template #footer>
           <n-button v-if="back" type="primary" ghost @click="router.replace(back)">
-            返回上一页
+            返回上一頁
           </n-button>
           <n-button type="primary" class="ml-20" @click="router.replace('/')">
-            返回首页
+            返回首頁
           </n-button>
         </template>
       </n-result>

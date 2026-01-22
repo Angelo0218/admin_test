@@ -3,15 +3,15 @@
  * @LastEditor: Ronnie Zhang
  * @LastEditTime: 2023/12/13 20:54:36
  * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
+ * Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
  **********************************/
 
 export const defaultLayout = 'normal'
 
 export const defaultPrimaryColor = '#316C72'
 
-// 控制 LayoutSetting 组件是否可见
-export const layoutSettingVisible = true
+// 控制 LayoutSetting 顯示
+export const layoutSettingVisible = false
 
 export const naiveThemeOverrides = {
   common: {
@@ -24,53 +24,62 @@ export const naiveThemeOverrides = {
 
 export const basePermissions = [
   {
-    code: 'ExternalLink',
-    name: '外链(可内嵌打开)',
+    code: 'Kyc',
+    name: 'KYC 審核',
     type: 'MENU',
-    icon: 'i-fe:external-link',
-    order: 98,
+    icon: 'i-fe:shield',
+    order: 1,
     enable: true,
     show: true,
+    path: '/kyc',
+    redirect: '/kyc/pending',
     children: [
       {
-        code: 'ShowDocs',
-        name: '项目文档',
+        code: 'KycPending',
+        name: '待審核列表',
         type: 'MENU',
-        path: 'https://isme.top',
-        icon: 'i-me:docs',
+        path: '/kyc/pending',
+        component: '/src/views/kyc/pending/index.vue',
+        icon: 'i-fe:list',
         order: 1,
         enable: true,
         show: true,
+        layout: 'normal',
+        keepAlive: true,
+        children: [
+          { code: 'KycAssign', name: '分配案件', type: 'BUTTON', enable: true, show: false },
+        ],
       },
       {
-        code: 'ApiFoxDocs',
-        name: '接口文档',
+        code: 'KycDetail',
+        name: '審核詳情',
         type: 'MENU',
-        path: 'https://apifox.com/apidoc/shared-ff4a4d32-c0d1-4caf-b0ee-6abc130f734a',
-        icon: 'i-me:apifox',
+        path: '/kyc/detail/:id',
+        component: '/src/views/kyc/detail/index.vue',
+        icon: 'i-fe:search',
         order: 2,
         enable: true,
-        show: true,
+        show: false,
+        layout: 'normal',
+        keepAlive: false,
+        children: [
+          { code: 'KycApprove', name: '通過', type: 'BUTTON', enable: true, show: false },
+          { code: 'KycReject', name: '拒絕', type: 'BUTTON', enable: true, show: false },
+          { code: 'KycReset', name: '重置狀態', type: 'BUTTON', enable: true, show: false },
+        ],
       },
       {
-        code: 'NaiveUI',
-        name: 'Naive UI',
+        code: 'KycHistory',
+        name: '歷史記錄與歸檔',
         type: 'MENU',
-        path: 'https://www.naiveui.com/zh-CN/os-theme',
-        icon: 'i-me:naiveui',
+        path: '/kyc/history',
+        component: '/src/views/kyc/history/index.vue',
+        icon: 'i-fe:archive',
         order: 3,
         enable: true,
         show: true,
-      },
-      {
-        code: 'MyBlog',
-        name: '博客-掘金',
-        type: 'MENU',
-        path: 'https://juejin.cn/user/1961184475483255/posts',
-        icon: 'i-simple-icons:juejin',
-        order: 4,
-        enable: true,
-        show: true,
+        layout: 'normal',
+        keepAlive: true,
       },
     ],
   },

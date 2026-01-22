@@ -9,8 +9,8 @@
 <template>
   <n-config-provider
     class="wh-full"
-    :locale="zhCN"
-    :date-locale="dateZhCN"
+    :locale="zhTW"
+    :date-locale="dateZhTW"
     :theme="appStore.isDark ? darkTheme : undefined"
     :theme-overrides="appStore.naiveThemeOverrides"
   >
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { darkTheme, dateZhCN, zhCN } from 'naive-ui'
+import { darkTheme, dateZhTW, zhTW } from 'naive-ui'
 import { LayoutSetting } from '@/components'
 import { useAppStore, useTabStore } from '@/store'
 import { layoutSettingVisible } from './settings'

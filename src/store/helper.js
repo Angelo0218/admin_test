@@ -19,6 +19,10 @@ export async function getUserInfo() {
 }
 
 export async function getPermissions() {
+  const permissionMode = import.meta.env.VITE_PERMISSION_MODE || 'static'
+  if (permissionMode !== 'remote') {
+    return cloneDeep(basePermissions)
+  }
   let asyncPermissions = []
   try {
     const res = await api.getRolePermissions()
@@ -27,5 +31,8 @@ export async function getPermissions() {
   catch (error) {
     console.error(error)
   }
-  return cloneDeep(basePermissions).concat(asyncPermissions)
+  if (asyncPermissions.length) {
+    return asyncPermissions
+  }
+  return cloneDeep(basePermissions)
 }
