@@ -1,141 +1,4 @@
 {
-  "GET /kyc/applications?status=PENDING&assignedTo=me&page=1&pageSize=20": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "items": [
-          {
-            "id": "KYC_1001",
-            "fullName": "Wang XiaoMing",
-            "idNumber": "A123456789",
-            "status": "PENDING",
-            "submittedAt": "2024-01-10T08:30:00Z",
-            "assignedAuditorId": "U_2001",
-            "assignedAuditorName": "Auditor A"
-          },
-          {
-            "id": "KYC_1002",
-            "fullName": "Chen YuLing",
-            "idNumber": "B223456789",
-            "status": "PENDING",
-            "submittedAt": "2024-01-11T10:12:00Z",
-            "assignedAuditorId": "U_2002",
-            "assignedAuditorName": "Auditor B"
-          }
-        ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 2
-      }
-    }
-  },
-  "GET /kyc/applications/KYC_1001": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "application": {
-          "id": "KYC_1001",
-          "userId": "U_3001",
-          "fullName": "Wang XiaoMing",
-          "idNumber": "A123456789",
-          "status": "PENDING",
-          "submittedAt": "2024-01-10T08:30:00Z",
-          "assignedAuditorId": "U_2001",
-          "assignedAuditorName": "Auditor A",
-          "documents": [
-            { "id": "D1", "type": "ID_FRONT", "url": "https://cdn.example.com/kyc/front.jpg" },
-            { "id": "D2", "type": "ID_BACK", "url": "https://cdn.example.com/kyc/back.jpg" },
-            { "id": "D3", "type": "SELFIE", "url": "https://cdn.example.com/kyc/selfie.jpg" }
-          ]
-        },
-        "auditHistory": [
-          {
-            "id": "AR_1001",
-            "action": "APPROVED",
-            "auditorId": "U_2001",
-            "auditorName": "Auditor A",
-            "comment": "Looks good",
-            "createdAt": "2024-01-10T09:10:00Z"
-          }
-        ]
-      }
-    }
-  },
-  "POST /kyc/applications/KYC_1001/audit": {
-    "request": {
-      "decision": "APPROVED",
-      "comment": "Looks good"
-    },
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "id": "KYC_1001",
-        "status": "APPROVED",
-        "auditedAt": "2024-01-10T09:20:00Z"
-      }
-    }
-  },
-  "POST /kyc/applications/KYC_1001/assign": {
-    "request": {
-      "auditorId": "U_2002"
-    },
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "id": "KYC_1001",
-        "assignedAuditorId": "U_2002",
-        "assignedAuditorName": "Auditor B"
-      }
-    }
-  },
-  "POST /kyc/applications/KYC_1001/reset": {
-    "request": {
-      "reason": "Recheck required"
-    },
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "id": "KYC_1001",
-        "status": "RESET"
-      }
-    }
-  },
-  "GET /kyc/applications/history?status=APPROVED&auditorId=&dateFrom=&dateTo=&page=1&pageSize=20": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "items": [
-          {
-            "id": "KYC_1000",
-            "fullName": "Lee ZiHan",
-            "idNumber": "C323456789",
-            "status": "APPROVED",
-            "auditorName": "Auditor A",
-            "updatedAt": "2024-01-08T12:00:00Z"
-          }
-        ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 1
-      }
-    }
-  },
-  "GET /kyc/auditors": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": [
-        { "id": "U_2001", "name": "Auditor A" },
-        { "id": "U_2002", "name": "Auditor B" }
-      ]
-    }
-  },
   "POST /auth/login": {
     "request": {
       "username": "admin",
@@ -146,41 +9,6 @@
       "message": "ok",
       "data": {
         "accessToken": "mock-access-token"
-      }
-    }
-  },
-  "GET /user/detail": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "id": "U_2001",
-        "username": "admin",
-        "profile": {
-          "avatar": "",
-          "nickName": "Admin"
-        },
-        "roles": [
-          { "id": "R_1", "code": "SUPER_ADMIN", "name": "Super Admin" },
-          { "id": "R_2", "code": "AUDITOR", "name": "Auditor" }
-        ],
-        "currentRole": { "id": "R_1", "code": "SUPER_ADMIN", "name": "Super Admin" }
-      }
-    }
-  },
-  "POST /auth/logout": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": true
-    }
-  },
-  "POST /auth/refresh/token": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "accessToken": "mock-access-token-refreshed"
       }
     }
   },
@@ -196,6 +24,26 @@
       }
     }
   },
+  "GET /user/detail": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "id": "U_1001",
+        "username": "admin",
+        "status": "ACTIVE",
+        "profile": {
+          "avatar": "",
+          "nickName": "Admin"
+        },
+        "roles": [
+          { "id": "R_1", "code": "ADMIN", "name": "管理員" },
+          { "id": "R_2", "code": "AUDITOR", "name": "審核員" }
+        ],
+        "currentRole": { "id": "R_1", "code": "ADMIN", "name": "管理員" }
+      }
+    }
+  },
   "GET /role/permissions/tree": {
     "response": {
       "code": 0,
@@ -205,10 +53,6 @@
           "code": "Kyc",
           "name": "KYC 審核",
           "type": "MENU",
-          "icon": "i-fe:shield",
-          "order": 1,
-          "enable": true,
-          "show": true,
           "path": "/kyc",
           "redirect": "/kyc/pending",
           "children": [
@@ -217,47 +61,14 @@
               "name": "待審核列表",
               "type": "MENU",
               "path": "/kyc/pending",
-              "component": "/src/views/kyc/pending/index.vue",
-              "layout": "normal",
-              "keepAlive": true,
-              "icon": "i-fe:list",
-              "order": 1,
-              "enable": true,
-              "show": true,
-              "children": [
-                { "code": "KycAssign", "name": "分配案件", "type": "BUTTON", "enable": true, "show": false }
-              ]
+              "component": "/src/views/kyc/pending/index.vue"
             },
             {
-              "code": "KycDetail",
-              "name": "審核詳情",
+              "code": "KycAppeals",
+              "name": "申訴列表",
               "type": "MENU",
-              "path": "/kyc/detail/:id",
-              "component": "/src/views/kyc/detail/index.vue",
-              "layout": "normal",
-              "keepAlive": false,
-              "icon": "i-fe:search",
-              "order": 2,
-              "enable": true,
-              "show": false,
-              "children": [
-                { "code": "KycApprove", "name": "通過", "type": "BUTTON", "enable": true, "show": false },
-                { "code": "KycReject", "name": "拒絕", "type": "BUTTON", "enable": true, "show": false },
-                { "code": "KycReset", "name": "重置狀態", "type": "BUTTON", "enable": true, "show": false }
-              ]
-            },
-            {
-              "code": "KycHistory",
-              "name": "歷史記錄與歸檔",
-              "type": "MENU",
-              "path": "/kyc/history",
-              "component": "/src/views/kyc/history/index.vue",
-              "layout": "normal",
-              "keepAlive": true,
-              "icon": "i-fe:archive",
-              "order": 3,
-              "enable": true,
-              "show": true
+              "path": "/kyc/appeals",
+              "component": "/src/views/kyc/appeals/index.vue"
             }
           ]
         }
@@ -274,24 +85,216 @@
       "data": true
     }
   },
-  "POST /permission/menu/validate (history)": {
-    "request": {
-      "path": "/kyc/history"
-    },
+  "GET /kyc/applications?status=PENDING&page=1&pageSize=20": {
     "response": {
       "code": 0,
       "message": "ok",
-      "data": true
+      "data": {
+        "items": [
+          {
+            "id": "KYC_1001",
+            "fullName": "Wang XiaoMing",
+            "idNumber": "A123456789",
+            "documentType": "ID_CARD",
+            "phone": "0912345678",
+            "status": "PENDING",
+            "applicantName": "Wang XiaoMing",
+            "submittedAt": "2024-01-10T08:30:00Z"
+          }
+        ],
+        "page": 1,
+        "pageSize": 20,
+        "total": 1
+      }
     }
   },
-  "POST /permission/menu/validate (unknown)": {
+  "GET /kyc/applications/KYC_1001": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "application": {
+          "id": "KYC_1001",
+          "userId": "U_2001",
+          "applicantName": "Wang XiaoMing",
+          "fullName": "Wang XiaoMing",
+          "idNumber": "A123456789",
+          "documentType": "ID_CARD",
+          "phone": "0912345678",
+          "status": "PENDING",
+          "submittedAt": "2024-01-10T08:30:00Z",
+          "updatedAt": "2024-01-10T08:30:00Z",
+          "documents": [
+            { "id": "D1", "type": "ID_FRONT", "url": "https://cdn.example.com/kyc/front.jpg" },
+            { "id": "D2", "type": "SELFIE", "url": "https://cdn.example.com/kyc/selfie.jpg" }
+          ]
+        },
+        "reviews": [],
+        "appeals": []
+      }
+    }
+  },
+  "POST /kyc/applications/KYC_1001/review": {
     "request": {
-      "path": "/unknown"
+      "action": "NEED_MORE",
+      "comment": "照片不清晰"
     },
     "response": {
       "code": 0,
       "message": "ok",
-      "data": false
+      "data": {
+        "id": "KYC_1001",
+        "status": "NEED_MORE",
+        "reviewedAt": "2024-01-10T09:20:00Z"
+      }
+    }
+  },
+  "GET /kyc/appeals?status=PENDING&page=1&pageSize=20": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "items": [
+          {
+            "id": "APPEAL_1",
+            "applicationId": "KYC_1003",
+            "applicantName": "Wang XiaoMing",
+            "idNumber": "A123456789",
+            "applicationStatus": "REJECTED",
+            "status": "PENDING",
+            "reason": "請重新檢查資料",
+            "createdAt": "2024-01-12T10:20:00Z"
+          }
+        ],
+        "page": 1,
+        "pageSize": 20,
+        "total": 1
+      }
+    }
+  },
+  "POST /kyc/appeals/APPEAL_1/resolve": {
+    "request": {
+      "status": "APPROVED",
+      "decisionComment": "補件通過"
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "id": "APPEAL_1",
+        "status": "APPROVED",
+        "handledAt": "2024-01-12T11:00:00Z"
+      }
+    }
+  },
+  "GET /tickets?status=WAITING&page=1&pageSize=20": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "items": [
+          {
+            "id": "TICKET_1",
+            "subject": "帳號無法登入",
+            "category": "ACCOUNT",
+            "status": "WAITING",
+            "tags": ["login"],
+            "requesterName": "Wang XiaoMing",
+            "createdAt": "2024-01-13T08:00:00Z"
+          }
+        ],
+        "page": 1,
+        "pageSize": 20,
+        "total": 1
+      }
+    }
+  },
+  "GET /tickets/TICKET_1": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "ticket": {
+          "id": "TICKET_1",
+          "subject": "帳號無法登入",
+          "category": "ACCOUNT",
+          "status": "WAITING",
+          "tags": ["login"],
+          "internalNote": "初始待回覆",
+          "requesterName": "Wang XiaoMing",
+          "createdAt": "2024-01-13T08:00:00Z",
+          "updatedAt": "2024-01-13T08:00:00Z"
+        },
+        "messages": []
+      }
+    }
+  },
+  "POST /tickets/TICKET_1/reply": {
+    "request": {
+      "message": "您好，請提供錯誤訊息截圖"
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "id": "MSG_1"
+      }
+    }
+  },
+  "GET /users?page=1&pageSize=20": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "items": [
+          {
+            "id": "U_2001",
+            "username": "user1",
+            "displayName": "Wang XiaoMing",
+            "status": "ACTIVE",
+            "roles": [],
+            "createdAt": "2024-01-10T08:00:00Z"
+          }
+        ],
+        "page": 1,
+        "pageSize": 20,
+        "total": 1
+      }
+    }
+  },
+  "POST /users/U_2001/disable": {
+    "request": {
+      "reason": "測試停用"
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "id": "U_2001",
+        "status": "DISABLED"
+      }
+    }
+  },
+  "GET /audit/logs?page=1&pageSize=20": {
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "items": [
+          {
+            "id": "A_1001",
+            "actorName": "Admin",
+            "action": "KYC_APPROVE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "KYC_1004",
+            "meta": { "comment": "資料完整" },
+            "createdAt": "2024-01-12T10:00:00Z"
+          }
+        ],
+        "page": 1,
+        "pageSize": 20,
+        "total": 1
+      }
     }
   }
 }

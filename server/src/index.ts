@@ -4,9 +4,12 @@ import { logger } from 'hono/logger'
 import { env } from './config/env'
 import { errorHandler } from './middlewares/error'
 import { seedDefaults } from './models/seed'
+import { auditRoutes } from './routes/audit'
 import { authRoutes } from './routes/auth'
 import { kycRoutes } from './routes/kyc'
 import { permissionRoutes } from './routes/permission'
+import { roleRoutes } from './routes/role'
+import { ticketRoutes } from './routes/ticket'
 import { userRoutes } from './routes/user'
 
 const app = new Hono()
@@ -23,6 +26,9 @@ app.route('/api/v1', authRoutes)
 app.route('/api/v1', userRoutes)
 app.route('/api/v1', permissionRoutes)
 app.route('/api/v1', kycRoutes)
+app.route('/api/v1', ticketRoutes)
+app.route('/api/v1', auditRoutes)
+app.route('/api/v1', roleRoutes)
 
 async function start() {
   await seedDefaults()

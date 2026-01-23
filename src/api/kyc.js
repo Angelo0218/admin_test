@@ -5,17 +5,11 @@
 import { request } from '@/utils'
 
 export default {
-  getPendingList: params => request.get('/kyc/applications', {
-    params: {
-      status: 'PENDING',
-      assignedTo: 'me',
-      ...params,
-    },
-  }),
+  list: params => request.get('/kyc/applications', { params }),
+  create: data => request.post('/kyc/applications', data),
   getDetail: id => request.get(`/kyc/applications/${id}`),
-  audit: (id, data) => request.post(`/kyc/applications/${id}/audit`, data),
-  assign: (id, data) => request.post(`/kyc/applications/${id}/assign`, data),
-  reset: (id, data) => request.post(`/kyc/applications/${id}/reset`, data),
-  getHistory: params => request.get('/kyc/applications/history', { params }),
-  getAuditors: () => request.get('/kyc/auditors'),
+  review: (id, data) => request.post(`/kyc/applications/${id}/review`, data),
+  listAppeals: params => request.get('/kyc/appeals', { params }),
+  createAppeal: (id, data) => request.post(`/kyc/applications/${id}/appeals`, data),
+  resolveAppeal: (id, data) => request.post(`/kyc/appeals/${id}/resolve`, data),
 }

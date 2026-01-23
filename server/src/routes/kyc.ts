@@ -1,27 +1,36 @@
 import { Hono } from 'hono'
 import {
-  assignApplicationHandler,
-  auditApplicationHandler,
-  getApplicationDetailHandler,
-  getApplications,
-  getAuditors,
-  getHistory,
-  resetApplicationHandler,
+  createKycAppeal,
+  createKycApplication,
+  getKycDetail,
+  listKycAppeals,
+  listKycApplications,
+  resolveKycAppeal,
+  reviewKycApplication,
 } from '../controllers/kyc'
 import { authMiddleware } from '../middlewares/auth'
 import { validateJson, validateParams, validateQuery } from '../middlewares/validate'
-import { assignSchema, auditSchema, idParamSchema, kycHistoryQuerySchema, kycListQuerySchema, resetSchema } from '../schemas/kyc'
+import {
+  idParamSchema,
+  kycAppealCreateSchema,
+  kycAppealListQuerySchema,
+  kycAppealResolveSchema,
+  kycCreateSchema,
+  kycListQuerySchema,
+  kycReviewSchema,
+} from '../schemas/kyc'
 
 const router = new Hono()
 
 router.use('/kyc/*', authMiddleware)
 
-router.get('/kyc/applications', validateQuery(kycListQuerySchema), getApplications)
-router.get('/kyc/applications/history', validateQuery(kycHistoryQuerySchema), getHistory)
-router.get('/kyc/applications/:id', validateParams(idParamSchema), getApplicationDetailHandler)
-router.post('/kyc/applications/:id/audit', validateParams(idParamSchema), validateJson(auditSchema), auditApplicationHandler)
-router.post('/kyc/applications/:id/assign', validateParams(idParamSchema), validateJson(assignSchema), assignApplicationHandler)
-router.post('/kyc/applications/:id/reset', validateParams(idParamSchema), validateJson(resetSchema), resetApplicationHandler)
-router.get('/kyc/auditors', getAuditors)
+router.get('/kyc/applications', validateQuery(kycListQuerySchema), listKycApplications)
+router.post('/kyc/applications', validateJson(kycCreateSchema), createKycApplication)
+router.get('/kyc/applications/:id', validateParams(idParamSchema), getKycDetail)
+router.post('/kyc/applications/:id/review', validateParams(idParamSchema), validateJson(kycReviewSchema), reviewKycApplication)
+router.post('/kyc/applications/:id/appeals', validateParams(idParamSchema), validateJson(kycAppealCreateSchema), createKycAppeal)
+
+router.get('/kyc/appeals', validateQuery(kycAppealListQuerySchema), listKycAppeals)
+router.post('/kyc/appeals/:id/resolve', validateParams(idParamSchema), validateJson(kycAppealResolveSchema), resolveKycAppeal)
 
 export const kycRoutes = router

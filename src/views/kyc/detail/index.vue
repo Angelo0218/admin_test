@@ -9,20 +9,26 @@
         <n-descriptions-item label="案件編號">
           {{ detail.id || '-' }}
         </n-descriptions-item>
+        <n-descriptions-item label="申請人">
+          {{ detail.applicantName || '-' }}
+        </n-descriptions-item>
         <n-descriptions-item label="姓名">
           {{ detail.fullName || '-' }}
         </n-descriptions-item>
         <n-descriptions-item label="身分證號">
           {{ detail.idNumber || '-' }}
         </n-descriptions-item>
+        <n-descriptions-item label="證件類型">
+          {{ detail.documentType || '-' }}
+        </n-descriptions-item>
+        <n-descriptions-item label="電話">
+          {{ detail.phone || '-' }}
+        </n-descriptions-item>
         <n-descriptions-item label="狀態">
           {{ detail.status || '-' }}
         </n-descriptions-item>
         <n-descriptions-item label="提交時間">
           {{ formatTime(detail.submittedAt) }}
-        </n-descriptions-item>
-        <n-descriptions-item label="分配審查員">
-          {{ detail.assignedAuditorName || '-' }}
         </n-descriptions-item>
       </n-descriptions>
 
@@ -41,11 +47,11 @@
       <n-card title="審核意見">
         <n-input v-model:value="comment" type="textarea" :rows="4" placeholder="輸入審核意見" />
         <div class="mt-16 flex justify-end gap-12">
-          <n-button v-if="isSuperAdmin" type="warning" @click="handleReset">
-            重置狀態
-          </n-button>
           <n-button type="error" @click="handleReject">
             拒絕
+          </n-button>
+          <n-button type="warning" @click="handleNeedMore">
+            補件
           </n-button>
           <n-button type="success" @click="handleApprove">
             通過
@@ -54,7 +60,11 @@
       </n-card>
 
       <n-card title="審核紀錄">
-        <n-data-table :columns="historyColumns" :data="auditHistory" striped />
+        <n-data-table :columns="reviewColumns" :data="reviews" striped />
+      </n-card>
+
+      <n-card title="申訴紀錄">
+        <n-data-table :columns="appealColumns" :data="appeals" striped />
       </n-card>
     </n-space>
   </CommonPage>
@@ -64,28 +74,28 @@
 import dayjs from 'dayjs'
 import api from '@/api/kyc'
 import { CommonPage } from '@/components'
-import { useUserStore } from '@/store'
 
 const route = useRoute()
-const userStore = useUserStore()
-const isSuperAdmin = computed(() => userStore.currentRole?.code === 'SUPER_ADMIN')
 
 const loading = ref(false)
 const comment = ref('')
-const auditHistory = ref([])
+const reviews = ref([])
+const appeals = ref([])
 const detail = reactive({
   id: route.params.id,
+  applicantName: '',
   fullName: '',
   idNumber: '',
+  documentType: '',
+  phone: '',
   status: 'PENDING',
   submittedAt: '',
-  assignedAuditorName: '',
   documents: [],
 })
 
-const historyColumns = [
+const reviewColumns = [
   { title: '動作', key: 'action', minWidth: 120 },
-  { title: '審查員', key: 'auditorName', minWidth: 120 },
+  { title: '審查員', key: 'reviewerName', minWidth: 120 },
   { title: '意見', key: 'comment', minWidth: 200 },
   {
     title: '時間',
@@ -93,6 +103,13 @@ const historyColumns = [
     minWidth: 180,
     render: row => formatTime(row.createdAt),
   },
+]
+
+const appealColumns = [
+  { title: '申訴原因', key: 'reason', minWidth: 200 },
+  { title: '狀態', key: 'status', minWidth: 100 },
+  { title: '處理人', key: 'handledByName', minWidth: 120 },
+  { title: '處理時間', key: 'handledAt', minWidth: 180, render: row => formatTime(row.handledAt) },
 ]
 
 function formatTime(value) {
@@ -104,13 +121,16 @@ async function fetchDetail() {
     loading.value = true
     const { data } = await api.getDetail(detail.id)
     const application = data?.application || {}
+    detail.applicantName = application.applicantName || ''
     detail.fullName = application.fullName || ''
     detail.idNumber = application.idNumber || ''
+    detail.documentType = application.documentType || ''
+    detail.phone = application.phone || ''
     detail.status = application.status || 'PENDING'
     detail.submittedAt = application.submittedAt || ''
-    detail.assignedAuditorName = application.assignedAuditorName || ''
     detail.documents = application.documents || []
-    auditHistory.value = data?.auditHistory || []
+    reviews.value = data?.reviews || []
+    appeals.value = data?.appeals || []
   }
   catch (error) {
     console.error(error)
@@ -120,7 +140,7 @@ async function fetchDetail() {
 }
 
 async function handleApprove() {
-  await handleAudit('APPROVED')
+  await handleReview('PASSED')
 }
 
 async function handleReject() {
@@ -128,16 +148,21 @@ async function handleReject() {
     $message.warning('請輸入拒絕原因')
     return
   }
-  await handleAudit('REJECTED')
+  await handleReview('REJECTED')
 }
 
-async function handleAudit(decision) {
+async function handleNeedMore() {
+  if (!comment.value) {
+    $message.warning('請輸入補件原因')
+    return
+  }
+  await handleReview('NEED_MORE')
+}
+
+async function handleReview(action) {
   try {
     loading.value = true
-    await api.audit(detail.id, {
-      decision,
-      comment: comment.value,
-    })
+    await api.review(detail.id, { action, comment: comment.value })
     $message.success('已送出審核')
     comment.value = ''
     await fetchDetail()
@@ -147,29 +172,6 @@ async function handleAudit(decision) {
     $message.error('審核送出失敗')
   }
   loading.value = false
-}
-
-async function handleReset() {
-  const d = $dialog.warning({
-    title: '確認',
-    content: '確定要重置審核狀態嗎？',
-    positiveText: '確定',
-    negativeText: '取消',
-    async onPositiveClick() {
-      try {
-        d.loading = true
-        await api.reset(detail.id, { reason: '重置審核狀態' })
-        $message.success('已重置狀態')
-        await fetchDetail()
-        d.loading = false
-      }
-      catch (error) {
-        console.error(error)
-        $message.error('重置狀態失敗')
-        d.loading = false
-      }
-    },
-  })
 }
 
 fetchDetail()

@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "npm run lint:fix",
     "lint:fix": "eslint --fix",
     "postinstall": "npx simple-git-hooks",
     "up": "taze major -I"

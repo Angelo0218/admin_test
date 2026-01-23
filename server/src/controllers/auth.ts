@@ -10,9 +10,12 @@ export async function login(c) {
   if (!user || user.passwordHash !== password) {
     return c.json({ code: 401, message: 'invalid credentials', data: null }, 401)
   }
+  if (user.status === 'DISABLED') {
+    return c.json({ code: 403, message: 'user disabled', data: null }, 403)
+  }
 
   const roles = user.roles.map(item => item.role)
-  const currentRole = roles.find(role => role.code === 'SUPER_ADMIN') || roles[0]
+  const currentRole = roles.find(role => role.code === 'ADMIN') || roles[0]
   if (!currentRole) {
     return c.json({ code: 403, message: 'role not assigned', data: null }, 403)
   }

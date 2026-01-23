@@ -8,17 +8,21 @@ datasource db {
 }
 
 model User {
-  id                   String            @id @default(cuid())
-  username             String            @unique
-  passwordHash         String
-  displayName          String
-  avatar               String?
-  roles                UserRole[]
-  applications         KycApplication[]  @relation("Applicant")
-  assignedApplications KycApplication[]  @relation("Auditor")
-  auditRecords         KycAuditRecord[]  @relation("AuditorRecords")
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  id             String          @id @default(cuid())
+  username       String          @unique
+  passwordHash   String
+  displayName    String
+  avatar         String?
+  status         String          @default("ACTIVE")
+  disabledReason String?
+  roles          UserRole[]
+  kycApplications KycApplication[] @relation("Applicant")
+  kycReviews     KycReview[]     @relation("Reviewer")
+  tickets        Ticket[]        @relation("TicketRequester")
+  ticketMessages TicketMessage[] @relation("TicketSender")
+  auditLogs      AuditLog[]      @relation("AuditActor")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Role {
@@ -38,19 +42,19 @@ model UserRole {
 }
 
 model KycApplication {
-  id                String          @id @default(cuid())
-  userId            String
-  user              User            @relation("Applicant", fields: [userId], references: [id])
-  fullName          String
-  idNumber          String
-  nationality       String?
-  status            String          @default("PENDING")
-  submittedAt       DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  assignedAuditorId String?
-  assignedAuditor   User?           @relation("Auditor", fields: [assignedAuditorId], references: [id])
-  documents         KycDocument[]
-  auditRecords      KycAuditRecord[]
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation("Applicant", fields: [userId], references: [id])
+  fullName     String
+  idNumber     String
+  documentType String
+  phone        String
+  status       String         @default("PENDING")
+  submittedAt  DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  documents    KycDocument[]
+  reviews      KycReview[]
+  appeals      KycAppeal[]
 }
 
 model KycDocument {
@@ -59,15 +63,65 @@ model KycDocument {
   application   KycApplication @relation(fields: [applicationId], references: [id])
   type          String
   url           String
+  createdAt     DateTime       @default(now())
 }
 
-model KycAuditRecord {
-  id            String          @id @default(cuid())
+model KycReview {
+  id            String         @id @default(cuid())
   applicationId String
-  application   KycApplication  @relation(fields: [applicationId], references: [id])
+  application   KycApplication @relation(fields: [applicationId], references: [id])
   action        String
-  auditorId     String
-  auditor       User            @relation("AuditorRecords", fields: [auditorId], references: [id])
+  reviewerId    String
+  reviewer      User           @relation("Reviewer", fields: [reviewerId], references: [id])
   comment       String?
-  createdAt     DateTime        @default(now())
+  createdAt     DateTime       @default(now())
+}
+
+model KycAppeal {
+  id              String         @id @default(cuid())
+  applicationId   String
+  application     KycApplication @relation(fields: [applicationId], references: [id])
+  status          String         @default("PENDING")
+  reason          String?
+  decisionComment String?
+  handledById     String?
+  handledBy       User?          @relation(fields: [handledById], references: [id])
+  handledAt       DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Ticket {
+  id           String         @id @default(cuid())
+  requesterId  String
+  requester    User           @relation("TicketRequester", fields: [requesterId], references: [id])
+  subject      String
+  category     String
+  status       String         @default("WAITING")
+  tags         String?
+  internalNote String?
+  messages     TicketMessage[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  senderId  String
+  sender    User     @relation("TicketSender", fields: [senderId], references: [id])
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation("AuditActor", fields: [actorId], references: [id])
+  action     String
+  targetType String
+  targetId   String
+  meta       String?
+  createdAt  DateTime @default(now())
 }

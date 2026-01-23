@@ -6,5 +6,5 @@ export const loginSchema = z.object({
 })
 
 export const roleToggleSchema = z.object({
-  role: z.enum(['SUPER_ADMIN', 'AUDITOR']),
+  role: z.enum(['ADMIN', 'SUPPORT', 'AUDITOR']),
 })
