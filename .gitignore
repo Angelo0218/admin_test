@@ -4,3 +4,4 @@ dist
 stats.html
 server/.env
 server/dev.db
+.worktrees
