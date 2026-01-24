@@ -28,9 +28,9 @@ test('click Ticket List should not trigger stack overflow', async ({ page, reque
   await page.waitForSelector('.side-menu')
 
   const menuItems = page.locator('.n-menu-item-content')
-  const menuTexts = await menuItems.allTextContents()
+  const menuTexts = (await menuItems.allTextContents()).map(text => text.trim())
 
-  const parentIndex = menuTexts.findIndex(text => /客服工單|Tickets/.test(text))
+  const parentIndex = menuTexts.findIndex(text => text === '工單' || text === 'Tickets')
   expect(parentIndex).toBeGreaterThan(-1)
   await menuItems.nth(parentIndex).click()
 
