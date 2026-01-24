@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
+  username: z.string().trim().min(3).max(32).regex(/^[\w.-]+$/),
+  password: z.string().min(8).max(64),
 })
 
 export const roleToggleSchema = z.object({
