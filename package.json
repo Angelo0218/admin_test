@@ -52,6 +52,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-vue-components": "^31.0.0",
     "vite": "^7.3.1",
+    "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-router-warn": "^2.0.0",
     "vite-plugin-vue-devtools": "^8.0.5",
     "vue3-intro-step": "^1.0.5"

@@ -1,11 +1,13 @@
 import path from 'node:path'
 import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
+import { visualizer } from 'rollup-plugin-visualizer'
 import Unocss from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig, loadEnv } from 'vite'
+import viteImagemin from 'vite-plugin-imagemin'
 import removeNoMatch from 'vite-plugin-router-warn'
 import VueDevTools from 'vite-plugin-vue-devtools'
 import { pluginIcons, pluginPagePathes } from './build/plugin-isme'
@@ -29,6 +31,15 @@ export default defineConfig(({ mode }) => {
         resolvers: [NaiveUiResolver()],
         dts: false,
       }),
+      viteImagemin({
+        gifsicle: { optimizationLevel: 3 },
+        mozjpeg: { quality: 75 },
+        pngquant: { quality: [0.65, 0.8] },
+        svgo: {
+          plugins: [{ name: 'removeViewBox', active: false }],
+        },
+      }),
+      visualizer({ filename: 'stats.html', open: false, gzipSize: true, brotliSize: true }),
       // 產生頁面路徑對應
       pluginPagePathes(),
       // 動態 icon
