@@ -106,18 +106,6 @@ export const basicRoutes = [
     },
   },
   {
-    name: 'Roles',
-    path: '/roles',
-    component: () => import('@/views/roles/index.vue'),
-    meta: {
-      title: '角色權限',
-      titleKey: 'menu.Roles',
-      layout: 'normal',
-      keepAlive: true,
-      roles: ['ADMIN'],
-    },
-  },
-  {
     name: 'Audit',
     path: '/audit',
     component: () => import('@/views/audit/index.vue'),

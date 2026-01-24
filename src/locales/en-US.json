@@ -206,22 +206,6 @@
       "failed": "Reset failed"
     }
   },
-  "rolesPage": {
-    "labels": {
-      "code": "Role Code",
-      "name": "Role Name",
-      "permissions": "Permission Codes"
-    },
-    "edit": {
-      "title": "Edit Permissions",
-      "placeholder": "Separate codes with commas",
-      "success": "Updated",
-      "failed": "Update failed"
-    },
-    "list": {
-      "fetchFailed": "Failed to load roles"
-    }
-  },
   "audit": {
     "labels": {
       "action": "Action",
@@ -249,7 +233,7 @@
   },
   "errors": {
     "403Title": "403 Forbidden",
-    "403Desc": "You don\u0027t have access to this page",
+    "403Desc": "You don't have access to this page",
     "404Title": "404 Not Found",
     "404Desc": "The page you visited does not exist",
     "sessionExpiredTitle": "Session expired",

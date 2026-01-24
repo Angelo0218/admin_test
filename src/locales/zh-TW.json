@@ -206,22 +206,6 @@
       "failed": "重設失敗"
     }
   },
-  "rolesPage": {
-    "labels": {
-      "code": "角色代碼",
-      "name": "角色名稱",
-      "permissions": "權限代碼"
-    },
-    "edit": {
-      "title": "編輯權限",
-      "placeholder": "以逗號分隔代碼",
-      "success": "更新成功",
-      "failed": "更新失敗"
-    },
-    "list": {
-      "fetchFailed": "取得角色列表失敗"
-    }
-  },
   "audit": {
     "labels": {
       "action": "操作",
