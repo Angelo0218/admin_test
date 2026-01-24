@@ -19,5 +19,8 @@
     "markdown",
     "json",
     "jsonc"
+  ],
+  "i18n-ally.localesPaths": [
+    "src/locales"
   ]
 }

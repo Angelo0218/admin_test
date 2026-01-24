@@ -17,7 +17,7 @@ export default defineConfig({
     presetWind3(),
     presetAttributify(),
     presetIcons({
-      warn: true,
+      warn: false,
       prefix: ['i-'],
       extraProperties: {
         display: 'inline-block',

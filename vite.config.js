@@ -1,11 +1,3 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:31:02
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import path from 'node:path'
 import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
@@ -37,11 +29,11 @@ export default defineConfig(({ mode }) => {
         resolvers: [NaiveUiResolver()],
         dts: false,
       }),
-      // 自定义插件，用于生成页面文件的path，并添加到虚拟模块
+      // 產生頁面路徑對應
       pluginPagePathes(),
-      // 自定义插件，用于生成自定义icon，并添加到虚拟模块
+      // 動態 icon
       pluginIcons(),
-      // 移除非必要的vue-router动态路由警告: No match found for location with path
+      // 移除 vue-router 的 No match found 警告
       removeNoMatch(),
     ],
     resolve: {
@@ -61,7 +53,7 @@ export default defineConfig(({ mode }) => {
           rewrite: path => path.replace(/^\/api/, ''),
           secure: false,
           configure: (proxy, options) => {
-            // 配置此项可在响应头中看到请求的真实地址
+            // 將實際代理網址回填到 header，方便除錯
             proxy.on('proxyRes', (proxyRes, req) => {
               proxyRes.headers['x-real-url'] = new URL(req.url || '', options.target)?.href || ''
             })
@@ -73,7 +65,7 @@ export default defineConfig(({ mode }) => {
       include: ['vue3-intro-step'],
     },
     build: {
-      chunkSizeWarningLimit: 1024, // chunk 大小警告的限制（单位kb）
+      chunkSizeWarningLimit: 1024, // chunk 檔案大小警告門檻（KB）
     },
   }
 })
