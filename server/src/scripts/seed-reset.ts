@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { seedDefaults, seedDemoData } from '../models/seed'
 
-export function resolveDatabasePath(databaseUrl, prismaDir) {
+export function resolveDatabasePath(databaseUrl: string | undefined, prismaDir: string) {
   if (!databaseUrl || !databaseUrl.startsWith('file:')) {
     return null
   }
@@ -24,7 +24,7 @@ function getPrismaDir() {
   return path.resolve(scriptDir, '..', '..', 'prisma')
 }
 
-async function runCommand(command, cwd) {
+async function runCommand(command: string[], cwd: string) {
   const result = Bun.spawnSync(command, {
     cwd,
     stdout: 'inherit',

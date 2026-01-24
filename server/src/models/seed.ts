@@ -268,3 +268,8 @@ export async function seedDefaults() {
     ],
   })
 }
+
+export async function seedDemoData() {
+  await seedDefaults()
+  return { seeded: true }
+}

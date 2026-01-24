@@ -7,7 +7,7 @@ export const ROLE_CODES = {
 export type RoleCode = typeof ROLE_CODES[keyof typeof ROLE_CODES]
 
 const ROLE_CODE_SET = new Set(Object.values(ROLE_CODES))
-const CREATABLE_ROLE_SET = new Set([ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR])
+const CREATABLE_ROLE_SET: Set<RoleCode> = new Set([ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR])
 
 export function isRoleCode(value: string): value is RoleCode {
   return ROLE_CODE_SET.has(value as RoleCode)
