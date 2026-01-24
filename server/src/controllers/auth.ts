@@ -52,18 +52,12 @@ export async function login(c: AppContext) {
   return c.json({ code: 0, message: 'ok', data: { accessToken } })
 }
 
-function extractRefreshToken(c: AppContext) {
-  const header = c.req.header('Cookie') || ''
-  const match = header.match(/refreshToken=([^;]+)/)
-  const raw = match?.[1] || getCookie(c, 'refreshToken') || ''
-  return decodeURIComponent(raw)
-    .replace(/\s/g, '')
-    .trim()
-    .replace(/^"|"$/g, '')
+export function readRefreshTokenCookie(c: AppContext) {
+  return getCookie(c, 'refreshToken') || ''
 }
 
 export async function refreshToken(c: AppContext) {
-  const token = extractRefreshToken(c)
+  const token = readRefreshTokenCookie(c)
   if (!token) {
     return c.json({ code: 401, message: 'missing refresh token', data: null }, 401)
   }
