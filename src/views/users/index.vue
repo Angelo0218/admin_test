@@ -6,10 +6,11 @@
       </NButton>
     </template>
 
-    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
-      <n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('common.status')" class="w-full sm:w-160" />
-      <n-input v-model:value="filters.keyword" :placeholder="t('users.list.searchPlaceholder')" class="w-full sm:w-220" />
-    </div>
+    <UserListFilters
+      :filters="filters"
+      :status-options="statusOptions"
+      @update-filter="handleFilterUpdate"
+    />
 
     <ResponsiveTable
       :columns="columns"
@@ -18,68 +19,26 @@
       :pagination="pagination"
     >
       <template #card="{ row }">
-        <div class="card-border rounded-8 auto-bg p-12">
-          <div class="flex items-center justify-between gap-8">
-            <div class="text-14 font-600">
-              {{ row.username || '-' }}
-            </div>
-            <NTag :type="statusType(row.status)">
-              {{ statusLabel(row.status) }}
-            </NTag>
-          </div>
-          <div class="grid mt-10 gap-6 text-12">
-            <div class="flex items-center justify-between gap-8">
-              <span class="opacity-60">{{ fieldLabels.displayName }}</span>
-              <span class="text-right">{{ row.displayName || '-' }}</span>
-            </div>
-            <div class="flex items-center justify-between gap-8">
-              <span class="opacity-60">{{ fieldLabels.roles }}</span>
-              <span class="text-right">{{ roleNames(row.roles) }}</span>
-            </div>
-            <div class="flex items-center justify-between gap-8">
-              <span class="opacity-60">{{ fieldLabels.createdAt }}</span>
-              <span class="text-right">{{ formatTime(row.createdAt) }}</span>
-            </div>
-          </div>
-          <div class="mt-10 flex flex-wrap justify-end gap-8">
-            <NButton
-              v-if="row.status === 'ACTIVE'"
-              size="small"
-              type="error"
-              @click="openDisable(row)"
-            >
-              {{ t('users.actions.disable') }}
-            </NButton>
-            <NButton
-              v-else
-              size="small"
-              type="success"
-              @click="handleEnable(row)"
-            >
-              {{ t('users.actions.enable') }}
-            </NButton>
-            <NButton size="small" @click="openReset(row)">
-              {{ t('users.actions.resetPassword') }}
-            </NButton>
-          </div>
-        </div>
+        <UserListCard
+          :row="row"
+          :field-labels="fieldLabels"
+          :status-label="statusLabel"
+          :status-type="statusType"
+          :role-names="roleNames"
+          :format-time="formatTime"
+          :on-disable="openDisable"
+          :on-enable="handleEnable"
+          :on-reset="openReset"
+        />
       </template>
     </ResponsiveTable>
 
     <MeModal ref="disableModalRef">
-      <n-form label-placement="left" label-width="80">
-        <n-form-item :label="t('users.disable.reasonLabel')">
-          <n-input v-model:value="disableState.reason" type="textarea" :rows="3" />
-        </n-form-item>
-      </n-form>
+      <UserDisableForm :state="disableState" @update-field="handleDisableFieldUpdate" />
     </MeModal>
 
     <MeModal ref="resetModalRef">
-      <n-form label-placement="left" label-width="80">
-        <n-form-item :label="t('users.reset.passwordLabel')">
-          <n-input v-model:value="resetState.password" :placeholder="t('users.reset.passwordPlaceholder')" />
-        </n-form-item>
-      </n-form>
+      <UserResetForm :state="resetState" @update-field="handleResetFieldUpdate" />
     </MeModal>
   </CommonPage>
 </template>
@@ -91,6 +50,10 @@ import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/user'
 import { CommonPage, MeModal, ResponsiveTable } from '@/components'
+import UserDisableForm from '@/components/users/UserDisableForm.vue'
+import UserListCard from '@/components/users/UserListCard.vue'
+import UserListFilters from '@/components/users/UserListFilters.vue'
+import UserResetForm from '@/components/users/UserResetForm.vue'
 import { useModal } from '@/composables'
 
 const { t } = useI18n()
@@ -342,6 +305,18 @@ async function handleReset() {
 
 function handleRefresh() {
   fetchList()
+}
+
+function handleFilterUpdate({ key, value }) {
+  filters[key] = value
+}
+
+function handleDisableFieldUpdate({ key, value }) {
+  disableState[key] = value
+}
+
+function handleResetFieldUpdate({ key, value }) {
+  resetState[key] = value
 }
 
 fetchList()

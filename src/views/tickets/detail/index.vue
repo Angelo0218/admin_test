@@ -1,63 +1,17 @@
 <template>
   <CommonPage back>
     <n-space vertical size="large">
-      <n-descriptions bordered :column="isMobile ? 1 : 2" label-placement="left">
-        <n-descriptions-item :label="t('tickets.labels.id')">
-          {{ detail.id || '-' }}
-        </n-descriptions-item>
-        <n-descriptions-item :label="t('tickets.labels.subject')">
-          {{ detail.subject || '-' }}
-        </n-descriptions-item>
-        <n-descriptions-item :label="t('tickets.labels.category')">
-          {{ categoryLabel(detail.category) }}
-        </n-descriptions-item>
-        <n-descriptions-item :label="t('tickets.labels.status')">
-          {{ statusLabel(detail.status) }}
-        </n-descriptions-item>
-        <n-descriptions-item :label="t('tickets.labels.requester')">
-          {{ detail.requesterName || '-' }}
-        </n-descriptions-item>
-        <n-descriptions-item :label="t('tickets.labels.createdAt')">
-          {{ formatTime(detail.createdAt) }}
-        </n-descriptions-item>
-      </n-descriptions>
-
-      <n-card :title="t('tickets.detail.settingsTitle')">
-        <div class="flex flex-col gap-12 sm:flex-row sm:flex-wrap sm:items-start">
-          <n-input v-model:value="meta.tags" :placeholder="t('tickets.detail.tagsPlaceholder')" class="w-full sm:w-240" />
-          <n-input v-model:value="meta.internalNote" :placeholder="t('tickets.detail.internalNotePlaceholder')" class="w-full sm:w-320" />
-          <n-button type="primary" @click="handleUpdateMeta">
-            {{ t('common.update') }}
-          </n-button>
-        </div>
-        <div class="mt-12 flex flex-col gap-12 sm:flex-row sm:flex-wrap sm:items-center">
-          <n-select v-model:value="meta.status" :options="statusOptions" class="w-full sm:w-180" :disabled="!canUpdateStatus" />
-          <n-button type="warning" :disabled="!canUpdateStatus" @click="handleUpdateStatus">
-            {{ t('tickets.detail.changeStatus') }}
-          </n-button>
-        </div>
-      </n-card>
-
-      <n-card :title="t('tickets.detail.conversationTitle')">
-        <n-empty v-if="!messages.length" :description="t('tickets.detail.emptyMessages')" />
-        <div v-else class="flex flex-col gap-12">
-          <div v-for="item in messages" :key="item.id" class="border rounded-8 p-12">
-            <div class="mb-6 text-13 opacity-60">
-              {{ item.senderName || item.senderId }} · {{ formatTime(item.createdAt) }}
-            </div>
-            <div>{{ item.message }}</div>
-          </div>
-        </div>
-      </n-card>
-
-      <n-card :title="t('tickets.detail.newMessageTitle')">
-        <n-input v-model:value="replyMessage" type="textarea" :rows="4" :placeholder="t('tickets.detail.replyPlaceholder')" />
-        <div class="mt-16 flex justify-end">
-          <n-button type="primary" @click="handleReply">
-            {{ t('tickets.detail.reply') }}
-          </n-button>
-        </div>
-      </n-card>
+      <TicketDetailSummary :summary="summary" :is-mobile="isMobile" />
+      <TicketDetailSettings
+        :meta="meta"
+        :status-options="statusOptions"
+        :can-update-status="canUpdateStatus"
+        @update-meta-field="handleMetaFieldChange"
+        @submit-meta="handleUpdateMeta"
+        @submit-status="handleUpdateStatus"
+      />
+      <TicketDetailConversation :messages="messages" :format-time="formatTime" />
+      <TicketDetailReply v-model="replyMessage" @submit="handleReply" />
     </n-space>
   </CommonPage>
 </template>
@@ -68,6 +22,10 @@ import dayjs from 'dayjs'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/ticket'
 import { CommonPage } from '@/components'
+import TicketDetailConversation from '@/components/tickets/TicketDetailConversation.vue'
+import TicketDetailReply from '@/components/tickets/TicketDetailReply.vue'
+import TicketDetailSettings from '@/components/tickets/TicketDetailSettings.vue'
+import TicketDetailSummary from '@/components/tickets/TicketDetailSummary.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -99,6 +57,14 @@ const allStatusOptions = computed(() => [
 ])
 
 const allowedStatuses = computed(() => detail.availableStatuses || [])
+const summary = computed(() => ({
+  id: detail.id || '-',
+  subject: detail.subject || '-',
+  category: categoryLabel(detail.category),
+  status: statusLabel(detail.status),
+  requesterName: detail.requesterName || '-',
+  createdAt: formatTime(detail.createdAt),
+}))
 
 // 狀態轉移僅做前端提示，後端仍保有嚴格檢查。
 const statusOptions = computed(() => {
@@ -133,6 +99,10 @@ function categoryLabel(category) {
 
 function formatTime(value) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
+}
+
+function handleMetaFieldChange({ key, value }) {
+  meta[key] = value
 }
 
 async function fetchDetail() {
