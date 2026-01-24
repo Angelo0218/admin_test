@@ -1,4 +1,5 @@
 import type { AuthPayload } from '../middlewares/auth'
+import type { AppContext } from '../types/context'
 import { createAuditLog } from '../models/audit'
 import {
   addTicketMessage,
@@ -13,22 +14,55 @@ function ensureTicketRole(role: string) {
   return role === 'ADMIN' || role === 'SUPPORT'
 }
 
-export async function listTicketItems(c) {
+interface TicketListQuery {
+  status?: string
+  category?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+interface TicketCreatePayload {
+  requesterId: string
+  subject: string
+  category: string
+  tags: string[]
+  internalNote?: string
+}
+
+interface TicketReplyPayload {
+  message: string
+}
+
+interface TicketStatusPayload {
+  status: string
+}
+
+interface TicketUpdatePayload {
+  tags?: string[]
+  internalNote?: string
+}
+
+interface IdParams {
+  id: string
+}
+
+export async function listTicketItems(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureTicketRole(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const query = c.get('validatedQuery')
+  const query = c.get('validatedQuery') as TicketListQuery
   const data = await listTickets(query)
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function getTicketInfo(c) {
+export async function getTicketInfo(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureTicketRole(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
+  const { id } = c.get('validatedParams') as IdParams
   const data = await getTicketDetail(id)
   if (!data) {
     return c.json({ code: 404, message: 'not found', data: null }, 404)
@@ -36,12 +70,12 @@ export async function getTicketInfo(c) {
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function createTicketItem(c) {
+export async function createTicketItem(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureTicketRole(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const payload = c.get('validatedBody')
+  const payload = c.get('validatedBody') as TicketCreatePayload
   const data = await createTicket(payload)
   if (!data) {
     return c.json({ code: 404, message: 'user not found', data: null }, 404)
@@ -56,13 +90,13 @@ export async function createTicketItem(c) {
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function replyTicket(c) {
+export async function replyTicket(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureTicketRole(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
-  const payload = c.get('validatedBody')
+  const { id } = c.get('validatedParams') as IdParams
+  const payload = c.get('validatedBody') as TicketReplyPayload
   const data = await addTicketMessage({
     ticketId: id,
     senderId: auth.userId,
@@ -81,13 +115,13 @@ export async function replyTicket(c) {
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function changeTicketStatus(c) {
+export async function changeTicketStatus(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureTicketRole(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
-  const payload = c.get('validatedBody')
+  const { id } = c.get('validatedParams') as IdParams
+  const payload = c.get('validatedBody') as TicketStatusPayload
   const data = await updateTicketStatus({ ticketId: id, status: payload.status })
   if (!data) {
     return c.json({ code: 404, message: 'not found', data: null }, 404)
@@ -105,13 +139,13 @@ export async function changeTicketStatus(c) {
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function updateTicketInfo(c) {
+export async function updateTicketInfo(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureTicketRole(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
-  const payload = c.get('validatedBody')
+  const { id } = c.get('validatedParams') as IdParams
+  const payload = c.get('validatedBody') as TicketUpdatePayload
   const data = await updateTicketMeta({
     ticketId: id,
     tags: payload.tags,

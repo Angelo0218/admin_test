@@ -1,11 +1,21 @@
 import type { AuthPayload } from '../middlewares/auth'
+import type { AppContext } from '../types/context'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { env } from '../config/env'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../models/auth'
 import { findUserById, findUserByUsername, mapUserResponse } from '../models/user'
 
-export async function login(c) {
-  const { username, password } = c.get('validatedBody')
+interface LoginPayload {
+  username: string
+  password: string
+}
+
+interface RoleTogglePayload {
+  role: 'ADMIN' | 'SUPPORT' | 'AUDITOR'
+}
+
+export async function login(c: AppContext) {
+  const { username, password } = c.get('validatedBody') as LoginPayload
   const user = await findUserByUsername(username)
   if (!user || user.passwordHash !== password) {
     return c.json({ code: 401, message: 'invalid credentials', data: null }, 401)
@@ -38,7 +48,7 @@ export async function login(c) {
   return c.json({ code: 0, message: 'ok', data: { accessToken } })
 }
 
-function extractRefreshToken(c) {
+function extractRefreshToken(c: AppContext) {
   const header = c.req.header('Cookie') || ''
   const match = header.match(/refreshToken=([^;]+)/)
   const raw = match?.[1] || getCookie(c, 'refreshToken') || ''
@@ -48,7 +58,7 @@ function extractRefreshToken(c) {
     .replace(/^"|"$/g, '')
 }
 
-export async function refreshToken(c) {
+export async function refreshToken(c: AppContext) {
   const token = extractRefreshToken(c)
   if (!token) {
     return c.json({ code: 401, message: 'missing refresh token', data: null }, 401)
@@ -72,13 +82,13 @@ export async function refreshToken(c) {
   }
 }
 
-export async function logout(c) {
+export async function logout(c: AppContext) {
   deleteCookie(c, 'refreshToken', { path: '/api/v1/auth/refresh/token' })
   return c.json({ code: 0, message: 'ok', data: true })
 }
 
-export async function toggleRole(c) {
-  const { role } = c.get('validatedBody')
+export async function toggleRole(c: AppContext) {
+  const { role } = c.get('validatedBody') as RoleTogglePayload
   const auth = c.get('user') as AuthPayload
   const user = await findUserById(auth.userId)
   if (!user) {
@@ -100,7 +110,7 @@ export async function toggleRole(c) {
   return c.json({ code: 0, message: 'ok', data: { accessToken } })
 }
 
-export async function currentUser(c) {
+export async function currentUser(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   const user = await findUserById(auth.userId)
   if (!user) {

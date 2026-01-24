@@ -1,7 +1,55 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
 
-export async function listApplications({ status, keyword, page, pageSize }) {
-  const where: Record<string, any> = {}
+interface KycDocumentInput {
+  type: string
+  url: string
+}
+
+export interface KycListParams {
+  status?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+export interface KycCreateParams {
+  userId: string
+  fullName: string
+  idNumber: string
+  documentType: string
+  phone: string
+  documents: KycDocumentInput[]
+}
+
+export interface KycReviewParams {
+  id: string
+  action: string
+  comment?: string
+  reviewerId: string
+}
+
+export interface KycAppealListParams {
+  status?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+export interface KycAppealCreateParams {
+  applicationId: string
+  reason: string
+}
+
+export interface KycAppealResolveParams {
+  id: string
+  status: string
+  decisionComment?: string
+  handledById: string
+}
+
+export async function listApplications({ status, keyword, page, pageSize }: KycListParams) {
+  const where: Prisma.KycApplicationWhereInput = {}
   if (status) {
     where.status = status
   }
@@ -43,7 +91,7 @@ export async function listApplications({ status, keyword, page, pageSize }) {
   }
 }
 
-export async function createApplication({ userId, fullName, idNumber, documentType, phone, documents }) {
+export async function createApplication({ userId, fullName, idNumber, documentType, phone, documents }: KycCreateParams) {
   const applicant = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true },
@@ -60,7 +108,7 @@ export async function createApplication({ userId, fullName, idNumber, documentTy
       phone,
       status: 'PENDING',
       documents: {
-        create: documents.map((doc: { type: string, url: string }) => ({
+        create: documents.map((doc: KycDocumentInput) => ({
           type: doc.type,
           url: doc.url,
         })),
@@ -139,7 +187,7 @@ export async function getApplicationDetail(id: string) {
   }
 }
 
-export async function reviewApplication({ id, action, comment, reviewerId }) {
+export async function reviewApplication({ id, action, comment, reviewerId }: KycReviewParams) {
   const existing = await prisma.kycApplication.findUnique({
     where: { id },
     select: { id: true, status: true },
@@ -171,8 +219,8 @@ export async function reviewApplication({ id, action, comment, reviewerId }) {
   }
 }
 
-export async function listAppeals({ status, keyword, page, pageSize }) {
-  const where: Record<string, any> = {}
+export async function listAppeals({ status, keyword, page, pageSize }: KycAppealListParams) {
+  const where: Prisma.KycAppealWhereInput = {}
   if (status) {
     where.status = status
   }
@@ -227,7 +275,7 @@ export async function listAppeals({ status, keyword, page, pageSize }) {
   }
 }
 
-export async function createAppeal({ applicationId, reason }) {
+export async function createAppeal({ applicationId, reason }: KycAppealCreateParams) {
   const existing = await prisma.kycApplication.findUnique({
     where: { id: applicationId },
     select: { id: true },
@@ -250,7 +298,7 @@ export async function createAppeal({ applicationId, reason }) {
   }
 }
 
-export async function resolveAppeal({ id, status, decisionComment, handledById }) {
+export async function resolveAppeal({ id, status, decisionComment, handledById }: KycAppealResolveParams) {
   const existing = await prisma.kycAppeal.findUnique({
     where: { id },
     select: { id: true, status: true },
@@ -278,12 +326,12 @@ export async function resolveAppeal({ id, status, decisionComment, handledById }
   }
 }
 
+// KYC 狀態轉移規則：後端為唯一準則，前端僅做提示與避免 400.
+const KYC_TRANSITIONS: Record<string, string[]> = {
+  PENDING: ['NEED_MORE', 'PASSED', 'REJECTED'],
+  NEED_MORE: ['PASSED', 'REJECTED'],
+}
+
 function isValidKycTransition(current: string, next: string) {
-  if (current === 'PENDING') {
-    return next === 'NEED_MORE' || next === 'PASSED' || next === 'REJECTED'
-  }
-  if (current === 'NEED_MORE') {
-    return next === 'PASSED' || next === 'REJECTED'
-  }
-  return false
+  return KYC_TRANSITIONS[current]?.includes(next) ?? false
 }

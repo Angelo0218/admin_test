@@ -1,4 +1,26 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
+
+export interface UserListParams {
+  status?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+export interface UserDisableParams {
+  id: string
+  reason: string
+}
+
+export interface UserEnableParams {
+  id: string
+}
+
+export interface UserResetPasswordParams {
+  id: string
+  password: string
+}
 
 export async function findUserByUsername(username: string) {
   return prisma.user.findUnique({
@@ -55,8 +77,8 @@ export function mapUserResponse(user: NonNullable<Awaited<ReturnType<typeof find
   }
 }
 
-export async function listUsers({ status, keyword, page, pageSize }) {
-  const where: Record<string, any> = {}
+export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
+  const where: Prisma.UserWhereInput = {}
   if (status) {
     where.status = status
   }
@@ -98,7 +120,7 @@ export async function listUsers({ status, keyword, page, pageSize }) {
   }
 }
 
-export async function disableUser({ id, reason }) {
+export async function disableUser({ id, reason }: UserDisableParams) {
   return prisma.user.update({
     where: { id },
     data: {
@@ -108,7 +130,7 @@ export async function disableUser({ id, reason }) {
   })
 }
 
-export async function enableUser({ id }) {
+export async function enableUser({ id }: UserEnableParams) {
   return prisma.user.update({
     where: { id },
     data: {
@@ -118,7 +140,7 @@ export async function enableUser({ id }) {
   })
 }
 
-export async function resetUserPassword({ id, password }) {
+export async function resetUserPassword({ id, password }: UserResetPasswordParams) {
   return prisma.user.update({
     where: { id },
     data: {

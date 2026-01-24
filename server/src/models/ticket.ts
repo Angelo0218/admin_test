@@ -1,4 +1,38 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
+
+export interface TicketListParams {
+  status?: string
+  category?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+export interface TicketCreateParams {
+  requesterId: string
+  subject: string
+  category: string
+  tags?: string[]
+  internalNote?: string
+}
+
+export interface TicketMessageParams {
+  ticketId: string
+  senderId: string
+  message: string
+}
+
+export interface TicketStatusParams {
+  ticketId: string
+  status: string
+}
+
+export interface TicketMetaParams {
+  ticketId: string
+  tags?: string[]
+  internalNote?: string
+}
 
 function serializeTags(tags?: string[]) {
   if (!tags) {
@@ -20,8 +54,8 @@ function parseTags(raw?: string | null) {
   }
 }
 
-export async function listTickets({ status, category, keyword, page, pageSize }) {
-  const where: Record<string, any> = {}
+export async function listTickets({ status, category, keyword, page, pageSize }: TicketListParams) {
+  const where: Prisma.TicketWhereInput = {}
   if (status) {
     where.status = status
   }
@@ -105,7 +139,7 @@ export async function getTicketDetail(id: string) {
   }
 }
 
-export async function createTicket({ requesterId, subject, category, tags, internalNote }) {
+export async function createTicket({ requesterId, subject, category, tags, internalNote }: TicketCreateParams) {
   const requester = await prisma.user.findUnique({
     where: { id: requesterId },
     select: { id: true },
@@ -131,7 +165,7 @@ export async function createTicket({ requesterId, subject, category, tags, inter
   }
 }
 
-export async function addTicketMessage({ ticketId, senderId, message }) {
+export async function addTicketMessage({ ticketId, senderId, message }: TicketMessageParams) {
   const existing = await prisma.ticket.findUnique({
     where: { id: ticketId },
     select: { id: true },
@@ -153,7 +187,7 @@ export async function addTicketMessage({ ticketId, senderId, message }) {
   }
 }
 
-export async function updateTicketStatus({ ticketId, status }) {
+export async function updateTicketStatus({ ticketId, status }: TicketStatusParams) {
   const existing = await prisma.ticket.findUnique({
     where: { id: ticketId },
     select: { id: true, status: true },
@@ -175,7 +209,7 @@ export async function updateTicketStatus({ ticketId, status }) {
   }
 }
 
-export async function updateTicketMeta({ ticketId, tags, internalNote }) {
+export async function updateTicketMeta({ ticketId, tags, internalNote }: TicketMetaParams) {
   const existing = await prisma.ticket.findUnique({
     where: { id: ticketId },
     select: { id: true },
@@ -198,12 +232,12 @@ export async function updateTicketMeta({ ticketId, tags, internalNote }) {
   }
 }
 
+// 工單狀態轉移規則：後端為唯一準則，前端僅做提示與避免 400.
+const TICKET_TRANSITIONS: Record<string, string[]> = {
+  WAITING: ['IN_PROGRESS'],
+  IN_PROGRESS: ['CLOSED'],
+}
+
 function isValidTicketTransition(current: string, next: string) {
-  if (current === 'WAITING') {
-    return next === 'IN_PROGRESS'
-  }
-  if (current === 'IN_PROGRESS') {
-    return next === 'CLOSED'
-  }
-  return false
+  return TICKET_TRANSITIONS[current]?.includes(next) ?? false
 }

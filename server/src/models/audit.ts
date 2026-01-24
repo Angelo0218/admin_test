@@ -1,7 +1,24 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
 
-export async function listAuditLogs({ action, targetType, keyword, page, pageSize }) {
-  const where: Record<string, any> = {}
+export interface AuditListParams {
+  action?: string
+  targetType?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+export interface AuditCreateParams {
+  actorId: string
+  action: string
+  targetType: string
+  targetId: string
+  meta?: unknown
+}
+
+export async function listAuditLogs({ action, targetType, keyword, page, pageSize }: AuditListParams) {
+  const where: Prisma.AuditLogWhereInput = {}
   if (action) {
     where.action = action
   }
@@ -45,7 +62,7 @@ export async function listAuditLogs({ action, targetType, keyword, page, pageSiz
   }
 }
 
-export async function createAuditLog({ actorId, action, targetType, targetId, meta }) {
+export async function createAuditLog({ actorId, action, targetType, targetId, meta }: AuditCreateParams) {
   return prisma.auditLog.create({
     data: {
       actorId,
@@ -57,7 +74,7 @@ export async function createAuditLog({ actorId, action, targetType, targetId, me
   })
 }
 
-function safeParseMeta(raw: string) {
+function safeParseMeta(raw: string): unknown {
   try {
     return JSON.parse(raw)
   }

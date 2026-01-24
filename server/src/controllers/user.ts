@@ -1,4 +1,5 @@
 import type { AuthPayload } from '../middlewares/auth'
+import type { AppContext } from '../types/context'
 import { createAuditLog } from '../models/audit'
 import {
   disableUser,
@@ -13,7 +14,26 @@ function ensureAdmin(role: string) {
   return role === 'ADMIN'
 }
 
-export async function getCurrentUser(c) {
+interface UserListQuery {
+  status?: string
+  keyword?: string
+  page: number
+  pageSize: number
+}
+
+interface UserDisablePayload {
+  reason: string
+}
+
+interface UserResetPasswordPayload {
+  password?: string
+}
+
+interface IdParams {
+  id: string
+}
+
+export async function getCurrentUser(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   const user = await findUserById(auth.userId)
   if (!user) {
@@ -23,22 +43,22 @@ export async function getCurrentUser(c) {
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function listUserAccounts(c) {
+export async function listUserAccounts(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const query = c.get('validatedQuery')
+  const query = c.get('validatedQuery') as UserListQuery
   const data = await listUsers(query)
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function getUserById(c) {
+export async function getUserById(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
+  const { id } = c.get('validatedParams') as IdParams
   const user = await findUserById(id)
   if (!user) {
     return c.json({ code: 404, message: 'user not found', data: null }, 404)
@@ -47,13 +67,13 @@ export async function getUserById(c) {
   return c.json({ code: 0, message: 'ok', data })
 }
 
-export async function disableUserAccount(c) {
+export async function disableUserAccount(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
-  const payload = c.get('validatedBody')
+  const { id } = c.get('validatedParams') as IdParams
+  const payload = c.get('validatedBody') as UserDisablePayload
   const user = await disableUser({ id, reason: payload.reason })
   await createAuditLog({
     actorId: auth.userId,
@@ -65,12 +85,12 @@ export async function disableUserAccount(c) {
   return c.json({ code: 0, message: 'ok', data: { id: user.id, status: user.status } })
 }
 
-export async function enableUserAccount(c) {
+export async function enableUserAccount(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
+  const { id } = c.get('validatedParams') as IdParams
   const user = await enableUser({ id })
   await createAuditLog({
     actorId: auth.userId,
@@ -81,13 +101,13 @@ export async function enableUserAccount(c) {
   return c.json({ code: 0, message: 'ok', data: { id: user.id, status: user.status } })
 }
 
-export async function resetUserPasswordHandler(c) {
+export async function resetUserPasswordHandler(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return c.json({ code: 403, message: 'forbidden', data: null }, 403)
   }
-  const { id } = c.get('validatedParams')
-  const payload = c.get('validatedBody')
+  const { id } = c.get('validatedParams') as IdParams
+  const payload = c.get('validatedBody') as UserResetPasswordPayload
   const password = payload.password || '123456'
   await resetUserPassword({ id, password })
   await createAuditLog({
