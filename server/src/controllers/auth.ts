@@ -4,6 +4,7 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { env } from '../config/env'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../models/auth'
 import { findUserById, findUserByUsername, mapUserResponse } from '../models/user'
+import { verifyPassword } from '../utils/password'
 
 interface LoginPayload {
   username: string
@@ -17,7 +18,7 @@ interface RoleTogglePayload {
 export async function login(c: AppContext) {
   const { username, password } = c.get('validatedBody') as LoginPayload
   const user = await findUserByUsername(username)
-  if (!user || user.passwordHash !== password) {
+  if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return c.json({ code: 401, message: 'invalid credentials', data: null }, 401)
   }
   if (user.status === 'DISABLED') {

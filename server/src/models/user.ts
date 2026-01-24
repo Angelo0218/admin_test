@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
+import { hashPassword } from '../utils/password'
 
 export interface UserListParams {
   status?: string
@@ -141,10 +142,11 @@ export async function enableUser({ id }: UserEnableParams) {
 }
 
 export async function resetUserPassword({ id, password }: UserResetPasswordParams) {
+  const passwordHash = await hashPassword(password)
   return prisma.user.update({
     where: { id },
     data: {
-      passwordHash: password,
+      passwordHash,
     },
   })
 }
