@@ -24,6 +24,8 @@ model User {
   auditLogs      AuditLog[]      @relation("AuditActor")
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@index([status, createdAt])
 }
 
 model Role {
@@ -56,6 +58,8 @@ model KycApplication {
   documents    KycDocument[]
   reviews      KycReview[]
   appeals      KycAppeal[]
+
+  @@index([status, submittedAt])
 }
 
 model KycDocument {
@@ -90,6 +94,8 @@ model KycAppeal {
   handledAt       DateTime?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+
+  @@index([status, createdAt])
 }
 
 model Ticket {
@@ -104,6 +110,8 @@ model Ticket {
   messages     TicketMessage[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+
+  @@index([status, createdAt])
 }
 
 model TicketMessage {
@@ -114,6 +122,8 @@ model TicketMessage {
   sender    User     @relation("TicketSender", fields: [senderId], references: [id])
   message   String
   createdAt DateTime @default(now())
+
+  @@index([ticketId, createdAt])
 }
 
 model AuditLog {
