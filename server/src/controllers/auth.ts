@@ -39,10 +39,13 @@ export async function login(c: AppContext) {
 
   const accessToken = signAccessToken(payload)
   const refreshToken = signRefreshToken(payload)
+  const isSecure = env.isProduction
 
   setCookie(c, 'refreshToken', refreshToken, {
     httpOnly: true,
-    sameSite: 'Lax',
+    sameSite: isSecure ? 'None' : 'Lax',
+    secure: isSecure,
+    maxAge: 60 * 60 * 24 * 7,
     path: '/api/v1/auth/refresh/token',
   })
 

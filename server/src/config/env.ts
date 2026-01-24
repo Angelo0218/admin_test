@@ -11,8 +11,9 @@ export const env = {
   jwtSecret: envSource.JWT_SECRET ?? '',
   jwtExpiresIn: envSource.JWT_EXPIRES_IN ?? '1h',
   jwtRefreshExpiresIn: envSource.JWT_REFRESH_EXPIRES_IN ?? '7d',
-  corsOrigin: envSource.CORS_ORIGIN ?? '*',
+  corsOrigin: envSource.CORS_ORIGIN ?? '',
   databaseUrl: envSource.DATABASE_URL ?? 'file:./dev.db',
   enableSeed: envSource.ENABLE_SEED === 'true' || envSource.ENABLE_SEED === '1',
   debugAuth: envSource.DEBUG_AUTH === '1',
+  isProduction,
 }

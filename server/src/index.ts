@@ -11,10 +11,21 @@ import { permissionRoutes } from './routes/permission'
 import { roleRoutes } from './routes/role'
 import { ticketRoutes } from './routes/ticket'
 import { userRoutes } from './routes/user'
+import { isOriginAllowed, resolveCorsOrigin } from './utils/cors'
 
 const app = new Hono()
 
-app.use('*', cors({ origin: env.corsOrigin, credentials: true }))
+app.use('*', async (c, next) => {
+  const origin = c.req.header('Origin')
+  if (origin && !isOriginAllowed(origin, env.corsOrigin)) {
+    return c.json({ code: 403, message: 'cors origin not allowed', data: null }, 403)
+  }
+  await next()
+})
+app.use('*', cors({
+  origin: origin => resolveCorsOrigin(origin, env.corsOrigin),
+  credentials: true,
+}))
 app.use('*', logger())
 
 app.onError(errorHandler)
