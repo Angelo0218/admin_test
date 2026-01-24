@@ -7,5 +7,6 @@ export type AppContext = Context<{
     validatedBody?: unknown
     validatedQuery?: unknown
     validatedParams?: unknown
+    requestId?: string
   }
 }>
