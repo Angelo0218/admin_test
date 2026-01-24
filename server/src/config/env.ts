@@ -1,8 +1,14 @@
 const envSource = globalThis.Bun?.env ?? globalThis.process?.env ?? {}
+const nodeEnv = envSource.NODE_ENV ?? 'development'
+const isProduction = nodeEnv === 'production' || envSource.CI === 'true' || envSource.CI === '1'
+
+if (isProduction && !envSource.JWT_SECRET) {
+  throw new Error('JWT_SECRET is required in production/CI')
+}
 
 export const env = {
   port: Number(envSource.PORT ?? 8085),
-  jwtSecret: envSource.JWT_SECRET ?? 'dev-secret',
+  jwtSecret: envSource.JWT_SECRET ?? '',
   jwtExpiresIn: envSource.JWT_EXPIRES_IN ?? '1h',
   jwtRefreshExpiresIn: envSource.JWT_REFRESH_EXPIRES_IN ?? '7d',
   corsOrigin: envSource.CORS_ORIGIN ?? '*',
