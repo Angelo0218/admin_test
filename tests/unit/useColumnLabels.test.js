@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'vitest'
 import { ref } from 'vue'
-import { useColumnLabels } from '../../src/composables/useColumnLabels.js'
+import { useColumnLabels } from '../../src/composables/useColumnLabels.ts'
 
 test('useColumnLabels builds label maps', () => {
   const baseColumns = ref([

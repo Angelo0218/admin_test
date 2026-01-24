@@ -33,7 +33,7 @@ test('axios refreshes token and retries', async ({ page }) => {
 
   const result = await page.evaluate(async () => {
     try {
-      const { request } = await import('/src/utils/http/index.js')
+      const { request } = await import('/src/utils/http/index.ts')
       const response = await request.get('/user/detail')
       return { ok: true, response }
     }

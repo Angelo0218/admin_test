@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'vitest'
-import { buildPermissionTreeOptions, collectPermissionCodes } from '../../src/utils/permission.js'
+import { buildPermissionTreeOptions, collectPermissionCodes } from '../../src/utils/permission.ts'
 
 const sampleTree = [
   {

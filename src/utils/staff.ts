@@ -1,4 +1,4 @@
-import { ROLE_CODES } from '../constants/roles.js'
+import { ROLE_CODES } from '../constants/roles.ts'
 
 const STAFF_ROLE_SET = new Set([
   ROLE_CODES.ADMIN,

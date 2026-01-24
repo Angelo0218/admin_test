@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'vitest'
 
-import { filterStaffUsers, getStaffRoleOptions, isStaffUser, validateStaffCreateInput } from '../../src/utils/staff.js'
+import { filterStaffUsers, getStaffRoleOptions, isStaffUser, validateStaffCreateInput } from '../../src/utils/staff.ts'
 
 test('isStaffUser returns true when user has a staff role', () => {
   assert.equal(

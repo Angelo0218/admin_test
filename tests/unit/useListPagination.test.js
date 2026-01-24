@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'vitest'
-import { useListPagination } from '../../src/composables/useListPagination.js'
+import { useListPagination } from '../../src/composables/useListPagination.ts'
 
 test('useListPagination updates page and triggers fetch', () => {
   let calls = 0
