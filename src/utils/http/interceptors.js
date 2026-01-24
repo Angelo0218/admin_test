@@ -3,6 +3,9 @@ import { resolveResError } from './helpers'
 
 export function setupInterceptors(axiosInstance) {
   const SUCCESS_CODES = [0, 200]
+  const pendingRequests = []
+  let isRefreshing = false
+
   function resResolve(response) {
     const { data, status, config, statusText, headers } = response
     if (headers['content-type']?.includes('json')) {
@@ -11,11 +14,64 @@ export function setupInterceptors(axiosInstance) {
       }
       const code = data?.code ?? status
       const needTip = config?.needTip !== false
-      // 根據 code 轉成提示訊息
+      // ??? code ?????????
       const message = resolveResError(code, data?.message ?? statusText, needTip)
       return Promise.reject({ code, message, error: data ?? response })
     }
     return Promise.resolve(data ?? response)
+  }
+
+  async function resReject(error) {
+    if (!error || !error.response) {
+      const code = error?.code
+      // ??? code ?????????
+      const message = resolveResError(code, error?.message)
+      return Promise.reject({ code, message, error })
+    }
+
+    const { data, status, config } = error.response
+    const code = data?.code ?? status
+
+    if (code === 401 && config && !config.skipAuthRefresh && !config._retry) {
+      config._retry = true
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          pendingRequests.push({ resolve, reject, config })
+        })
+      }
+      isRefreshing = true
+      const authStore = useAuthStore()
+      try {
+        const refreshRes = await axiosInstance.post('/auth/refresh/token', {}, { needToken: false, skipAuthRefresh: true })
+        const accessToken = refreshRes?.data?.accessToken
+        if (!accessToken) {
+          throw new Error('missing access token')
+        }
+        authStore.setToken({ accessToken })
+
+        pendingRequests.splice(0).forEach(({ resolve, config }) => {
+          config.headers = config.headers || {}
+          config.headers.Authorization = `Bearer ${accessToken}`
+          resolve(axiosInstance(config))
+        })
+
+        config.headers = config.headers || {}
+        config.headers.Authorization = `Bearer ${accessToken}`
+        return axiosInstance(config)
+      }
+      catch (refreshError) {
+        pendingRequests.splice(0).forEach(({ reject }) => reject(refreshError))
+        authStore.logout()
+        return Promise.reject(refreshError)
+      }
+      finally {
+        isRefreshing = false
+      }
+    }
+
+    const needTip = config?.needTip !== false
+    const message = resolveResError(code, data?.message ?? error.message, needTip)
+    return Promise.reject({ code, message, error: error.response?.data || error.response })
   }
 
   axiosInstance.interceptors.request.use(reqResolve, reqReject)
@@ -23,7 +79,7 @@ export function setupInterceptors(axiosInstance) {
 }
 
 function reqResolve(config) {
-  // needToken = false 時，不附帶 token
+  // needToken = false ????????token
   if (config.needToken === false) {
     return config
   }
@@ -39,20 +95,4 @@ function reqResolve(config) {
 
 function reqReject(error) {
   return Promise.reject(error)
-}
-
-async function resReject(error) {
-  if (!error || !error.response) {
-    const code = error?.code
-    // 根據 code 轉成提示訊息
-    const message = resolveResError(code, error.message)
-    return Promise.reject({ code, message, error })
-  }
-
-  const { data, status, config } = error.response
-  const code = data?.code ?? status
-
-  const needTip = config?.needTip !== false
-  const message = resolveResError(code, data?.message ?? error.message, needTip)
-  return Promise.reject({ code, message, error: error.response?.data || error.response })
 }
