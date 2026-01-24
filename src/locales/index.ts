@@ -3,6 +3,7 @@ import enUS from './en-US.json'
 import zhTW from './zh-TW.json'
 
 export const messages = {
+  'zh': zhTW,
   'zh-TW': zhTW,
   'en-US': enUS,
 }

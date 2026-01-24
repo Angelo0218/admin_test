@@ -35,7 +35,6 @@
     "TicketList": "工單列表",
     "TicketDetail": "工單詳情",
     "Users": "使用者",
-    "Roles": "角色",
     "Audit": "稽核紀錄"
   },
   "roles": {

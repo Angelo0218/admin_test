@@ -15,9 +15,9 @@ function getNested(obj, keyPath) {
   return keyPath.split('.').reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj)
 }
 
-const localesIndexPath = path.resolve(__dirname, '../src/locales/index.js')
+const localesIndexPath = path.resolve(__dirname, '../src/locales/index.ts')
 const localesIndexSource = fs.readFileSync(localesIndexPath, 'utf8')
-assert(/['"]zh['"]\s*:/.test(localesIndexSource), 'missing locale alias: messages["zh"]')
+assert(/\bzh\s*:/.test(localesIndexSource), 'missing locale alias: messages["zh"]')
 
 const zhTwPath = path.resolve(__dirname, '../src/locales/zh-TW.json')
 const zhTwSource = fs.readFileSync(zhTwPath, 'utf8')

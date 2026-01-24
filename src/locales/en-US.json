@@ -35,7 +35,6 @@
     "TicketList": "Ticket List",
     "TicketDetail": "Ticket Detail",
     "Users": "Users",
-    "Roles": "Roles",
     "Audit": "Audit Logs"
   },
   "roles": {
