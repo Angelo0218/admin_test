@@ -82,7 +82,6 @@ const loginInfo = ref({
 const localLoginInfo = lStorage.get('loginInfo')
 if (localLoginInfo) {
   loginInfo.value.username = localLoginInfo.username || ''
-  loginInfo.value.password = localLoginInfo.password || ''
 }
 
 const isRemember = useStorage('isRemember', true)
@@ -96,7 +95,7 @@ async function handleLogin() {
     $message.loading(t('login.loading'), { key: 'login' })
     const { data } = await api.login({ username, password: password.toString() })
     if (isRemember.value) {
-      lStorage.set('loginInfo', { username, password })
+      lStorage.set('loginInfo', { username })
     }
     else {
       lStorage.remove('loginInfo')
