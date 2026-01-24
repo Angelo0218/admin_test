@@ -2,32 +2,36 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const root = process.cwd()
-const permissionPath = path.join(root, 'src/router/permission-tree.js')
+const routesPath = path.join(root, 'src/router/basic-routes.ts')
 const pendingPath = path.join(root, 'src/views/kyc/pending/index.vue')
 
-const [permissionContent, pendingContent] = await Promise.all([
-  readFile(permissionPath, 'utf8'),
+const [routesContent, pendingContent] = await Promise.all([
+  readFile(routesPath, 'utf8'),
   readFile(pendingPath, 'utf8'),
 ])
 
-const menuCodes = ['KycPending', 'KycAppeals', 'TicketList']
-const missingIcons = menuCodes.filter((code) => {
-  const hasIcon = (content) => {
-    const lines = content.split(/\r?\n/)
-    const codeIndex = lines.findIndex(line => line.includes(`code: '${code}'`))
-    if (codeIndex === -1)
-      return false
-    for (let i = codeIndex + 1; i < lines.length; i++) {
-      const line = lines[i]
-      if (line.includes('code:'))
-        break
-      if (line.includes('icon:'))
-        return true
-    }
+const missingIcons = []
+function hasRouteIcon(content, name) {
+  const lines = content.split(/\r?\n/)
+  const nameIndex = lines.findIndex(line => line.includes(`name: '${name}'`))
+  if (nameIndex === -1)
     return false
+  for (let i = nameIndex + 1; i < lines.length; i++) {
+    const line = lines[i]
+    if (line.includes('name:'))
+      break
+    if (line.includes('icon:'))
+      return true
   }
-  return !hasIcon(permissionContent)
-})
+  return false
+}
+
+if (!hasRouteIcon(routesContent, 'Kyc'))
+  missingIcons.push('Kyc')
+
+const hasTicketsGroupIcon = /group:\s*\{[\s\S]*?code:\s*'Tickets'[\s\S]*?icon:/.test(routesContent)
+if (!hasTicketsGroupIcon)
+  missingIcons.push('Tickets')
 
 const mockUrls = [
   'https://picsum.photos/160/120?random=1',
