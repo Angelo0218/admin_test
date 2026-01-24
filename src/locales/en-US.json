@@ -1,0 +1,297 @@
+{
+  "common": {
+    "refresh": "Refresh",
+    "view": "View",
+    "status": "Status",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "update": "Update",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "back": "Back",
+    "openNewTab": "Open in new tab",
+    "close": "Close",
+    "search": "Search",
+    "noData": "No data",
+    "switchLanguage": "Switch language",
+    "languageZh": "繁體中文",
+    "languageEn": "English",
+    "toggleRole": "Switch Role",
+    "logout": "Logout",
+    "logoutSuccess": "Logged out",
+    "confirmLogout": "Confirm logout?",
+    "switchRoleSuccess": "Role switched"
+  },
+  "menu": {
+    "login": "Login",
+    "Kyc": "KYC Review",
+    "KycPending": "Pending List",
+    "KycAppeals": "Appeals",
+    "KycDetail": "Review Detail",
+    "Tickets": "Tickets",
+    "TicketList": "Ticket List",
+    "TicketDetail": "Ticket Detail",
+    "Users": "Users",
+    "Roles": "Roles",
+    "Audit": "Audit Logs"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "SUPPORT": "Support",
+    "AUDITOR": "Auditor"
+  },
+  "kyc": {
+    "labels": {
+      "caseId": "Case ID",
+      "applicant": "Applicant",
+      "name": "Name",
+      "idNumber": "ID Number",
+      "documentType": "Document Type",
+      "phone": "Phone",
+      "status": "Status",
+      "submittedAt": "Submitted At"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "NEED_MORE": "Need More",
+      "PASSED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "appealStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "documents": {
+      "title": "Documents",
+      "empty": "No documents"
+    },
+    "review": {
+      "title": "Review Actions",
+      "placeholder": "Enter review comment",
+      "reject": "Reject",
+      "needMore": "Need More",
+      "approve": "Approve",
+      "needRejectReason": "Please enter rejection reason",
+      "needMoreReason": "Please enter required documents",
+      "invalidStatus": "Action not allowed for current status",
+      "success": "Review submitted",
+      "failed": "Review failed",
+      "fetchFailed": "Failed to load review detail"
+    },
+    "reviewRecords": {
+      "title": "Review Records"
+    },
+    "appealRecords": {
+      "title": "Appeal Records"
+    },
+    "columns": {
+      "action": "Action",
+      "reviewer": "Reviewer",
+      "comment": "Comment",
+      "time": "Time",
+      "reason": "Reason",
+      "handledBy": "Handled By",
+      "handledAt": "Handled At",
+      "applicantName": "Name"
+    },
+    "list": {
+      "pendingFetchFailed": "Failed to load pending list",
+      "appealsFetchFailed": "Failed to load appeals",
+      "appealSearchPlaceholder": "Search name or ID"
+    }
+  },
+  "tickets": {
+    "labels": {
+      "id": "Ticket ID",
+      "subject": "Subject",
+      "category": "Category",
+      "status": "Status",
+      "requester": "User",
+      "createdAt": "Created At"
+    },
+    "status": {
+      "WAITING": "Waiting",
+      "IN_PROGRESS": "In Progress",
+      "CLOSED": "Closed"
+    },
+    "category": {
+      "ACCOUNT": "Account",
+      "KYC": "KYC",
+      "TICKET": "Ticket",
+      "OTHER": "Other"
+    },
+    "list": {
+      "create": "New Ticket",
+      "searchPlaceholder": "Search subject or name",
+      "fetchFailed": "Failed to load tickets"
+    },
+    "create": {
+      "title": "New Ticket",
+      "userId": "User ID",
+      "subject": "Subject",
+      "category": "Category",
+      "tags": "Tags",
+      "internalNote": "Internal Note",
+      "userIdPlaceholder": "Enter user ID",
+      "subjectPlaceholder": "Enter subject",
+      "tagsPlaceholder": "Separate tags with commas",
+      "success": "Ticket created",
+      "failed": "Failed to create ticket",
+      "missing": "Please enter user ID and subject"
+    },
+    "detail": {
+      "settingsTitle": "Ticket Settings",
+      "tagsPlaceholder": "Tags (comma-separated)",
+      "internalNotePlaceholder": "Internal note",
+      "changeStatus": "Change Status",
+      "conversationTitle": "Conversation",
+      "emptyMessages": "No messages",
+      "newMessageTitle": "New Message",
+      "replyPlaceholder": "Enter message",
+      "reply": "Send",
+      "replySuccess": "Message sent",
+      "replyFailed": "Failed to send message",
+      "fetchFailed": "Failed to load ticket detail",
+      "updateSuccess": "Updated",
+      "updateFailed": "Update failed",
+      "statusInvalid": "Status cannot be changed",
+      "statusSelect": "Please select status",
+      "statusUpdateSuccess": "Status updated",
+      "statusUpdateFailed": "Status update failed",
+      "replyRequired": "Please enter a message"
+    }
+  },
+  "users": {
+    "labels": {
+      "id": "User ID",
+      "username": "Username",
+      "displayName": "Name",
+      "roles": "Roles",
+      "createdAt": "Created At",
+      "status": "Status"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
+    },
+    "list": {
+      "searchPlaceholder": "Search username or name",
+      "fetchFailed": "Failed to load users"
+    },
+    "actions": {
+      "disable": "Disable",
+      "enable": "Enable",
+      "resetPassword": "Reset Password"
+    },
+    "disable": {
+      "title": "Disable User",
+      "reasonLabel": "Reason",
+      "reasonRequired": "Please enter a reason",
+      "success": "User disabled",
+      "failed": "Disable failed"
+    },
+    "enable": {
+      "success": "User enabled",
+      "failed": "Enable failed"
+    },
+    "reset": {
+      "title": "Reset Password",
+      "passwordLabel": "New Password",
+      "passwordPlaceholder": "Default 123456",
+      "success": "Password updated",
+      "failed": "Reset failed"
+    }
+  },
+  "rolesPage": {
+    "labels": {
+      "code": "Role Code",
+      "name": "Role Name",
+      "permissions": "Permission Codes"
+    },
+    "edit": {
+      "title": "Edit Permissions",
+      "placeholder": "Separate codes with commas",
+      "success": "Updated",
+      "failed": "Update failed"
+    },
+    "list": {
+      "fetchFailed": "Failed to load roles"
+    }
+  },
+  "audit": {
+    "labels": {
+      "action": "Action",
+      "actor": "Actor",
+      "targetType": "Target Type",
+      "targetId": "Target ID",
+      "time": "Time"
+    },
+    "list": {
+      "fetchFailed": "Failed to load audit logs",
+      "actionPlaceholder": "Action",
+      "targetTypePlaceholder": "Target type",
+      "keywordPlaceholder": "Search target ID"
+    }
+  },
+  "login": {
+    "usernamePlaceholder": "Enter username",
+    "passwordPlaceholder": "Enter password",
+    "remember": "Remember me",
+    "submit": "Login",
+    "missing": "Please enter username and password",
+    "loading": "Logging in...",
+    "redirecting": "Login success, redirecting...",
+    "success": "Login successful"
+  },
+  "errors": {
+    "403Title": "403 Forbidden",
+    "403Desc": "You don\u0027t have access to this page",
+    "404Title": "404 Not Found",
+    "404Desc": "The page you visited does not exist",
+    "sessionExpiredTitle": "Session expired",
+    "sessionExpiredContent": "Your session has expired. Log in again?",
+    "sessionExpiredWithMessage": "{message}, log in again?",
+    "forbidden": "Request rejected",
+    "notFound": "Requested resource not found",
+    "serverError": "Server error",
+    "unknown": "【{code}】: Unknown error",
+    "back": "Back",
+    "backHome": "Home"
+  },
+  "form": {
+    "required": "This field is required"
+  },
+  "crud": {
+    "createSuccess": "Created successfully",
+    "updateSuccess": "Updated successfully",
+    "deleteSuccess": "Deleted successfully",
+    "deleteConfirmTitle": "Confirm",
+    "deleteConfirmContent": "Confirm deletion?"
+  },
+  "tabs": {
+    "reload": "Reload",
+    "close": "Close",
+    "closeOthers": "Close Others",
+    "closeLeft": "Close Left",
+    "closeRight": "Close Right"
+  },
+  "layout": {
+    "setting": "Layout Settings",
+    "simple": "Simple",
+    "normal": "Normal",
+    "full": "Full",
+    "empty": "Empty",
+    "hint": "Note: This setting applies only when layout is not specified or follows system. Menu layout has highest priority."
+  },
+  "theme": {
+    "primaryColor": "Set primary color"
+  },
+  "external": {
+    "title": "External Link",
+    "content": "You are about to open an external link. Continue?"
+  }
+}

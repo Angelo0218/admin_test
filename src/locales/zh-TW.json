@@ -1,0 +1,297 @@
+{
+  "common": {
+    "refresh": "重新整理",
+    "view": "查看",
+    "status": "狀態",
+    "actions": "操作",
+    "confirm": "確認",
+    "cancel": "取消",
+    "save": "儲存",
+    "update": "更新",
+    "edit": "編輯",
+    "create": "新增",
+    "submit": "送出",
+    "back": "返回",
+    "openNewTab": "在新分頁開啟",
+    "close": "關閉",
+    "search": "搜尋",
+    "noData": "尚無資料",
+    "switchLanguage": "切換語言",
+    "languageZh": "繁體中文",
+    "languageEn": "English",
+    "toggleRole": "切換角色",
+    "logout": "登出",
+    "logoutSuccess": "已登出",
+    "confirmLogout": "確認登出？",
+    "switchRoleSuccess": "角色已切換"
+  },
+  "menu": {
+    "login": "登入",
+    "Kyc": "KYC 審核",
+    "KycPending": "待審核列表",
+    "KycAppeals": "申訴列表",
+    "KycDetail": "審核詳情",
+    "Tickets": "客服工單",
+    "TicketList": "工單列表",
+    "TicketDetail": "工單詳情",
+    "Users": "用戶管理",
+    "Roles": "角色權限",
+    "Audit": "審計記錄"
+  },
+  "roles": {
+    "ADMIN": "管理員",
+    "SUPPORT": "客服",
+    "AUDITOR": "審核員"
+  },
+  "kyc": {
+    "labels": {
+      "caseId": "案件編號",
+      "applicant": "申請人",
+      "name": "姓名",
+      "idNumber": "身分證號",
+      "documentType": "證件類型",
+      "phone": "電話",
+      "status": "狀態",
+      "submittedAt": "提交時間"
+    },
+    "status": {
+      "PENDING": "待審核",
+      "NEED_MORE": "補件",
+      "PASSED": "通過",
+      "REJECTED": "退回"
+    },
+    "appealStatus": {
+      "PENDING": "待處理",
+      "APPROVED": "已通過",
+      "REJECTED": "已駁回"
+    },
+    "documents": {
+      "title": "證件照片",
+      "empty": "尚無證件照片"
+    },
+    "review": {
+      "title": "審核操作",
+      "placeholder": "請輸入審核意見",
+      "reject": "退回",
+      "needMore": "補件",
+      "approve": "通過",
+      "needRejectReason": "請輸入退回原因",
+      "needMoreReason": "請輸入補件原因",
+      "invalidStatus": "此狀態不可進行審核",
+      "success": "審核已送出",
+      "failed": "審核失敗",
+      "fetchFailed": "取得審核詳情失敗"
+    },
+    "reviewRecords": {
+      "title": "審核記錄"
+    },
+    "appealRecords": {
+      "title": "申訴記錄"
+    },
+    "columns": {
+      "action": "動作",
+      "reviewer": "審查員",
+      "comment": "意見",
+      "time": "時間",
+      "reason": "申訴原因",
+      "handledBy": "處理人",
+      "handledAt": "處理時間",
+      "applicantName": "姓名"
+    },
+    "list": {
+      "pendingFetchFailed": "取得待審核列表失敗",
+      "appealsFetchFailed": "取得申訴列表失敗",
+      "appealSearchPlaceholder": "搜尋姓名或身分證號"
+    }
+  },
+  "tickets": {
+    "labels": {
+      "id": "工單編號",
+      "subject": "主旨",
+      "category": "分類",
+      "status": "狀態",
+      "requester": "用戶",
+      "createdAt": "建立時間"
+    },
+    "status": {
+      "WAITING": "待處理",
+      "IN_PROGRESS": "處理中",
+      "CLOSED": "已關閉"
+    },
+    "category": {
+      "ACCOUNT": "帳號問題",
+      "KYC": "KYC 問題",
+      "TICKET": "票務問題",
+      "OTHER": "其他"
+    },
+    "list": {
+      "create": "新增工單",
+      "searchPlaceholder": "搜尋標題或姓名",
+      "fetchFailed": "取得工單列表失敗"
+    },
+    "create": {
+      "title": "新增工單",
+      "userId": "用戶 ID",
+      "subject": "主旨",
+      "category": "分類",
+      "tags": "標籤",
+      "internalNote": "內部備註",
+      "userIdPlaceholder": "請輸入用戶 ID",
+      "subjectPlaceholder": "請輸入主旨",
+      "tagsPlaceholder": "多個標籤以逗號分隔",
+      "success": "工單已建立",
+      "failed": "建立工單失敗",
+      "missing": "請輸入用戶 ID 與主旨"
+    },
+    "detail": {
+      "settingsTitle": "工單設定",
+      "tagsPlaceholder": "標籤 (逗號分隔)",
+      "internalNotePlaceholder": "內部備註",
+      "changeStatus": "變更狀態",
+      "conversationTitle": "對話紀錄",
+      "emptyMessages": "尚無訊息紀錄",
+      "newMessageTitle": "新增訊息",
+      "replyPlaceholder": "請輸入訊息內容",
+      "reply": "送出訊息",
+      "replySuccess": "訊息已送出",
+      "replyFailed": "送出訊息失敗",
+      "fetchFailed": "取得工單詳情失敗",
+      "updateSuccess": "更新成功",
+      "updateFailed": "更新失敗",
+      "statusInvalid": "狀態不可變更",
+      "statusSelect": "請選擇狀態",
+      "statusUpdateSuccess": "狀態更新成功",
+      "statusUpdateFailed": "狀態更新失敗",
+      "replyRequired": "請輸入訊息內容"
+    }
+  },
+  "users": {
+    "labels": {
+      "id": "用戶 ID",
+      "username": "帳號",
+      "displayName": "姓名",
+      "roles": "角色",
+      "createdAt": "建立時間",
+      "status": "狀態"
+    },
+    "status": {
+      "ACTIVE": "啟用",
+      "DISABLED": "停用"
+    },
+    "list": {
+      "searchPlaceholder": "搜尋帳號或姓名",
+      "fetchFailed": "取得用戶列表失敗"
+    },
+    "actions": {
+      "disable": "停用",
+      "enable": "啟用",
+      "resetPassword": "重設密碼"
+    },
+    "disable": {
+      "title": "停用用戶",
+      "reasonLabel": "停用原因",
+      "reasonRequired": "請輸入停用原因",
+      "success": "停用成功",
+      "failed": "停用失敗"
+    },
+    "enable": {
+      "success": "啟用成功",
+      "failed": "啟用失敗"
+    },
+    "reset": {
+      "title": "重設密碼",
+      "passwordLabel": "新密碼",
+      "passwordPlaceholder": "預設 123456",
+      "success": "密碼已更新",
+      "failed": "重設密碼失敗"
+    }
+  },
+  "rolesPage": {
+    "labels": {
+      "code": "角色代碼",
+      "name": "角色名稱",
+      "permissions": "權限代碼"
+    },
+    "edit": {
+      "title": "編輯權限",
+      "placeholder": "多個代碼以逗號分隔",
+      "success": "更新成功",
+      "failed": "更新權限失敗"
+    },
+    "list": {
+      "fetchFailed": "取得角色列表失敗"
+    }
+  },
+  "audit": {
+    "labels": {
+      "action": "動作",
+      "actor": "操作者",
+      "targetType": "目標類型",
+      "targetId": "目標 ID",
+      "time": "時間"
+    },
+    "list": {
+      "fetchFailed": "取得審計記錄失敗",
+      "actionPlaceholder": "動作",
+      "targetTypePlaceholder": "目標類型",
+      "keywordPlaceholder": "搜尋目標 ID"
+    }
+  },
+  "login": {
+    "usernamePlaceholder": "請輸入帳號",
+    "passwordPlaceholder": "請輸入密碼",
+    "remember": "記住帳號密碼",
+    "submit": "登入",
+    "missing": "請輸入帳號與密碼",
+    "loading": "登入中...",
+    "redirecting": "登入成功，正在跳轉...",
+    "success": "登入成功"
+  },
+  "errors": {
+    "403Title": "403 權限不足",
+    "403Desc": "你沒有權限存取此頁面",
+    "404Title": "404 找不到頁面",
+    "404Desc": "你造訪的頁面不存在",
+    "sessionExpiredTitle": "登入已過期",
+    "sessionExpiredContent": "登入已過期，是否重新登入？",
+    "sessionExpiredWithMessage": "{message}，是否重新登入？",
+    "forbidden": "請求被拒絕",
+    "notFound": "請求資源或介面不存在",
+    "serverError": "伺服器發生異常",
+    "unknown": "【{code}】：未知異常",
+    "back": "返回上一頁",
+    "backHome": "回到首頁"
+  },
+  "form": {
+    "required": "此為必填欄位"
+  },
+  "crud": {
+    "createSuccess": "新增成功",
+    "updateSuccess": "更新成功",
+    "deleteSuccess": "刪除成功",
+    "deleteConfirmTitle": "提示",
+    "deleteConfirmContent": "確定刪除？"
+  },
+  "tabs": {
+    "reload": "重新載入",
+    "close": "關閉",
+    "closeOthers": "關閉其他",
+    "closeLeft": "關閉左側",
+    "closeRight": "關閉右側"
+  },
+  "layout": {
+    "setting": "佈局設定",
+    "simple": "簡約",
+    "normal": "通用",
+    "full": "全面",
+    "empty": "空白",
+    "hint": "註：此設定僅對未設定 layout 或設定成跟隨系統的頁面有效，選單指定的 layout 優先級最高。"
+  },
+  "theme": {
+    "primaryColor": "設定主題色"
+  },
+  "external": {
+    "title": "外部連結",
+    "content": "即將開啟外部連結，是否繼續？"
+  }
+}
