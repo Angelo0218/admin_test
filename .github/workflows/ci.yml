@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.1.43
+      - run: pnpm install
+      - run: pnpm run lint
+      - run: pnpm run check:i18n
+      - run: pnpm run check:kyc-ui
+      - run: pnpm run check:language-menu
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm run test:e2e
+      - run: bun test
+        working-directory: server

@@ -8,8 +8,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "npm run lint:fix",
+    "lint": "eslint .",
     "lint:fix": "eslint --fix",
     "test:e2e": "playwright test",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:kyc-ui": "node scripts/check-kyc-ui.mjs",
+    "check:language-menu": "node scripts/check-language-menu.mjs",
     "postinstall": "npx simple-git-hooks",
     "up": "taze major -I"
   },
