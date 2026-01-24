@@ -1,12 +1,7 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:22:43
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { cloneDeep } from 'lodash-es'
+import { i18n } from '@/locales'
+
+const t = (key, params) => i18n.global.t(key, params)
 
 export function useForm(initFormData = {}) {
   const formRef = ref(null)
@@ -14,7 +9,7 @@ export function useForm(initFormData = {}) {
   const rules = {
     required: {
       required: true,
-      message: '此为必填项',
+      message: t('form.required'),
       trigger: ['blur', 'change'],
     },
   }

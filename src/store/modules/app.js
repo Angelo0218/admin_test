@@ -1,11 +1,3 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:25:31
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { generate, getRgbStr } from '@arco-design/color'
 import { useDark } from '@vueuse/core'
 import { defineStore } from 'pinia'
@@ -14,17 +6,25 @@ import { defaultLayout, defaultPrimaryColor, naiveThemeOverrides } from '@/setti
 export const useAppStore = defineStore('app', {
   state: () => ({
     collapsed: false,
+    mobileMenuOpen: false,
     isDark: useDark(),
     layout: defaultLayout,
     primaryColor: defaultPrimaryColor,
     naiveThemeOverrides,
+    locale: 'zh-TW',
   }),
   actions: {
     switchCollapsed() {
       this.collapsed = !this.collapsed
     },
+    toggleMobileMenu() {
+      this.mobileMenuOpen = !this.mobileMenuOpen
+    },
     setCollapsed(b) {
       this.collapsed = b
+    },
+    setMobileMenuOpen(b) {
+      this.mobileMenuOpen = b
     },
     toggleDark() {
       this.isDark = !this.isDark
@@ -48,9 +48,12 @@ export const useAppStore = defineStore('app', {
         primaryColorPressed: colors[6],
       })
     },
+    setLocale(locale) {
+      this.locale = locale
+    },
   },
   persist: {
-    pick: ['collapsed', 'layout', 'primaryColor', 'naiveThemeOverrides'],
+    pick: ['collapsed', 'layout', 'primaryColor', 'naiveThemeOverrides', 'locale'],
     storage: sessionStorage,
   },
 })

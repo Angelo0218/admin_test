@@ -1,23 +1,33 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:50:18
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <div
     id="menu-collapse"
     class="f-c-c cursor-pointer rounded-4 auto-bg-hover p-6 text-22 transition-all-300"
-    @click="appStore.switchCollapsed"
+    @click="handleToggle"
   >
-    <i :class="appStore.collapsed ? 'i-line-md-menu-unfold-left' : 'i-line-md-menu-fold-left'" />
+    <i :class="menuIcon" />
   </div>
 </template>
 
 <script setup>
+import { useWindowSize } from '@vueuse/core'
 import { useAppStore } from '@/store'
 
 const appStore = useAppStore()
+const { width } = useWindowSize()
+const isMobile = computed(() => width.value < 900)
+
+const menuIcon = computed(() => {
+  if (isMobile.value) {
+    return appStore.mobileMenuOpen ? 'i-fe:x' : 'i-fe:menu'
+  }
+  return appStore.collapsed ? 'i-fe:chevrons-right' : 'i-fe:chevrons-left'
+})
+
+function handleToggle() {
+  if (isMobile.value) {
+    appStore.toggleMobileMenu()
+    return
+  }
+  appStore.switchCollapsed()
+}
 </script>

@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2024/01/13 17:41:38
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <n-modal
     v-model:show="show"
@@ -24,7 +16,6 @@
       </template>
       <slot />
 
-      <!-- 底部按钮 -->
       <template #footer>
         <slot name="footer">
           <footer v-if="modalOptions.showFooter" class="flex justify-end">
@@ -48,6 +39,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { initDrag } from './utils'
 
 const props = defineProps({
@@ -65,11 +57,11 @@ const props = defineProps({
   },
   cancelText: {
     type: String,
-    default: '取消',
+    default: '',
   },
   okText: {
     type: String,
-    default: '确定',
+    default: '',
   },
   showFooter: {
     type: Boolean,
@@ -85,11 +77,11 @@ const props = defineProps({
   },
   modalStyle: {
     type: Object,
-    default: () => {},
+    default: () => ({}),
   },
   contentStyle: {
     type: Object,
-    default: () => {},
+    default: () => ({}),
   },
   onOk: {
     type: Function,
@@ -100,9 +92,12 @@ const props = defineProps({
     default: () => {},
   },
 })
-// 声明一个show变量，用于控制模态框的显示与隐藏
+
+const { t } = useI18n()
+
+// 控制顯示狀態
 const show = ref(false)
-// 声明一个modalOptions变量，用于存储模态框的配置信息
+// 保存開啟時的設定
 const modalOptions = ref({})
 
 const okLoading = computed({
@@ -116,12 +111,18 @@ const okLoading = computed({
   },
 })
 
-// 打开模态框
+// 開啟彈窗
 async function open(options = {}) {
-  // 将props和options合并赋值给modalOptions
-  modalOptions.value = { ...props, ...options }
+  modalOptions.value = {
+    ...props,
+    ...options,
+  }
 
-  // 将show的值设置为true
+  if (!modalOptions.value.cancelText)
+    modalOptions.value.cancelText = t('common.cancel')
+  if (!modalOptions.value.okText)
+    modalOptions.value.okText = t('common.confirm')
+
   show.value = true
   await nextTick()
   initDrag(
@@ -130,21 +131,18 @@ async function open(options = {}) {
   )
 }
 
-// 定义一个close函数，用于关闭模态框
+// 關閉彈窗
 function close() {
   show.value = false
 }
 
-// 定义一个handleOk函数，用于处理模态框确定操作
+// 確認事件
 async function handleOk(data) {
-  // 如果modalOptions中没有onOk函数，则直接关闭模态框
   if (typeof modalOptions.value.onOk !== 'function') {
     return close()
   }
   try {
-    // 调用onOk函数，传入data参数
     const res = await modalOptions.value.onOk(data)
-    // 如果onOk函数的返回值不为false，则关闭模态框
     if (res !== false)
       close()
   }
@@ -154,17 +152,13 @@ async function handleOk(data) {
   }
 }
 
-// 定义一个handleCancel函数，用于处理模态框取消操作
+// 取消事件
 async function handleCancel(data) {
-  // 如果modalOptions中没有onCancel函数，则直接关闭模态框
   if (typeof modalOptions.value.onCancel !== 'function') {
     return close()
   }
   try {
-    // 调用onCancel函数，传入data参数
     const res = await modalOptions.value.onCancel(data)
-
-    // 如果onCancel函数的返回值不为false，则关闭模态框
     if (res !== false)
       close()
   }
@@ -182,7 +176,7 @@ async function onAfterLeave() {
   )
 }
 
-// 定义一个defineExpose函数，用于暴露open、close、handleOk、handleCancel函数
+// 對外暴露方法
 defineExpose({
   open,
   close,

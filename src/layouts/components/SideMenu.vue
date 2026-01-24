@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:50:35
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <n-menu
     ref="menu"
@@ -22,6 +14,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { useAppStore, usePermissionStore } from '@/store'
 import { isExternal } from '@/utils'
 
@@ -29,6 +22,7 @@ const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 const permissionStore = usePermissionStore()
+const { t } = useI18n()
 
 const activeKey = computed(() => route.meta?.parentKey || route.name)
 
@@ -42,9 +36,10 @@ function handleMenuSelect(key, item) {
   if (isExternal(item.originPath)) {
     $dialog.confirm({
       type: 'info',
-      title: `请选择打开方式`,
-      positiveText: '外链打开',
-      negativeText: '在本站内嵌打开',
+      title: t('external.title'),
+      content: t('external.content'),
+      positiveText: t('common.openNewTab'),
+      negativeText: t('common.cancel'),
       confirm() {
         window.open(item.originPath)
       },

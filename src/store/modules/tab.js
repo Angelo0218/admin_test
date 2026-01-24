@@ -1,11 +1,3 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:25:52
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { defineStore } from 'pinia'
 import { useRouterStore } from './router'
 
@@ -22,7 +14,8 @@ export const useTabStore = defineStore('tab', {
   },
   actions: {
     async setActiveTab(path) {
-      await nextTick() // tab栏dom更新完再设置激活，让tab栏定位到新增的tab上生效
+      // 等待 tab DOM 更新後再定位
+      await nextTick()
       this.activeTab = path
     },
     setTabs(tabs) {
@@ -42,7 +35,7 @@ export const useTabStore = defineStore('tab', {
       const findItem = this.tabs.find(item => item.path === path)
       if (!findItem)
         return
-      // 更新key可让keepAlive失效
+      // 更新 key 可讓 keepAlive 失效
       if (keepAlive)
         findItem.keepAlive = false
       $loadingBar.start()

@@ -1,50 +1,79 @@
-<!--------------------------------
- - KYC Appeals
- --------------------------------->
-
 <template>
   <CommonPage>
     <template #action>
       <NButton type="primary" @click="handleRefresh">
-        重新整理
+        {{ t('common.refresh') }}
       </NButton>
     </template>
 
-    <div class="mb-16 flex flex-wrap gap-12">
-      <n-select v-model:value="filters.status" :options="statusOptions" placeholder="狀態" class="w-180" />
-      <n-input v-model:value="filters.keyword" placeholder="搜尋姓名或身分證號" class="w-220" />
+    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
+      <n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('common.status')" class="w-full sm:w-180" />
+      <n-input v-model:value="filters.keyword" :placeholder="t('kyc.list.appealSearchPlaceholder')" class="w-full sm:w-220" />
     </div>
 
-    <n-data-table
+    <ResponsiveTable
       :columns="columns"
       :data="rows"
       :loading="loading"
       :pagination="pagination"
-      striped
-    />
-
-    <MeModal ref="resolveModalRef">
-      <n-form label-placement="left" label-width="80">
-        <n-form-item label="處理結果">
-          <n-select v-model:value="resolveState.status" :options="resolveOptions" />
-        </n-form-item>
-        <n-form-item label="處理備註">
-          <n-input v-model:value="resolveState.decisionComment" type="textarea" :rows="3" />
-        </n-form-item>
-      </n-form>
-    </MeModal>
+    >
+      <template #card="{ row }">
+        <div class="card-border rounded-8 auto-bg p-12">
+          <div class="flex items-center justify-between gap-8">
+            <div class="text-14 font-600">
+              {{ row.applicationId || '-' }}
+            </div>
+            <NTag :type="statusType(row.status)">
+              {{ statusLabel(row.status) }}
+            </NTag>
+          </div>
+          <div class="grid mt-10 gap-6 text-12">
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.applicantName }}</span>
+              <span class="text-right">{{ row.applicantName || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.idNumber }}</span>
+              <span class="text-right">{{ row.idNumber || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.reason }}</span>
+              <span class="text-right">{{ row.reason || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.handledAt }}</span>
+              <span class="text-right">{{ formatTime(row.handledAt) }}</span>
+            </div>
+          </div>
+          <div class="mt-10 flex justify-end gap-8">
+            <NButton
+              size="small"
+              type="primary"
+              @click="router.push(`/kyc/detail/${row.applicationId}`)"
+            >
+              {{ t('common.view') }}
+            </NButton>
+          </div>
+        </div>
+      </template>
+    </ResponsiveTable>
   </CommonPage>
 </template>
 
 <script setup>
+import { useWindowSize } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
-import { CommonPage, MeModal } from '@/components'
-import { useModal } from '@/composables'
+import { CommonPage, ResponsiveTable } from '@/components'
 
+const { t } = useI18n()
+const router = useRouter()
 const loading = ref(false)
 const rows = ref([])
+const { width } = useWindowSize()
+const isNarrow = computed(() => width.value < 1400)
 const pagination = reactive({
   page: 1,
   pageSize: 20,
@@ -65,68 +94,75 @@ const filters = reactive({
   keyword: '',
 })
 
-const statusOptions = [
-  { label: '待處理', value: 'PENDING' },
-  { label: '申訴通過', value: 'APPROVED' },
-  { label: '申訴拒絕', value: 'REJECTED' },
-]
+const statusOptions = computed(() => [
+  { label: t('kyc.appealStatus.PENDING'), value: 'PENDING' },
+  { label: t('kyc.appealStatus.APPROVED'), value: 'APPROVED' },
+  { label: t('kyc.appealStatus.REJECTED'), value: 'REJECTED' },
+])
 
-const resolveOptions = [
-  { label: '申訴通過', value: 'APPROVED' },
-  { label: '申訴拒絕', value: 'REJECTED' },
-]
-
-const [resolveModalRef, resolveLoading] = useModal()
-const resolveState = reactive({
-  id: '',
-  status: 'APPROVED',
-  decisionComment: '',
-})
-
-const columns = [
-  { title: '案件編號', key: 'applicationId', minWidth: 120 },
-  { title: '姓名', key: 'applicantName', minWidth: 120 },
-  { title: '身分證號', key: 'idNumber', minWidth: 140 },
+const baseColumns = computed(() => [
+  { title: t('kyc.labels.caseId'), key: 'applicationId', width: 120, ellipsis: true },
+  { title: t('kyc.labels.name'), key: 'applicantName', width: 120, ellipsis: true },
+  { title: t('kyc.labels.idNumber'), key: 'idNumber', width: 120, ellipsis: true },
   {
-    title: '狀態',
+    title: t('kyc.labels.status'),
     key: 'status',
-    minWidth: 100,
+    width: 90,
     render: row =>
       h(
         NTag,
-        { type: row.status === 'PENDING' ? 'warning' : row.status === 'APPROVED' ? 'success' : 'error' },
-        { default: () => row.status || '-' },
+        { type: statusType(row.status) },
+        { default: () => statusLabel(row.status) },
       ),
   },
-  { title: '申訴原因', key: 'reason', minWidth: 200 },
-  { title: '處理人', key: 'handledByName', minWidth: 120 },
+  { title: t('kyc.columns.reason'), key: 'reason', width: 180, ellipsis: true },
+  { title: t('kyc.columns.handledBy'), key: 'handledByName', width: 120, ellipsis: true },
   {
-    title: '處理時間',
+    title: t('kyc.columns.handledAt'),
     key: 'handledAt',
-    minWidth: 180,
+    width: 140,
     render: row => formatTime(row.handledAt),
   },
   {
-    title: '操作',
+    title: t('common.actions'),
     key: 'actions',
-    minWidth: 120,
+    width: 80,
     align: 'right',
     render: (row) => {
-      if (row.status !== 'PENDING') {
-        return null
-      }
       return h(
         NButton,
         {
           size: 'small',
           type: 'primary',
-          onClick: () => openResolve(row),
+          onClick: () => router.push(`/kyc/detail/${row.applicationId}`),
         },
-        { default: () => '處理' },
+        { default: () => t('common.view') },
       )
     },
   },
-]
+])
+
+const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
+const fieldLabels = computed(() => ({
+  applicantName: columnLabelMap.value.applicantName,
+  idNumber: columnLabelMap.value.idNumber,
+  reason: columnLabelMap.value.reason,
+  handledAt: columnLabelMap.value.handledAt,
+}))
+const narrowColumnKeys = new Set(['applicationId', 'applicantName', 'status', 'reason', 'handledAt', 'actions'])
+const columns = computed(() => (isNarrow.value
+  ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
+  : baseColumns.value))
+
+function statusLabel(status) {
+  const key = `kyc.appealStatus.${status}`
+  const label = t(key)
+  return label === key ? status || '-' : label
+}
+
+function statusType(status) {
+  return status === 'PENDING' ? 'warning' : status === 'APPROVED' ? 'success' : 'error'
+}
 
 function formatTime(value) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
@@ -150,40 +186,9 @@ async function fetchList() {
   }
   catch (error) {
     console.error(error)
-    $message.error('讀取申訴列表失敗')
+    $message.error(t('kyc.list.appealsFetchFailed'))
   }
   loading.value = false
-}
-
-function openResolve(row) {
-  resolveState.id = row.id
-  resolveState.status = 'APPROVED'
-  resolveState.decisionComment = ''
-  resolveModalRef.value?.open({
-    title: `處理申訴 - ${row.applicationId}`,
-    okText: '確認',
-    onOk: handleResolve,
-  })
-}
-
-async function handleResolve() {
-  try {
-    resolveLoading.value = true
-    await api.resolveAppeal(resolveState.id, {
-      status: resolveState.status,
-      decisionComment: resolveState.decisionComment || undefined,
-    })
-    $message.success('已更新申訴狀態')
-    await fetchList()
-  }
-  catch (error) {
-    console.error(error)
-    $message.error('更新申訴狀態失敗')
-    return false
-  }
-  finally {
-    resolveLoading.value = false
-  }
 }
 
 function handleRefresh() {

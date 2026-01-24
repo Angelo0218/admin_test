@@ -1,31 +1,74 @@
-<!--------------------------------
- - User List
- --------------------------------->
-
 <template>
   <CommonPage>
     <template #action>
       <NButton type="primary" @click="handleRefresh">
-        重新整理
+        {{ t('common.refresh') }}
       </NButton>
     </template>
 
-    <div class="mb-16 flex flex-wrap gap-12">
-      <n-select v-model:value="filters.status" :options="statusOptions" placeholder="狀態" class="w-160" />
-      <n-input v-model:value="filters.keyword" placeholder="搜尋帳號或姓名" class="w-220" />
+    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
+      <n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('common.status')" class="w-full sm:w-160" />
+      <n-input v-model:value="filters.keyword" :placeholder="t('users.list.searchPlaceholder')" class="w-full sm:w-220" />
     </div>
 
-    <n-data-table
+    <ResponsiveTable
       :columns="columns"
       :data="rows"
       :loading="loading"
       :pagination="pagination"
-      striped
-    />
+    >
+      <template #card="{ row }">
+        <div class="card-border rounded-8 auto-bg p-12">
+          <div class="flex items-center justify-between gap-8">
+            <div class="text-14 font-600">
+              {{ row.username || '-' }}
+            </div>
+            <NTag :type="statusType(row.status)">
+              {{ statusLabel(row.status) }}
+            </NTag>
+          </div>
+          <div class="grid mt-10 gap-6 text-12">
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.displayName }}</span>
+              <span class="text-right">{{ row.displayName || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.roles }}</span>
+              <span class="text-right">{{ roleNames(row.roles) }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.createdAt }}</span>
+              <span class="text-right">{{ formatTime(row.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="mt-10 flex flex-wrap justify-end gap-8">
+            <NButton
+              v-if="row.status === 'ACTIVE'"
+              size="small"
+              type="error"
+              @click="openDisable(row)"
+            >
+              {{ t('users.actions.disable') }}
+            </NButton>
+            <NButton
+              v-else
+              size="small"
+              type="success"
+              @click="handleEnable(row)"
+            >
+              {{ t('users.actions.enable') }}
+            </NButton>
+            <NButton size="small" @click="openReset(row)">
+              {{ t('users.actions.resetPassword') }}
+            </NButton>
+          </div>
+        </div>
+      </template>
+    </ResponsiveTable>
 
     <MeModal ref="disableModalRef">
       <n-form label-placement="left" label-width="80">
-        <n-form-item label="停用原因">
+        <n-form-item :label="t('users.disable.reasonLabel')">
           <n-input v-model:value="disableState.reason" type="textarea" :rows="3" />
         </n-form-item>
       </n-form>
@@ -33,8 +76,8 @@
 
     <MeModal ref="resetModalRef">
       <n-form label-placement="left" label-width="80">
-        <n-form-item label="新密碼">
-          <n-input v-model:value="resetState.password" placeholder="預設 123456" />
+        <n-form-item :label="t('users.reset.passwordLabel')">
+          <n-input v-model:value="resetState.password" :placeholder="t('users.reset.passwordPlaceholder')" />
         </n-form-item>
       </n-form>
     </MeModal>
@@ -42,14 +85,19 @@
 </template>
 
 <script setup>
+import { useWindowSize } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/user'
-import { CommonPage, MeModal } from '@/components'
+import { CommonPage, MeModal, ResponsiveTable } from '@/components'
 import { useModal } from '@/composables'
 
+const { t } = useI18n()
 const loading = ref(false)
 const rows = ref([])
+const { width } = useWindowSize()
+const isNarrow = computed(() => width.value < 1400)
 const pagination = reactive({
   page: 1,
   pageSize: 20,
@@ -70,10 +118,10 @@ const filters = reactive({
   keyword: '',
 })
 
-const statusOptions = [
-  { label: '正常', value: 'ACTIVE' },
-  { label: '停用', value: 'DISABLED' },
-]
+const statusOptions = computed(() => [
+  { label: t('users.status.ACTIVE'), value: 'ACTIVE' },
+  { label: t('users.status.DISABLED'), value: 'DISABLED' },
+])
 
 const [disableModalRef, disableLoading] = useModal()
 const [resetModalRef, resetLoading] = useModal()
@@ -86,37 +134,38 @@ const resetState = reactive({
   password: '',
 })
 
-const columns = [
-  { title: '用戶 ID', key: 'id', minWidth: 120 },
-  { title: '帳號', key: 'username', minWidth: 120 },
-  { title: '名稱', key: 'displayName', minWidth: 120 },
+const baseColumns = computed(() => [
+  { title: t('users.labels.id'), key: 'id', width: 160, ellipsis: true },
+  { title: t('users.labels.username'), key: 'username', width: 120, ellipsis: true },
+  { title: t('users.labels.displayName'), key: 'displayName', width: 120, ellipsis: true },
   {
-    title: '狀態',
+    title: t('users.labels.status'),
     key: 'status',
-    minWidth: 100,
+    width: 90,
     render: row =>
       h(
         NTag,
-        { type: row.status === 'ACTIVE' ? 'success' : 'error' },
-        { default: () => row.status || '-' },
+        { type: statusType(row.status) },
+        { default: () => statusLabel(row.status) },
       ),
   },
   {
-    title: '角色',
+    title: t('users.labels.roles'),
     key: 'roles',
-    minWidth: 160,
-    render: row => (row.roles || []).map(item => item.name).join(', ') || '-',
+    width: 140,
+    ellipsis: true,
+    render: row => roleNames(row.roles),
   },
   {
-    title: '建立時間',
+    title: t('users.labels.createdAt'),
     key: 'createdAt',
-    minWidth: 180,
+    width: 140,
     render: row => formatTime(row.createdAt),
   },
   {
-    title: '操作',
+    title: t('common.actions'),
     key: 'actions',
-    minWidth: 220,
+    width: 150,
     align: 'right',
     render: (row) => {
       const actions = []
@@ -129,7 +178,7 @@ const columns = [
               type: 'error',
               onClick: () => openDisable(row),
             },
-            { default: () => '停用' },
+            { default: () => t('users.actions.disable') },
           ),
         )
       }
@@ -142,7 +191,7 @@ const columns = [
               type: 'success',
               onClick: () => handleEnable(row),
             },
-            { default: () => '啟用' },
+            { default: () => t('users.actions.enable') },
           ),
         )
       }
@@ -154,13 +203,45 @@ const columns = [
             class: 'ml-8',
             onClick: () => openReset(row),
           },
-          { default: () => '重設密碼' },
+          { default: () => t('users.actions.resetPassword') },
         ),
       )
-      return h('div', { class: 'flex justify-end' }, actions)
+      return h('div', { class: 'flex flex-wrap justify-end gap-6' }, actions)
     },
   },
-]
+])
+
+const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
+const fieldLabels = computed(() => ({
+  displayName: columnLabelMap.value.displayName,
+  roles: columnLabelMap.value.roles,
+  createdAt: columnLabelMap.value.createdAt,
+}))
+const narrowColumnKeys = new Set(['username', 'displayName', 'status', 'roles', 'actions'])
+const columns = computed(() => (isNarrow.value
+  ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
+  : baseColumns.value))
+
+function statusLabel(status) {
+  const key = `users.status.${status}`
+  const label = t(key)
+  return label === key ? status || '-' : label
+}
+
+function roleNames(roles) {
+  if (!roles?.length)
+    return '-'
+  const names = roles.map((role) => {
+    const key = `roles.${role.code}`
+    const label = t(key)
+    return label === key ? role.name : label
+  })
+  return names.join(', ')
+}
+
+function statusType(status) {
+  return status === 'ACTIVE' ? 'success' : 'error'
+}
 
 function formatTime(value) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
@@ -184,7 +265,7 @@ async function fetchList() {
   }
   catch (error) {
     console.error(error)
-    $message.error('讀取用戶列表失敗')
+    $message.error(t('users.list.fetchFailed'))
   }
   loading.value = false
 }
@@ -193,26 +274,26 @@ function openDisable(row) {
   disableState.id = row.id
   disableState.reason = ''
   disableModalRef.value?.open({
-    title: `停用用戶 - ${row.username}`,
-    okText: '確認',
+    title: `${t('users.disable.title')} - ${row.username}`,
+    okText: t('common.confirm'),
     onOk: handleDisable,
   })
 }
 
 async function handleDisable() {
   if (!disableState.reason) {
-    $message.warning('請輸入停用原因')
+    $message.warning(t('users.disable.reasonRequired'))
     return false
   }
   try {
     disableLoading.value = true
     await api.disable(disableState.id, { reason: disableState.reason })
-    $message.success('已停用')
+    $message.success(t('users.disable.success'))
     await fetchList()
   }
   catch (error) {
     console.error(error)
-    $message.error('停用失敗')
+    $message.error(t('users.disable.failed'))
     return false
   }
   finally {
@@ -222,14 +303,13 @@ async function handleDisable() {
 
 async function handleEnable(row) {
   try {
-    loading.value = true
     await api.enable(row.id)
-    $message.success('已啟用')
+    $message.success(t('users.enable.success'))
     await fetchList()
   }
   catch (error) {
     console.error(error)
-    $message.error('啟用失敗')
+    $message.error(t('users.enable.failed'))
   }
   loading.value = false
 }
@@ -238,8 +318,8 @@ function openReset(row) {
   resetState.id = row.id
   resetState.password = ''
   resetModalRef.value?.open({
-    title: `重設密碼 - ${row.username}`,
-    okText: '確認',
+    title: `${t('users.reset.title')} - ${row.username}`,
+    okText: t('common.confirm'),
     onOk: handleReset,
   })
 }
@@ -248,11 +328,11 @@ async function handleReset() {
   try {
     resetLoading.value = true
     await api.resetPassword(resetState.id, { password: resetState.password || undefined })
-    $message.success('已重設密碼')
+    $message.success(t('users.reset.success'))
   }
   catch (error) {
     console.error(error)
-    $message.error('重設密碼失敗')
+    $message.error(t('users.reset.failed'))
     return false
   }
   finally {

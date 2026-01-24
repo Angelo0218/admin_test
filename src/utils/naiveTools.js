@@ -1,13 +1,5 @@
-/**********************************
- * @FilePath: naiveTools.js
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/04 22:45:20
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import * as NaiveUI from 'naive-ui'
+import { i18n } from '@/locales'
 import { useAppStore } from '@/store'
 import { isNullOrUndef } from '@/utils'
 
@@ -15,7 +7,7 @@ export function setupMessage(NMessage) {
   class Message {
     static instance
     constructor() {
-      // 单例模式
+      // 單例模式
       if (Message.instance)
         return Message.instance
       Message.instance = this
@@ -89,10 +81,11 @@ export function setupMessage(NMessage) {
 export function setupDialog(NDialog) {
   NDialog.confirm = function (option = {}) {
     const showIcon = !isNullOrUndef(option.title)
+    const { t } = i18n.global
     return NDialog[option.type || 'warning']({
       showIcon,
-      positiveText: '确定',
-      negativeText: '取消',
+      positiveText: t('common.confirm'),
+      negativeText: t('common.cancel'),
       onPositiveClick: option.confirm,
       onNegativeClick: option.cancel,
       onMaskClick: option.cancel,

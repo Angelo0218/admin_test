@@ -1,39 +1,66 @@
-<!--------------------------------
- - Audit Logs
- --------------------------------->
-
 <template>
   <CommonPage>
     <template #action>
       <NButton type="primary" @click="handleRefresh">
-        重新整理
+        {{ t('common.refresh') }}
       </NButton>
     </template>
 
-    <div class="mb-16 flex flex-wrap gap-12">
-      <n-input v-model:value="filters.action" placeholder="動作" class="w-180" />
-      <n-input v-model:value="filters.targetType" placeholder="目標類型" class="w-180" />
-      <n-input v-model:value="filters.keyword" placeholder="搜尋目標 ID" class="w-220" />
+    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
+      <n-input v-model:value="filters.action" :placeholder="t('audit.list.actionPlaceholder')" class="w-full sm:w-180" />
+      <n-input v-model:value="filters.targetType" :placeholder="t('audit.list.targetTypePlaceholder')" class="w-full sm:w-180" />
+      <n-input v-model:value="filters.keyword" :placeholder="t('audit.list.keywordPlaceholder')" class="w-full sm:w-220" />
     </div>
 
-    <n-data-table
+    <ResponsiveTable
       :columns="columns"
       :data="rows"
       :loading="loading"
       :pagination="pagination"
-      striped
-    />
+    >
+      <template #card="{ row }">
+        <div class="card-border rounded-8 auto-bg p-12">
+          <div class="flex items-center justify-between gap-8">
+            <div class="text-14 font-600">
+              {{ row.action || '-' }}
+            </div>
+            <div class="text-12 opacity-60">
+              {{ formatTime(row.createdAt) }}
+            </div>
+          </div>
+          <div class="grid mt-10 gap-6 text-12">
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.actorName }}</span>
+              <span class="text-right">{{ row.actorName || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.targetType }}</span>
+              <span class="text-right">{{ row.targetType || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.targetId }}</span>
+              <span class="text-right">{{ row.targetId || '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </template>
+    </ResponsiveTable>
   </CommonPage>
 </template>
 
 <script setup>
+import { useWindowSize } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { NButton } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/audit'
-import { CommonPage } from '@/components'
+import { CommonPage, ResponsiveTable } from '@/components'
 
+const { t } = useI18n()
 const loading = ref(false)
 const rows = ref([])
+const { width } = useWindowSize()
+const isNarrow = computed(() => width.value < 1400)
 const pagination = reactive({
   page: 1,
   pageSize: 20,
@@ -55,18 +82,29 @@ const filters = reactive({
   keyword: '',
 })
 
-const columns = [
-  { title: '動作', key: 'action', minWidth: 160 },
-  { title: '操作者', key: 'actorName', minWidth: 120 },
-  { title: '目標類型', key: 'targetType', minWidth: 140 },
-  { title: '目標 ID', key: 'targetId', minWidth: 140 },
+const baseColumns = computed(() => [
+  { title: t('audit.labels.action'), key: 'action', width: 140, ellipsis: true },
+  { title: t('audit.labels.actor'), key: 'actorName', width: 120, ellipsis: true },
+  { title: t('audit.labels.targetType'), key: 'targetType', width: 120, ellipsis: true },
+  { title: t('audit.labels.targetId'), key: 'targetId', width: 140, ellipsis: true },
   {
-    title: '時間',
+    title: t('audit.labels.time'),
     key: 'createdAt',
-    minWidth: 180,
+    width: 140,
     render: row => formatTime(row.createdAt),
   },
-]
+])
+
+const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
+const fieldLabels = computed(() => ({
+  actorName: columnLabelMap.value.actorName,
+  targetType: columnLabelMap.value.targetType,
+  targetId: columnLabelMap.value.targetId,
+}))
+const narrowColumnKeys = new Set(['action', 'actorName', 'targetType', 'createdAt'])
+const columns = computed(() => (isNarrow.value
+  ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
+  : baseColumns.value))
 
 function formatTime(value) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
@@ -91,7 +129,7 @@ async function fetchList() {
   }
   catch (error) {
     console.error(error)
-    $message.error('讀取審計記錄失敗')
+    $message.error(t('audit.list.fetchFailed'))
   }
   loading.value = false
 }

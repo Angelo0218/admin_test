@@ -1,29 +1,42 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:25:07
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
-import api from '@/api'
 import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
-import { getPermissions, getUserInfo } from '@/store/helper'
+import { getUserInfo } from '@/store/helper'
 
-const WHITE_LIST = ['/login', '/404']
+const WHITE_LIST = ['/login', '/403', '/404']
+const DEFAULT_ROUTE = {
+  ADMIN: '/kyc/pending',
+  AUDITOR: '/kyc/pending',
+  SUPPORT: '/tickets',
+}
+
+function getRoleCode(userStore) {
+  return userStore?.currentRole?.code || userStore?.roles?.[0]?.code || ''
+}
+
+function getDefaultPath(role) {
+  return DEFAULT_ROUTE[role] || '/login'
+}
+
+function hasAccess(route, role) {
+  // 白名單與未設定 meta.roles 的路由一律放行
+  if (WHITE_LIST.includes(route.path))
+    return true
+  const allowRoles = route.meta?.roles
+  if (!allowRoles || !allowRoles.length)
+    return true
+  return allowRoles.includes(role)
+}
+
 export function createPermissionGuard(router) {
   router.beforeEach(async (to) => {
     const authStore = useAuthStore()
     const token = authStore.accessToken
 
-    /** 没有token */
     if (!token) {
       if (WHITE_LIST.includes(to.path))
         return true
-      return { path: 'login', query: { ...to.query, redirect: to.path } }
+      return { path: '/login', query: { ...to.query, redirect: to.fullPath } }
     }
 
-    // 有token的情况
     if (to.path === '/login')
       return { path: '/' }
     if (WHITE_LIST.includes(to.path))
@@ -31,26 +44,27 @@ export function createPermissionGuard(router) {
 
     const userStore = useUserStore()
     const permissionStore = usePermissionStore()
+
     if (!userStore.userInfo) {
-      const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
-      userStore.setUser(user)
-      permissionStore.setPermissions(permissions)
-      const routeComponents = import.meta.glob('@/views/**/*.vue')
-      permissionStore.accessRoutes.forEach((route) => {
-        route.component = routeComponents[route.component] || undefined
-        !router.hasRoute(route.name) && router.addRoute(route)
-      })
-      return { ...to, replace: true }
+      try {
+        // 僅向 /user/detail 取一次使用者資訊與角色
+        const user = await getUserInfo()
+        userStore.setUser(user)
+      }
+      catch (error) {
+        console.error(error)
+        authStore.resetLoginState()
+        return { path: '/login', query: { redirect: to.fullPath } }
+      }
     }
 
-    const routes = router.getRoutes()
-    if (routes.find(route => route.name === to.name))
-      return true
+    const roleCode = getRoleCode(userStore)
+    permissionStore.setRolePermissions(roleCode)
 
-    // 判断是无权限还是404
-    const { data: hasMenu } = await api.validateMenuPath(to.path)
-    return hasMenu
-      ? { name: '403', query: { path: to.fullPath }, state: { from: 'permission-guard' } }
-      : { name: '404', query: { path: to.fullPath } }
+    if (to.path === '/')
+      return { path: getDefaultPath(roleCode), replace: true }
+    if (!hasAccess(to, roleCode))
+      return { name: '403', query: { path: to.fullPath }, state: { from: 'permission-guard' } }
+    return true
   })
 }

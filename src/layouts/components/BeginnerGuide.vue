@@ -42,6 +42,7 @@
 <script setup>
 import Vue3IntroStep from 'vue3-intro-step'
 
+/** @type {import('vue').Ref<{ next: () => void, prev: () => void } | null>} */
 const myIntroStep = shallowRef(null)
 const show = shallowRef(false)
 const config = {
@@ -108,13 +109,20 @@ function done() {
   show.value = false
 }
 
-function next() {
+/**
+ * @param {unknown} _tipItem
+ */
+function next(_tipItem) {
   // tipItem当前的提示项信息
   // 调用vue3-intro-step的next方法 手动触发下一步
-  myIntroStep.value.next()
+  myIntroStep.value?.next()
 }
-function prev() {
+/**
+ * @param {unknown} _tipItem
+ * @param {number} _index
+ */
+function prev(_tipItem, _index) {
   // 调用vue3-intro-step的prev方法 手动触发上一步
-  myIntroStep.value.prev()
+  myIntroStep.value?.prev()
 }
 </script>

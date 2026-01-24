@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:49:53
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <div>
     <n-tooltip trigger="hover" placement="left">
@@ -14,10 +6,10 @@
           <i class="i-fe:settings cursor-pointer bg-white text-20" />
         </div>
       </template>
-      布局设置
+      {{ t('layout.setting') }}
     </n-tooltip>
 
-    <MeModal ref="modalRef" title="布局设置" :show-footer="false" width="600px">
+    <MeModal ref="modalRef" :title="t('layout.setting')" :show-footer="false" width="600px">
       <n-space justify="space-between">
         <div class="flex-col cursor-pointer justify-center" @click="appStore.setLayout('simple')">
           <div class="flex">
@@ -32,7 +24,7 @@
             :type="appStore.layout === 'simple' ? 'primary' : ''"
             ghost
           >
-            简约
+            {{ t('layout.simple') }}
           </n-button>
         </div>
         <div class="flex-col cursor-pointer justify-center" @click="appStore.setLayout('normal')">
@@ -49,7 +41,7 @@
             :type="appStore.layout === 'normal' ? 'primary' : ''"
             ghost
           >
-            通用
+            {{ t('layout.normal') }}
           </n-button>
         </div>
 
@@ -68,7 +60,7 @@
             :type="appStore.layout === 'full' ? 'primary' : ''"
             ghost
           >
-            全面
+            {{ t('layout.full') }}
           </n-button>
         </div>
         <div class="flex-col cursor-pointer justify-center" @click="appStore.setLayout('empty')">
@@ -81,22 +73,24 @@
             :type="appStore.layout === 'empty' ? 'primary' : ''"
             ghost
           >
-            空白
+            {{ t('layout.empty') }}
           </n-button>
         </div>
       </n-space>
       <p class="mt-16 opacity-50">
-        注: 此设置仅对未设置layout或者设置成跟随系统的页面有效，菜单设置的layout优先级最高
+        {{ t('layout.hint') }}
       </p>
     </MeModal>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { MeModal } from '@/components'
 import { useModal } from '@/composables'
 import { useAppStore } from '@/store'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const [modalRef] = useModal()
 </script>

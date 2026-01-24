@@ -1,27 +1,19 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/05 21:28:09
- - @Email: zclzone@outlook.com
- - Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
- --------------------------------->
-
 <template>
   <CommonPage :show-header="false">
     <div class="wh-full flex">
       <n-result
         class="m-auto"
         status="403"
-        title="403 權限不足"
-        description="您沒有權限存取此頁面"
+        :title="t('errors.403Title')"
+        :description="t('errors.403Desc')"
         size="large"
       >
         <template #footer>
           <n-button v-if="back" type="primary" ghost @click="router.replace(back)">
-            返回上一頁
+            {{ t('errors.back') }}
           </n-button>
           <n-button type="primary" class="ml-20" @click="router.replace('/')">
-            返回首頁
+            {{ t('errors.backHome') }}
           </n-button>
         </template>
       </n-result>
@@ -30,6 +22,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 

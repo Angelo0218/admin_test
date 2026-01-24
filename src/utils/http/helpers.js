@@ -1,27 +1,25 @@
-/**********************************
- * @FilePath: helpers.js
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/04 22:46:22
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
+import { i18n } from '@/locales'
 import { useAuthStore } from '@/store'
 
 let isConfirming = false
 
+function t(key, params) {
+  return i18n.global.t(key, params)
+}
+
 function handleAuthExpired(content, needTip) {
   if (isConfirming || !needTip)
-    return
+    return false
   isConfirming = true
   $dialog.confirm({
-    title: '提示',
+    title: t('errors.sessionExpiredTitle'),
     type: 'info',
     content,
+    positiveText: t('common.confirm'),
+    negativeText: t('common.cancel'),
     confirm() {
       useAuthStore().logout()
-      window.$message?.success('已退出登录')
+      window.$message?.success(t('common.logoutSuccess'))
       isConfirming = false
     },
     cancel() {
@@ -32,25 +30,35 @@ function handleAuthExpired(content, needTip) {
 }
 
 export function resolveResError(code, message, needTip = true) {
+  const hasMessage = typeof message === 'string' && message.trim()
   switch (code) {
-    case 401:
-      return handleAuthExpired('登录已过期，是否重新登录？', needTip)
+    case 401: {
+      const content = t('errors.sessionExpiredContent')
+      handleAuthExpired(content, needTip)
+      return content
+    }
     case 11007:
-    case 11008:
-      return handleAuthExpired(`${message}，是否重新登录？`, needTip)
+    case 11008: {
+      const content = t('errors.sessionExpiredWithMessage', {
+        message: hasMessage ? message : t('errors.sessionExpiredContent'),
+      })
+      handleAuthExpired(content, needTip)
+      return content
+    }
     case 403:
-      message = '请求被拒绝'
+      message = hasMessage ? message : t('errors.forbidden')
       break
     case 404:
-      message = '请求资源或接口不存在'
+      message = hasMessage ? message : t('errors.notFound')
       break
     case 500:
-      message = '服务器发生异常'
+      message = hasMessage ? message : t('errors.serverError')
       break
     default:
-      message = message ?? `【${code}】: 未知异常!`
+      message = hasMessage ? message : t('errors.unknown', { code })
       break
   }
-  needTip && window.$message?.error(message)
+  if (needTip)
+    window.$message?.error(message)
   return message
 }

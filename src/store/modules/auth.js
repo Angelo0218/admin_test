@@ -1,11 +1,3 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:25:39
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { defineStore } from 'pinia'
 import { usePermissionStore, useRouterStore, useTabStore, useUserStore } from '@/store'
 
@@ -37,15 +29,10 @@ export const useAuthStore = defineStore('auth', {
       const { resetRouter } = useRouterStore()
       const { resetPermission, accessRoutes } = usePermissionStore()
       const { resetTabs } = useTabStore()
-      // 重置路由
       resetRouter(accessRoutes)
-      // 重置用户
       resetUser()
-      // 重置权限
       resetPermission()
-      // 重置Tabs
       resetTabs()
-      // 重置token
       this.resetToken()
     },
     async logout() {

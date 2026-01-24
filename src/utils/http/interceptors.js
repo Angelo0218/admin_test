@@ -1,12 +1,3 @@
-/**********************************
- * @FilePath: interceptors.js
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/04 22:46:40
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { useAuthStore } from '@/store'
 import { resolveResError } from './helpers'
 
@@ -19,12 +10,9 @@ export function setupInterceptors(axiosInstance) {
         return Promise.resolve(data)
       }
       const code = data?.code ?? status
-
       const needTip = config?.needTip !== false
-
-      // 根据code处理对应的操作，并返回处理后的message
+      // 根據 code 轉成提示訊息
       const message = resolveResError(code, data?.message ?? statusText, needTip)
-
       return Promise.reject({ code, message, error: data ?? response })
     }
     return Promise.resolve(data ?? response)
@@ -35,7 +23,7 @@ export function setupInterceptors(axiosInstance) {
 }
 
 function reqResolve(config) {
-  // 处理不需要token的请求
+  // needToken = false 時，不附帶 token
   if (config.needToken === false) {
     return config
   }
@@ -56,7 +44,7 @@ function reqReject(error) {
 async function resReject(error) {
   if (!error || !error.response) {
     const code = error?.code
-    /** 根据code处理对应的操作，并返回处理后的message */
+    // 根據 code 轉成提示訊息
     const message = resolveResError(code, error.message)
     return Promise.reject({ code, message, error })
   }

@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:50:54
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <div id="top-tab">
     <n-tabs
@@ -21,7 +13,7 @@
         @click="handleItemClick(item.path)"
         @contextmenu.prevent="handleContextMenu($event, item)"
       >
-        {{ item.title }}
+        {{ t(item.titleKey || item.title || item.name) }}
       </n-tab>
     </n-tabs>
 
@@ -36,11 +28,13 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { useTabStore } from '@/store'
 import ContextMenu from './ContextMenu.vue'
 
 const router = useRouter()
 const tabStore = useTabStore()
+const { t } = useI18n()
 
 const contextMenuOption = reactive({
   show: false,
@@ -64,7 +58,7 @@ function setContextMenu(x, y, currentPath) {
   Object.assign(contextMenuOption, { x, y, currentPath })
 }
 
-// 右击菜单
+// 右鍵顯示分頁操作選單
 async function handleContextMenu(e, tagItem) {
   const { clientX, clientY } = e
   hideContextMenu()

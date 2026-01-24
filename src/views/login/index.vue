@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/05 21:28:36
- - @Email: zclzone@outlook.com
- - Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
- --------------------------------->
-
 <template>
   <div class="wh-full flex-col bg-[url(@/assets/images/login_bg.webp)] bg-cover">
     <div
@@ -24,7 +16,7 @@
           v-model:value="loginInfo.username"
           autofocus
           class="mt-32 h-40 items-center"
-          placeholder="請輸入帳號"
+          :placeholder="t('login.usernamePlaceholder')"
           :maxlength="20"
         >
           <template #prefix>
@@ -36,7 +28,7 @@
           class="mt-20 h-40 items-center"
           type="password"
           show-password-on="mousedown"
-          placeholder="請輸入密碼"
+          :placeholder="t('login.passwordPlaceholder')"
           :maxlength="20"
           @keydown.enter="handleLogin()"
         >
@@ -48,7 +40,7 @@
         <n-checkbox
           class="mt-20"
           :checked="isRemember"
-          label="記住帳號密碼"
+          :label="t('login.remember')"
           :on-update:checked="(val) => (isRemember = val)"
         />
 
@@ -59,7 +51,7 @@
             :loading="loading"
             @click="handleLogin()"
           >
-            登入
+            {{ t('login.submit') }}
           </n-button>
         </div>
       </div>
@@ -71,10 +63,12 @@
 
 <script setup>
 import { useStorage } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/store'
 import { lStorage } from '@/utils'
 import api from './api'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
@@ -96,10 +90,10 @@ const loading = ref(false)
 async function handleLogin() {
   const { username, password } = loginInfo.value
   if (!username || !password)
-    return $message.warning('請輸入帳號與密碼')
+    return $message.warning(t('login.missing'))
   try {
     loading.value = true
-    $message.loading('登入中，請稍候...', { key: 'login' })
+    $message.loading(t('login.loading'), { key: 'login' })
     const { data } = await api.login({ username, password: password.toString() })
     if (isRemember.value) {
       lStorage.set('loginInfo', { username, password })
@@ -118,9 +112,9 @@ async function handleLogin() {
 
 async function onLoginSuccess(data = {}) {
   authStore.setToken(data)
-  $message.loading('登入成功，正在跳轉...', { key: 'login' })
+  $message.loading(t('login.redirecting'), { key: 'login' })
   try {
-    $message.success('登入成功', { key: 'login' })
+    $message.success(t('login.success'), { key: 'login' })
     if (route.query.redirect) {
       const path = route.query.redirect
       delete route.query.redirect

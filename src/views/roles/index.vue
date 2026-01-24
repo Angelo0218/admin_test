@@ -1,26 +1,37 @@
-<!--------------------------------
- - Role Permissions
- --------------------------------->
-
 <template>
   <CommonPage>
     <template #action>
       <NButton type="primary" @click="handleRefresh">
-        重新整理
+        {{ t('common.refresh') }}
       </NButton>
     </template>
 
-    <n-data-table
+    <ResponsiveTable
       :columns="columns"
       :data="rows"
       :loading="loading"
-      striped
-    />
+    >
+      <template #card="{ row }">
+        <div class="card-border rounded-8 auto-bg p-12">
+          <div class="flex items-center justify-between gap-8">
+            <div class="text-14 font-600">
+              {{ row.code || '-' }}
+            </div>
+            <NButton size="small" @click="openEdit(row)">
+              {{ t('rolesPage.edit.title') }}
+            </NButton>
+          </div>
+          <div class="mt-8 text-12 opacity-70">
+            {{ roleLabel(row.code) }}
+          </div>
+        </div>
+      </template>
+    </ResponsiveTable>
 
     <MeModal ref="editModalRef">
       <n-form label-placement="left" label-width="100">
-        <n-form-item label="權限代碼">
-          <n-input v-model:value="editState.codes" placeholder="以逗號分隔" />
+        <n-form-item :label="t('rolesPage.labels.permissions')">
+          <n-input v-model:value="editState.codes" :placeholder="t('rolesPage.edit.placeholder')" />
         </n-form-item>
       </n-form>
     </MeModal>
@@ -29,10 +40,12 @@
 
 <script setup>
 import { NButton } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/role'
-import { CommonPage, MeModal } from '@/components'
+import { CommonPage, MeModal, ResponsiveTable } from '@/components'
 import { useModal } from '@/composables'
 
+const { t } = useI18n()
 const loading = ref(false)
 const rows = ref([])
 const [editModalRef, editLoading] = useModal()
@@ -41,11 +54,11 @@ const editState = reactive({
   codes: '',
 })
 
-const columns = [
-  { title: '角色代碼', key: 'code', minWidth: 120 },
-  { title: '角色名稱', key: 'name', minWidth: 120 },
+const columns = computed(() => [
+  { title: t('rolesPage.labels.code'), key: 'code', minWidth: 120 },
+  { title: t('rolesPage.labels.name'), key: 'name', minWidth: 120, render: row => roleLabel(row.code) },
   {
-    title: '操作',
+    title: t('common.actions'),
     key: 'actions',
     minWidth: 120,
     align: 'right',
@@ -56,10 +69,16 @@ const columns = [
           size: 'small',
           onClick: () => openEdit(row),
         },
-        { default: () => '編輯權限' },
+        { default: () => t('rolesPage.edit.title') },
       ),
   },
-]
+])
+
+function roleLabel(code) {
+  const key = `roles.${code}`
+  const label = t(key)
+  return label === key ? code : label
+}
 
 async function fetchList() {
   try {
@@ -69,7 +88,7 @@ async function fetchList() {
   }
   catch (error) {
     console.error(error)
-    $message.error('讀取角色列表失敗')
+    $message.error(t('rolesPage.list.fetchFailed'))
   }
   loading.value = false
 }
@@ -78,8 +97,8 @@ function openEdit(row) {
   editState.id = row.id
   editState.codes = ''
   editModalRef.value?.open({
-    title: `編輯權限 - ${row.name}`,
-    okText: '儲存',
+    title: `${t('rolesPage.edit.title')} - ${roleLabel(row.code)}`,
+    okText: t('common.save'),
     onOk: handleSave,
   })
 }
@@ -91,11 +110,11 @@ async function handleSave() {
       ? editState.codes.split(',').map(item => item.trim()).filter(Boolean)
       : []
     await api.updatePermissions(editState.id, { permissionCodes: permissionCodes.length ? permissionCodes : ['placeholder'] })
-    $message.success('已更新權限')
+    $message.success(t('rolesPage.edit.success'))
   }
   catch (error) {
     console.error(error)
-    $message.error('更新權限失敗')
+    $message.error(t('rolesPage.edit.failed'))
     return false
   }
   finally {

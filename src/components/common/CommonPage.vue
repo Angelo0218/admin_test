@@ -1,16 +1,8 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/04 22:51:21
- - @Email: zclzone@outlook.com
- - Copyright 穢 2023 Ronnie Zhang(憭扯?? | https://isme.top
- --------------------------------->
-
 <template>
   <main class="h-full flex-col flex-1 overflow-hidden bg-#f5f6fb dark:bg-#121212">
     <AppCard
       v-if="showHeader"
-      class="sticky top-0 z-1 min-h-60 flex items-center justify-between px-24"
+      class="sticky top-0 z-1 min-h-60 flex flex-col justify-between gap-12 px-16 sm:flex-row sm:items-center sm:px-24"
       border-b="1px solid light_border dark:dark_border"
     >
       <slot v-if="$slots.header" name="header" />
@@ -23,21 +15,21 @@
                 @click="router.back()"
               >
                 <i class="i-material-symbols:arrow-left-alt" />
-                <span class="ml-4">返回</span>
+                <span class="ml-4">{{ t('common.back') }}</span>
               </div>
             </template>
           </slot>
 
           <div class="mr-12 h-16 w-4 rounded-l-2 bg-primary" />
           <h2 class="font-normal">
-            {{ title ?? route.meta?.title }}
+            {{ pageTitle }}
           </h2>
           <slot name="title-suffix" />
         </div>
         <slot name="action" />
       </template>
     </AppCard>
-    <AppCard class="cus-scroll m-12 h-0 flex-1 rounded-8 p-24" bordered>
+    <AppCard class="cus-scroll m-8 h-0 flex-1 rounded-8 p-16 sm:m-12 sm:p-24" bordered>
       <slot />
     </AppCard>
 
@@ -50,7 +42,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { useI18n } from 'vue-i18n'
+
+const props = defineProps({
   back: {
     type: Boolean,
     default: false,
@@ -70,4 +64,14 @@ defineProps({
 })
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
+
+const pageTitle = computed(() => {
+  if (props.title)
+    return props.title
+  const key = route.meta?.titleKey
+  if (key)
+    return t(key)
+  return route.meta?.title || ''
+})
 </script>

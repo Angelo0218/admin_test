@@ -1,15 +1,7 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:50:10
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <n-breadcrumb>
     <n-breadcrumb-item v-if="!breadItems?.length" :clickable="false">
-      {{ route.meta.title }}
+      {{ rootTitle }}
     </n-breadcrumb-item>
     <n-breadcrumb-item
       v-for="(item, index) of breadItems"
@@ -24,7 +16,7 @@
       >
         <div class="flex items-center">
           <i :class="item.icon" class="mr-8" />
-          {{ item.name }}
+          {{ resolveName(item) }}
         </div>
       </n-dropdown>
     </n-breadcrumb-item>
@@ -32,11 +24,13 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { usePermissionStore } from '@/store'
 
 const router = useRouter()
 const route = useRoute()
 const permissionStore = usePermissionStore()
+const { t } = useI18n()
 
 const breadItems = ref([])
 watch(
@@ -46,6 +40,19 @@ watch(
   },
   { immediate: true },
 )
+
+const rootTitle = computed(() => {
+  const key = route.meta?.titleKey
+  if (key)
+    return t(key)
+  return route.meta?.title || ''
+})
+
+function resolveName(item) {
+  const key = `menu.${item.code}`
+  const label = t(key)
+  return label === key ? item.name : label
+}
 
 function findMatchs(tree, code, parents = []) {
   for (const item of tree) {
@@ -72,7 +79,7 @@ function getDropOptions(list = []) {
   return list
     .filter(item => item.show)
     .map(child => ({
-      label: child.name,
+      label: resolveName(child),
       key: child.code,
       icon: () => h('i', { class: child.icon }),
     }))

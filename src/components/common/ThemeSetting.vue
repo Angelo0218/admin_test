@@ -11,15 +11,17 @@
           :render-label="() => ''"
         />
       </template>
-      设置主题色
+      {{ t('theme.primaryColor') }}
     </n-tooltip>
   </div>
 </template>
 
 <script setup>
 import { getPresetColors } from '@arco-design/color'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/store'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 
 const primaryColors = Object.entries(getPresetColors()).map(([, value]) => value.primary)

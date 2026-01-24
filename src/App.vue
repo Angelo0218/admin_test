@@ -1,16 +1,8 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:49:42
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <n-config-provider
     class="wh-full"
-    :locale="zhTW"
-    :date-locale="dateZhTW"
+    :locale="naiveLocale"
+    :date-locale="naiveDateLocale"
     :theme="appStore.isDark ? darkTheme : undefined"
     :theme-overrides="appStore.naiveThemeOverrides"
   >
@@ -29,14 +21,20 @@
 </template>
 
 <script setup>
-import { darkTheme, dateZhTW, zhTW } from 'naive-ui'
+import dayjs from 'dayjs'
+import { darkTheme, dateEnUS, dateZhTW, enUS, zhTW } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import { LayoutSetting } from '@/components'
-import { useAppStore, useTabStore } from '@/store'
+import { useAppStore, usePermissionStore, useTabStore } from '@/store'
 import { layoutSettingVisible } from './settings'
+
+const { locale } = useI18n()
+const appStore = useAppStore()
+const permissionStore = usePermissionStore()
+const tabStore = useTabStore()
 
 const layouts = new Map()
 function getLayout(name) {
-  // 利用map将加载过的layout缓存起来，防止重新加载layout导致页面闪烁
   if (layouts.get(name))
     return layouts.get(name)
   const layout = markRaw(defineAsyncComponent(() => import(`@/layouts/${name}/index.vue`)))
@@ -45,7 +43,6 @@ function getLayout(name) {
 }
 
 const route = useRoute()
-const appStore = useAppStore()
 if (appStore.layout === 'default')
   appStore.setLayout('')
 const Layout = computed(() => {
@@ -54,12 +51,19 @@ const Layout = computed(() => {
   return getLayout(route.meta?.layout || appStore.layout)
 })
 
-const tabStore = useTabStore()
+const naiveLocale = computed(() => (locale.value === 'en-US' ? enUS : zhTW))
+const naiveDateLocale = computed(() => (locale.value === 'en-US' ? dateEnUS : dateZhTW))
+
 const keepAliveNames = computed(() => {
   return tabStore.tabs.filter(item => item.keepAlive).map(item => item.name)
 })
 
 watchEffect(() => {
   appStore.setThemeColor(appStore.primaryColor, appStore.isDark)
+  locale.value = appStore.locale
+  dayjs.locale(locale.value === 'en-US' ? 'en' : 'zh-tw')
+  if (permissionStore.permissions.length) {
+    permissionStore.rebuildMenus()
+  }
 })
 </script>

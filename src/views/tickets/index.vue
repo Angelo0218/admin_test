@@ -1,49 +1,80 @@
-<!--------------------------------
- - Ticket List
- --------------------------------->
-
 <template>
   <CommonPage>
     <template #action>
       <n-space>
         <NButton type="primary" @click="openCreate">
-          新增工單
+          {{ t('tickets.list.create') }}
         </NButton>
         <NButton @click="handleRefresh">
-          重新整理
+          {{ t('common.refresh') }}
         </NButton>
       </n-space>
     </template>
 
-    <div class="mb-16 flex flex-wrap gap-12">
-      <n-select v-model:value="filters.status" :options="statusOptions" placeholder="狀態" class="w-160" />
-      <n-select v-model:value="filters.category" :options="categoryOptions" placeholder="分類" class="w-180" />
-      <n-input v-model:value="filters.keyword" placeholder="搜尋標題或姓名" class="w-220" />
+    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
+      <n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('common.status')" class="w-full sm:w-160" />
+      <n-select v-model:value="filters.category" :options="categoryOptions" :placeholder="t('tickets.labels.category')" class="w-full sm:w-180" />
+      <n-input v-model:value="filters.keyword" :placeholder="t('tickets.list.searchPlaceholder')" class="w-full sm:w-220" />
     </div>
 
-    <n-data-table
+    <ResponsiveTable
       :columns="columns"
       :data="rows"
       :loading="loading"
       :pagination="pagination"
-      striped
-    />
+    >
+      <template #card="{ row }">
+        <div class="card-border rounded-8 auto-bg p-12">
+          <div class="flex items-center justify-between gap-8">
+            <div class="text-14 font-600">
+              {{ row.id || '-' }}
+            </div>
+            <NTag :type="statusType(row.status)">
+              {{ statusLabel(row.status) }}
+            </NTag>
+          </div>
+          <div class="grid mt-10 gap-6 text-12">
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.subject }}</span>
+              <span class="text-right">{{ row.subject || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.category }}</span>
+              <span class="text-right">{{ categoryLabel(row.category) }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.requesterName }}</span>
+              <span class="text-right">{{ row.requesterName || '-' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-8">
+              <span class="opacity-60">{{ fieldLabels.createdAt }}</span>
+              <span class="text-right">{{ formatTime(row.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="mt-10 flex justify-end">
+            <NButton size="small" type="primary" @click="router.push(`/tickets/${row.id}`)">
+              {{ t('common.view') }}
+            </NButton>
+          </div>
+        </div>
+      </template>
+    </ResponsiveTable>
 
     <MeModal ref="createModalRef">
       <n-form label-placement="left" label-width="90">
-        <n-form-item label="用戶 ID">
-          <n-input v-model:value="createState.requesterId" placeholder="輸入用戶 ID" />
+        <n-form-item :label="t('tickets.create.userId')">
+          <n-input v-model:value="createState.requesterId" :placeholder="t('tickets.create.userIdPlaceholder')" />
         </n-form-item>
-        <n-form-item label="主旨">
-          <n-input v-model:value="createState.subject" placeholder="輸入主旨" />
+        <n-form-item :label="t('tickets.create.subject')">
+          <n-input v-model:value="createState.subject" :placeholder="t('tickets.create.subjectPlaceholder')" />
         </n-form-item>
-        <n-form-item label="分類">
+        <n-form-item :label="t('tickets.create.category')">
           <n-select v-model:value="createState.category" :options="categoryOptions" />
         </n-form-item>
-        <n-form-item label="標籤">
-          <n-input v-model:value="createState.tags" placeholder="以逗號分隔" />
+        <n-form-item :label="t('tickets.create.tags')">
+          <n-input v-model:value="createState.tags" :placeholder="t('tickets.create.tagsPlaceholder')" />
         </n-form-item>
-        <n-form-item label="內部備註">
+        <n-form-item :label="t('tickets.create.internalNote')">
           <n-input v-model:value="createState.internalNote" type="textarea" :rows="3" />
         </n-form-item>
       </n-form>
@@ -52,15 +83,20 @@
 </template>
 
 <script setup>
+import { useWindowSize } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/ticket'
-import { CommonPage, MeModal } from '@/components'
+import { CommonPage, MeModal, ResponsiveTable } from '@/components'
 import { useModal } from '@/composables'
 
+const { t } = useI18n()
 const router = useRouter()
 const loading = ref(false)
 const rows = ref([])
+const { width } = useWindowSize()
+const isNarrow = computed(() => width.value < 1400)
 const pagination = reactive({
   page: 1,
   pageSize: 20,
@@ -82,18 +118,18 @@ const filters = reactive({
   keyword: '',
 })
 
-const statusOptions = [
-  { label: '待回覆', value: 'WAITING' },
-  { label: '處理中', value: 'IN_PROGRESS' },
-  { label: '已結案', value: 'CLOSED' },
-]
+const statusOptions = computed(() => [
+  { label: t('tickets.status.WAITING'), value: 'WAITING' },
+  { label: t('tickets.status.IN_PROGRESS'), value: 'IN_PROGRESS' },
+  { label: t('tickets.status.CLOSED'), value: 'CLOSED' },
+])
 
-const categoryOptions = [
-  { label: '帳號問題', value: 'ACCOUNT' },
-  { label: 'KYC 問題', value: 'KYC' },
-  { label: '票務問題', value: 'TICKET' },
-  { label: '其他', value: 'OTHER' },
-]
+const categoryOptions = computed(() => [
+  { label: t('tickets.category.ACCOUNT'), value: 'ACCOUNT' },
+  { label: t('tickets.category.KYC'), value: 'KYC' },
+  { label: t('tickets.category.TICKET'), value: 'TICKET' },
+  { label: t('tickets.category.OTHER'), value: 'OTHER' },
+])
 
 const [createModalRef, createLoading] = useModal()
 const createState = reactive({
@@ -104,41 +140,39 @@ const createState = reactive({
   internalNote: '',
 })
 
-const columns = [
-  { title: '工單編號', key: 'id', minWidth: 140 },
-  { title: '主旨', key: 'subject', minWidth: 200 },
-  { title: '分類', key: 'category', minWidth: 120 },
+const baseColumns = computed(() => [
+  { title: t('tickets.labels.id'), key: 'id', width: 160, ellipsis: true },
+  { title: t('tickets.labels.subject'), key: 'subject', width: 180, ellipsis: true },
   {
-    title: '狀態',
+    title: t('tickets.labels.category'),
+    key: 'category',
+    width: 100,
+    render: row => categoryLabel(row.category),
+  },
+  {
+    title: t('tickets.labels.status'),
     key: 'status',
-    minWidth: 100,
+    width: 90,
     render: row =>
       h(
         NTag,
         {
-          type:
-            row.status === 'WAITING'
-              ? 'warning'
-              : row.status === 'IN_PROGRESS'
-                ? 'info'
-                : row.status === 'CLOSED'
-                  ? 'success'
-                  : 'default',
+          type: statusType(row.status),
         },
-        { default: () => row.status || '-' },
+        { default: () => statusLabel(row.status) },
       ),
   },
-  { title: '用戶', key: 'requesterName', minWidth: 120 },
+  { title: t('tickets.labels.requester'), key: 'requesterName', width: 120, ellipsis: true },
   {
-    title: '建立時間',
+    title: t('tickets.labels.createdAt'),
     key: 'createdAt',
-    minWidth: 180,
+    width: 140,
     render: row => formatTime(row.createdAt),
   },
   {
-    title: '操作',
+    title: t('common.actions'),
     key: 'actions',
-    minWidth: 120,
+    width: 80,
     align: 'right',
     render: row =>
       h(
@@ -148,10 +182,44 @@ const columns = [
           type: 'primary',
           onClick: () => router.push(`/tickets/${row.id}`),
         },
-        { default: () => '查看' },
+        { default: () => t('common.view') },
       ),
   },
-]
+])
+
+const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
+const fieldLabels = computed(() => ({
+  subject: columnLabelMap.value.subject,
+  category: columnLabelMap.value.category,
+  requesterName: columnLabelMap.value.requesterName,
+  createdAt: columnLabelMap.value.createdAt,
+}))
+const narrowColumnKeys = new Set(['id', 'subject', 'status', 'requesterName', 'createdAt', 'actions'])
+const columns = computed(() => (isNarrow.value
+  ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
+  : baseColumns.value))
+
+function statusLabel(status) {
+  const key = `tickets.status.${status}`
+  const label = t(key)
+  return label === key ? status || '-' : label
+}
+
+function categoryLabel(category) {
+  const key = `tickets.category.${category}`
+  const label = t(key)
+  return label === key ? category || '-' : label
+}
+
+function statusType(status) {
+  return status === 'WAITING'
+    ? 'warning'
+    : status === 'IN_PROGRESS'
+      ? 'info'
+      : status === 'CLOSED'
+        ? 'success'
+        : 'default'
+}
 
 function formatTime(value) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
@@ -176,7 +244,7 @@ async function fetchList() {
   }
   catch (error) {
     console.error(error)
-    $message.error('讀取工單列表失敗')
+    $message.error(t('tickets.list.fetchFailed'))
   }
   loading.value = false
 }
@@ -188,15 +256,15 @@ function openCreate() {
   createState.tags = ''
   createState.internalNote = ''
   createModalRef.value?.open({
-    title: '新增工單',
-    okText: '建立',
+    title: t('tickets.create.title'),
+    okText: t('common.create'),
     onOk: handleCreate,
   })
 }
 
 async function handleCreate() {
   if (!createState.requesterId || !createState.subject) {
-    $message.warning('請輸入用戶 ID 與主旨')
+    $message.warning(t('tickets.create.missing'))
     return false
   }
   try {
@@ -208,12 +276,12 @@ async function handleCreate() {
       tags: createState.tags ? createState.tags.split(',').map(item => item.trim()).filter(Boolean) : [],
       internalNote: createState.internalNote || undefined,
     })
-    $message.success('已建立工單')
+    $message.success(t('tickets.create.success'))
     await fetchList()
   }
   catch (error) {
     console.error(error)
-    $message.error('建立工單失敗')
+    $message.error(t('tickets.create.failed'))
     return false
   }
   finally {

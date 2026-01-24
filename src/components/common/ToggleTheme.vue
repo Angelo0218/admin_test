@@ -13,7 +13,11 @@ import { useAppStore } from '@/store'
 
 const appStore = useAppStore()
 const isDark = useDark()
-async function toggleDark({ clientX, clientY }) {
+/**
+ * @param {MouseEvent} event
+ */
+async function toggleDark(event) {
+  const { clientX, clientY } = event
   function handler() {
     appStore.toggleDark()
     useToggle(isDark)()
