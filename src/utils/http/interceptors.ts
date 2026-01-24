@@ -9,13 +9,14 @@ export function setupInterceptors(axiosInstance) {
   function resResolve(response) {
     const { data, status, config, statusText, headers } = response
     if (headers['content-type']?.includes('json')) {
-      if (SUCCESS_CODES.includes(data?.code)) {
+      const isSuccess = data?.success === true || SUCCESS_CODES.includes(data?.code)
+      if (isSuccess) {
         return Promise.resolve(data)
       }
-      const code = data?.code ?? status
+      const code = data?.error?.code ?? data?.code ?? status
       const needTip = config?.needTip !== false
       // ??? code ?????????
-      const message = resolveResError(code, data?.message ?? statusText, needTip)
+      const message = resolveResError(code, data?.error?.message ?? data?.message ?? statusText, needTip)
       return Promise.reject({ code, message, error: data ?? response })
     }
     return Promise.resolve(data ?? response)
@@ -30,7 +31,7 @@ export function setupInterceptors(axiosInstance) {
     }
 
     const { data, status, config } = error.response
-    const code = data?.code ?? status
+    const code = data?.error?.code ?? data?.code ?? status
 
     if (code === 401 && config && !config.skipAuthRefresh && !config._retry) {
       config._retry = true
@@ -70,7 +71,7 @@ export function setupInterceptors(axiosInstance) {
     }
 
     const needTip = config?.needTip !== false
-    const message = resolveResError(code, data?.message ?? error.message, needTip)
+    const message = resolveResError(code, data?.error?.message ?? data?.message ?? error.message, needTip)
     return Promise.reject({ code, message, error: error.response?.data || error.response })
   }
 

@@ -9,7 +9,7 @@ test('工單列表與詳情可讀取', async ({ request }) => {
   })
   expect(listRes.ok()).toBeTruthy()
   const listBody = await listRes.json()
-  expect(listBody.code).toBe(0)
+  expect(listBody.success).toBe(true)
   const first = listBody.data?.items?.[0]
   expect(first?.id).toBeTruthy()
 
@@ -18,7 +18,7 @@ test('工單列表與詳情可讀取', async ({ request }) => {
   })
   expect(detailRes.ok()).toBeTruthy()
   const detailBody = await detailRes.json()
-  expect(detailBody.code).toBe(0)
+  expect(detailBody.success).toBe(true)
 })
 
 test('工單狀態不合法轉移應回 400', async ({ request }) => {

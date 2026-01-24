@@ -8,7 +8,7 @@ test('login 取得 token 後可讀取使用者資訊', async ({ request }) => {
   })
   expect(res.ok()).toBeTruthy()
   const body = await res.json()
-  expect(body.code).toBe(0)
+  expect(body.success).toBe(true)
   expect(body.data?.username).toBe('admin')
 })
 

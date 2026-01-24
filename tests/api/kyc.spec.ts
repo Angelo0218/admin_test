@@ -10,7 +10,7 @@ test('KYC 列表與詳情可讀取', async ({ request }) => {
   })
   expect(detailRes.ok()).toBeTruthy()
   const detailBody = await detailRes.json()
-  expect(detailBody.code).toBe(0)
+  expect(detailBody.success).toBe(true)
 })
 
 test('KYC 狀態轉移不合法應回 400', async ({ request }) => {
@@ -39,5 +39,5 @@ test('KYC 申訴列表可讀取', async ({ request }) => {
   })
   expect(res.ok()).toBeTruthy()
   const body = await res.json()
-  expect(body.code).toBe(0)
+  expect(body.success).toBe(true)
 })

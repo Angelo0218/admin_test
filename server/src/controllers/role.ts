@@ -1,6 +1,7 @@
 import type { AuthPayload } from '../middlewares/auth'
 import type { AppContext } from '../types/context'
 import { prisma } from '../db/client'
+import { fail, ok } from '../utils/response'
 
 function ensureAdmin(role: string) {
   return role === 'ADMIN'
@@ -17,7 +18,7 @@ interface IdParams {
 export async function listRoles(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const roles = await prisma.role.findMany({
     orderBy: { code: 'asc' },
@@ -27,23 +28,19 @@ export async function listRoles(c: AppContext) {
     code: role.code,
     name: role.name,
   }))
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function updateRolePermissions(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
   const payload = c.get('validatedBody') as RolePermissionPayload
-  return c.json({
-    code: 0,
-    message: 'ok',
-    data: {
-      roleId: id,
-      permissionCodes: payload.permissionCodes,
-      updated: true,
-    },
+  return ok(c, {
+    roleId: id,
+    permissionCodes: payload.permissionCodes,
+    updated: true,
   })
 }

@@ -2,10 +2,11 @@ import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { env } from '../config/env'
 import { logError } from '../utils/logger'
+import { fail } from '../utils/response'
 
 export function errorHandler(err: unknown, c: Context) {
   if (err instanceof HTTPException) {
-    return c.json({ code: err.status, message: err.message, data: null }, err.status)
+    return fail(c, err.status, err.message, err.status)
   }
   logError(err, {
     requestId: c.get('requestId'),
@@ -13,5 +14,5 @@ export function errorHandler(err: unknown, c: Context) {
     path: c.req.path,
   })
   const message = env.isProduction ? 'internal error' : (err instanceof Error ? err.message : 'internal error')
-  return c.json({ code: 500, message, data: null }, 500)
+  return fail(c, 500, message, 500)
 }

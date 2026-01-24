@@ -5,6 +5,7 @@ import { env } from '../config/env'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../models/auth'
 import { findUserById, findUserByUsername, mapUserResponse } from '../models/user'
 import { verifyPassword } from '../utils/password'
+import { fail, ok } from '../utils/response'
 
 interface LoginPayload {
   username: string
@@ -19,16 +20,16 @@ export async function login(c: AppContext) {
   const { username, password } = c.get('validatedBody') as LoginPayload
   const user = await findUserByUsername(username)
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
-    return c.json({ code: 401, message: 'invalid credentials', data: null }, 401)
+    return fail(c, 401, 'invalid credentials', 401)
   }
   if (user.status === 'DISABLED') {
-    return c.json({ code: 403, message: 'user disabled', data: null }, 403)
+    return fail(c, 403, 'user disabled', 403)
   }
 
   const roles = user.roles.map(item => item.role)
   const currentRole = roles.find(role => role.code === 'ADMIN') || roles[0]
   if (!currentRole) {
-    return c.json({ code: 403, message: 'role not assigned', data: null }, 403)
+    return fail(c, 403, 'role not assigned', 403)
   }
 
   const payload: AuthPayload = {
@@ -49,7 +50,7 @@ export async function login(c: AppContext) {
     path: '/api/v1/auth/refresh/token',
   })
 
-  return c.json({ code: 0, message: 'ok', data: { accessToken } })
+  return ok(c, { accessToken })
 }
 
 export function readRefreshTokenCookie(c: AppContext) {
@@ -59,7 +60,7 @@ export function readRefreshTokenCookie(c: AppContext) {
 export async function refreshToken(c: AppContext) {
   const token = readRefreshTokenCookie(c)
   if (!token) {
-    return c.json({ code: 401, message: 'missing refresh token', data: null }, 401)
+    return fail(c, 401, 'missing refresh token', 401)
   }
 
   try {
@@ -69,20 +70,17 @@ export async function refreshToken(c: AppContext) {
       role: payload.role,
       username: payload.username,
     })
-    return c.json({ code: 0, message: 'ok', data: { accessToken } })
+    return ok(c, { accessToken })
   }
   catch (error) {
     console.warn('refresh token verify failed', error)
-    const data = env.debugAuth
-      ? { tokenLength: token.length, tokenPreview: token.slice(0, 16) }
-      : null
-    return c.json({ code: 401, message: 'invalid refresh token', data }, 401)
+    return fail(c, 401, 'invalid refresh token', 401)
   }
 }
 
 export async function logout(c: AppContext) {
   deleteCookie(c, 'refreshToken', { path: '/api/v1/auth/refresh/token' })
-  return c.json({ code: 0, message: 'ok', data: true })
+  return ok(c, true)
 }
 
 export async function toggleRole(c: AppContext) {
@@ -90,12 +88,12 @@ export async function toggleRole(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   const user = await findUserById(auth.userId)
   if (!user) {
-    return c.json({ code: 404, message: 'user not found', data: null }, 404)
+    return fail(c, 404, 'user not found', 404)
   }
   const roles = user.roles.map(item => item.role)
   const targetRole = roles.find(item => item.code === role)
   if (!targetRole) {
-    return c.json({ code: 403, message: 'role not allowed', data: null }, 403)
+    return fail(c, 403, 'role not allowed', 403)
   }
 
   const payload: AuthPayload = {
@@ -105,15 +103,15 @@ export async function toggleRole(c: AppContext) {
   }
 
   const accessToken = signAccessToken(payload)
-  return c.json({ code: 0, message: 'ok', data: { accessToken } })
+  return ok(c, { accessToken })
 }
 
 export async function currentUser(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   const user = await findUserById(auth.userId)
   if (!user) {
-    return c.json({ code: 404, message: 'user not found', data: null }, 404)
+    return fail(c, 404, 'user not found', 404)
   }
   const data = mapUserResponse(user, auth.role)
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }

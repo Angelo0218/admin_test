@@ -10,6 +10,7 @@ import {
   resolveAppeal,
   reviewApplication,
 } from '../models/kyc'
+import { fail, ok } from '../utils/response'
 
 function ensureKycRole(role: string) {
   return role === 'ADMIN' || role === 'AUDITOR'
@@ -63,22 +64,22 @@ interface IdParams {
 export async function listKycApplications(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureKycRole(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const query = c.get('validatedQuery') as KycListQuery
   const data = await listApplications(query)
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function createKycApplication(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const payload = c.get('validatedBody') as KycCreatePayload
   const data = await createApplication(payload)
   if (!data) {
-    return c.json({ code: 404, message: 'user not found', data: null }, 404)
+    return fail(c, 404, 'user not found', 404)
   }
   await createAuditLog({
     actorId: auth.userId,
@@ -87,26 +88,26 @@ export async function createKycApplication(c: AppContext) {
     targetId: data.id,
     meta: payload,
   })
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function getKycDetail(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureKycRole(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
   const data = await getApplicationDetail(id)
   if (!data) {
-    return c.json({ code: 404, message: 'not found', data: null }, 404)
+    return fail(c, 404, 'not found', 404)
   }
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function reviewKycApplication(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureKycRole(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
   const payload = c.get('validatedBody') as KycReviewPayload
@@ -117,10 +118,10 @@ export async function reviewKycApplication(c: AppContext) {
     reviewerId: auth.userId,
   })
   if (!data) {
-    return c.json({ code: 404, message: 'not found', data: null }, 404)
+    return fail(c, 404, 'not found', 404)
   }
   if (data.error === 'INVALID_STATUS') {
-    return c.json({ code: 400, message: 'invalid status transition', data: null }, 400)
+    return fail(c, 400, 'invalid status transition', 400)
   }
   await createAuditLog({
     actorId: auth.userId,
@@ -129,29 +130,29 @@ export async function reviewKycApplication(c: AppContext) {
     targetId: id,
     meta: payload,
   })
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function listKycAppeals(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureKycRole(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const query = c.get('validatedQuery') as KycAppealListQuery
   const data = await listAppeals(query)
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function createKycAppeal(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
   const payload = c.get('validatedBody') as KycAppealCreatePayload
   const data = await createAppeal({ applicationId: id, reason: payload.reason })
   if (!data) {
-    return c.json({ code: 404, message: 'not found', data: null }, 404)
+    return fail(c, 404, 'not found', 404)
   }
   await createAuditLog({
     actorId: auth.userId,
@@ -160,13 +161,13 @@ export async function createKycAppeal(c: AppContext) {
     targetId: data.id,
     meta: { applicationId: id, reason: payload.reason },
   })
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }
 
 export async function resolveKycAppeal(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureKycRole(auth.role)) {
-    return c.json({ code: 403, message: 'forbidden', data: null }, 403)
+    return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
   const payload = c.get('validatedBody') as KycAppealResolvePayload
@@ -177,10 +178,10 @@ export async function resolveKycAppeal(c: AppContext) {
     handledById: auth.userId,
   })
   if (!data) {
-    return c.json({ code: 404, message: 'not found', data: null }, 404)
+    return fail(c, 404, 'not found', 404)
   }
   if (data.error === 'INVALID_STATUS') {
-    return c.json({ code: 400, message: 'invalid status transition', data: null }, 400)
+    return fail(c, 400, 'invalid status transition', 400)
   }
   await createAuditLog({
     actorId: auth.userId,
@@ -189,5 +190,5 @@ export async function resolveKycAppeal(c: AppContext) {
     targetId: id,
     meta: payload,
   })
-  return c.json({ code: 0, message: 'ok', data })
+  return ok(c, data)
 }

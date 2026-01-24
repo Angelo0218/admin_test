@@ -9,7 +9,7 @@ test('角色與審計列表可讀取', async ({ request }) => {
   })
   expect(rolesRes.ok()).toBeTruthy()
   const rolesBody = await rolesRes.json()
-  expect(rolesBody.code).toBe(0)
+  expect(rolesBody.success).toBe(true)
   expect(Array.isArray(rolesBody.data)).toBeTruthy()
 
   const auditRes = await request.get(`${apiBase}/audit/logs`, {
@@ -18,5 +18,5 @@ test('角色與審計列表可讀取', async ({ request }) => {
   })
   expect(auditRes.ok()).toBeTruthy()
   const auditBody = await auditRes.json()
-  expect(auditBody.code).toBe(0)
+  expect(auditBody.success).toBe(true)
 })

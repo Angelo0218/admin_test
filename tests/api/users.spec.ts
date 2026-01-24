@@ -9,6 +9,6 @@ test('用戶列表可讀取', async ({ request }) => {
   })
   expect(res.ok()).toBeTruthy()
   const body = await res.json()
-  expect(body.code).toBe(0)
+  expect(body.success).toBe(true)
   expect(Array.isArray(body.data?.items)).toBeTruthy()
 })

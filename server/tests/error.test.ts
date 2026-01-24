@@ -32,5 +32,6 @@ test('errors are masked in production', async () => {
   const res = await app.request('/boom')
   const body = await res.json()
 
-  expect(body.message).toBe('internal error')
+  expect(body.success).toBe(false)
+  expect(body.error?.message).toBe('internal error')
 })

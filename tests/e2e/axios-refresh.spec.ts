@@ -9,14 +9,14 @@ test('axios refreshes token and retries', async ({ page }) => {
       await route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ code: 401, message: 'unauthorized', data: null }),
+        body: JSON.stringify({ success: false, data: null, error: { code: 401, message: 'unauthorized' } }),
       })
       return
     }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ code: 0, message: 'ok', data: { ok: true } }),
+      body: JSON.stringify({ success: true, data: { ok: true }, error: null }),
     })
   })
 
@@ -24,7 +24,7 @@ test('axios refreshes token and retries', async ({ page }) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ code: 0, message: 'ok', data: { accessToken: 'new-token' } }),
+      body: JSON.stringify({ success: true, data: { accessToken: 'new-token' }, error: null }),
     })
   })
 
@@ -46,7 +46,7 @@ test('axios refreshes token and retries', async ({ page }) => {
     throw new Error(JSON.stringify(result.error))
   }
 
-  expect(result.response?.code).toBe(0)
+  expect(result.response?.success).toBe(true)
   expect(result.response?.data?.ok).toBe(true)
   expect(detailCount).toBe(2)
 })
