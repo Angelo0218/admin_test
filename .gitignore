@@ -5,3 +5,4 @@ stats.html
 server/.env
 server/dev.db
 .worktrees
+server/prisma/dev.db
