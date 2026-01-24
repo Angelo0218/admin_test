@@ -200,15 +200,19 @@ const columns = computed(() => (isNarrow.value
   : baseColumns.value))
 
 function statusLabel(status) {
+  if (!status)
+    return '-'
   const key = `tickets.status.${status}`
   const label = t(key)
-  return label === key ? status || '-' : label
+  return label === key ? status : label
 }
 
 function categoryLabel(category) {
+  if (!category)
+    return '-'
   const key = `tickets.category.${category}`
   const label = t(key)
-  return label === key ? category || '-' : label
+  return label === key ? category : label
 }
 
 function statusType(status) {
