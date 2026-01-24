@@ -117,6 +117,9 @@ export async function getTicketDetail(id: string) {
     return null
   }
 
+  const availableActions = getTicketAvailableActions(ticket.status)
+  const availableStatuses = getTicketAvailableStatuses(ticket.status)
+
   return {
     ticket: {
       id: ticket.id,
@@ -129,6 +132,8 @@ export async function getTicketDetail(id: string) {
       createdAt: ticket.createdAt.toISOString(),
       updatedAt: ticket.updatedAt.toISOString(),
     },
+    availableActions,
+    availableStatuses,
     messages: ticket.messages.map(message => ({
       id: message.id,
       senderId: message.senderId,
@@ -236,6 +241,14 @@ export async function updateTicketMeta({ ticketId, tags, internalNote }: TicketM
 const TICKET_TRANSITIONS: Record<string, string[]> = {
   WAITING: ['IN_PROGRESS'],
   IN_PROGRESS: ['CLOSED'],
+}
+
+export function getTicketAvailableActions(status: string) {
+  return TICKET_TRANSITIONS[status] ?? []
+}
+
+export function getTicketAvailableStatuses(status: string) {
+  return getTicketAvailableActions(status)
 }
 
 function isValidTicketTransition(current: string, next: string) {

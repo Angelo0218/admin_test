@@ -148,6 +148,9 @@ export async function getApplicationDetail(id: string) {
     return null
   }
 
+  const availableActions = getKycAvailableActions(application.status)
+  const availableStatuses = getKycAvailableStatuses(application.status)
+
   return {
     application: {
       id: application.id,
@@ -167,6 +170,8 @@ export async function getApplicationDetail(id: string) {
         createdAt: doc.createdAt.toISOString(),
       })),
     },
+    availableActions,
+    availableStatuses,
     reviews: application.reviews.map(record => ({
       id: record.id,
       action: record.action,
@@ -330,6 +335,14 @@ export async function resolveAppeal({ id, status, decisionComment, handledById }
 const KYC_TRANSITIONS: Record<string, string[]> = {
   PENDING: ['NEED_MORE', 'PASSED', 'REJECTED'],
   NEED_MORE: ['PASSED', 'REJECTED'],
+}
+
+export function getKycAvailableActions(status: string) {
+  return KYC_TRANSITIONS[status] ?? []
+}
+
+export function getKycAvailableStatuses(status: string) {
+  return getKycAvailableActions(status)
 }
 
 function isValidKycTransition(current: string, next: string) {

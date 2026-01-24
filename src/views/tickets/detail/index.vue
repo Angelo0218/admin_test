@@ -68,7 +68,6 @@ import dayjs from 'dayjs'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/ticket'
 import { CommonPage } from '@/components'
-import { TICKET_TRANSITIONS } from '@/constants/status'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -84,6 +83,7 @@ const detail = reactive({
   status: '',
   requesterName: '',
   createdAt: '',
+  availableStatuses: [],
 })
 
 const meta = reactive({
@@ -98,7 +98,7 @@ const allStatusOptions = computed(() => [
   { label: t('tickets.status.CLOSED'), value: 'CLOSED' },
 ])
 
-const allowedStatuses = computed(() => TICKET_TRANSITIONS[detail.status] || [])
+const allowedStatuses = computed(() => detail.availableStatuses || [])
 
 // 狀態轉移僅做前端提示，後端仍保有嚴格檢查。
 const statusOptions = computed(() => {
@@ -145,6 +145,7 @@ async function fetchDetail() {
     detail.status = ticket.status || ''
     detail.requesterName = ticket.requesterName || ''
     detail.createdAt = ticket.createdAt || ''
+    detail.availableStatuses = data?.availableStatuses || []
     meta.tags = (ticket.tags || []).join(',')
     meta.internalNote = ticket.internalNote || ''
     meta.status = allowedStatuses.value[0] || detail.status || ''

@@ -118,7 +118,6 @@ import dayjs from 'dayjs'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
 import { CommonPage, ResponsiveTable } from '@/components'
-import { KYC_TRANSITIONS } from '@/constants/status'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -139,6 +138,8 @@ const detail = reactive({
   status: 'PENDING',
   submittedAt: '',
   documents: [],
+  availableActions: [],
+  availableStatuses: [],
 })
 
 const reviewColumns = computed(() => [
@@ -194,8 +195,7 @@ function appealStatusLabel(status) {
 
 // 狀態轉移僅供前端提示，實際規則由後端判定。
 function isReviewActionAllowed(action) {
-  const allowed = KYC_TRANSITIONS[detail.status] || []
-  return allowed.includes(action)
+  return detail.availableActions.includes(action)
 }
 
 const canApprove = computed(() => isReviewActionAllowed('PASSED'))
@@ -219,6 +219,8 @@ async function fetchDetail() {
     detail.status = application.status || 'PENDING'
     detail.submittedAt = application.submittedAt || ''
     detail.documents = application.documents || []
+    detail.availableActions = data?.availableActions || []
+    detail.availableStatuses = data?.availableStatuses || []
     reviews.value = data?.reviews || []
     appeals.value = data?.appeals || []
   }
