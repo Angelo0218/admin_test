@@ -18,6 +18,7 @@ model User {
   roles          UserRole[]
   kycApplications KycApplication[] @relation("Applicant")
   kycReviews     KycReview[]     @relation("Reviewer")
+  handledAppeals KycAppeal[]     @relation("AppealHandler")
   tickets        Ticket[]        @relation("TicketRequester")
   ticketMessages TicketMessage[] @relation("TicketSender")
   auditLogs      AuditLog[]      @relation("AuditActor")
@@ -85,7 +86,7 @@ model KycAppeal {
   reason          String?
   decisionComment String?
   handledById     String?
-  handledBy       User?          @relation(fields: [handledById], references: [id])
+  handledBy       User?          @relation("AppealHandler", fields: [handledById], references: [id])
   handledAt       DateTime?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt

@@ -28,7 +28,7 @@ export async function seedDefaults() {
     data: {
       username: 'admin',
       passwordHash: '123456',
-      displayName: 'Admin',
+      displayName: '管理員',
       roles: {
         create: [{ roleId: adminRole.id }],
       },
@@ -37,7 +37,7 @@ export async function seedDefaults() {
 
   const support = await prisma.user.create({
     data: {
-      username: '客服',
+      username: 'support',
       passwordHash: '123456',
       displayName: '客服',
       roles: {
@@ -48,7 +48,7 @@ export async function seedDefaults() {
 
   const auditor = await prisma.user.create({
     data: {
-      username: '審核',
+      username: 'auditor',
       passwordHash: '123456',
       displayName: '審核員 A',
       roles: {
@@ -111,7 +111,7 @@ export async function seedDefaults() {
           {
             action: 'NEED_MORE',
             reviewerId: auditor.id,
-            comment: '照片不清晰，請補件',
+            comment: '請補上自拍照',
           },
         ],
       },
@@ -138,7 +138,7 @@ export async function seedDefaults() {
           {
             action: 'REJECTED',
             reviewerId: auditor.id,
-            comment: '資料不一致',
+            comment: '資料不符',
           },
         ],
       },
@@ -165,7 +165,7 @@ export async function seedDefaults() {
           {
             action: 'PASSED',
             reviewerId: admin.id,
-            comment: '資料完整',
+            comment: '審核通過',
           },
         ],
       },
@@ -176,7 +176,7 @@ export async function seedDefaults() {
     data: {
       applicationId: kycRejected.id,
       status: 'PENDING',
-      reason: '請重新檢查資料',
+      reason: '資料有誤，請重新審核',
     },
   })
 
@@ -184,8 +184,8 @@ export async function seedDefaults() {
     data: {
       applicationId: kycNeedMore.id,
       status: 'APPROVED',
-      reason: '已補件完成',
-      decisionComment: '補件通過',
+      reason: '補件已完成',
+      decisionComment: '已確認，通過申訴',
       handledById: admin.id,
       handledAt: new Date(),
     },
@@ -194,11 +194,11 @@ export async function seedDefaults() {
   const ticket1 = await prisma.ticket.create({
     data: {
       requesterId: applicant1.id,
-      subject: '帳號無法登入',
+      subject: '無法登入帳號',
       category: 'ACCOUNT',
       status: 'WAITING',
       tags: 'login,account',
-      internalNote: '初始待回覆',
+      internalNote: '等待客服回覆',
     },
   })
 
@@ -227,17 +227,17 @@ export async function seedDefaults() {
       {
         ticketId: ticket1.id,
         senderId: support.id,
-        message: '您好，請提供錯誤訊息截圖。',
+        message: '你好，我們已收到你的問題，正在處理中。',
       },
       {
         ticketId: ticket2.id,
         senderId: support.id,
-        message: '我們正在確認票務資訊，請稍候。',
+        message: '請提供更多詳細資訊以協助處理。',
       },
       {
         ticketId: ticket3.id,
         senderId: support.id,
-        message: '此問題已處理完成，感謝回覆。',
+        message: '問題已解決，如有需要請再聯繫。',
       },
     ],
   })
@@ -249,21 +249,21 @@ export async function seedDefaults() {
         action: 'KYC_APPROVE',
         targetType: 'KYC_APPLICATION',
         targetId: kycPassed.id,
-        meta: JSON.stringify({ comment: '資料完整' }),
+        meta: JSON.stringify({ comment: '審核通過' }),
       },
       {
         actorId: auditor.id,
         action: 'KYC_REJECT',
         targetType: 'KYC_APPLICATION',
         targetId: kycRejected.id,
-        meta: JSON.stringify({ comment: '資料不一致' }),
+        meta: JSON.stringify({ comment: '資料不符' }),
       },
       {
         actorId: support.id,
         action: 'TICKET_REPLY',
         targetType: 'TICKET',
         targetId: ticket1.id,
-        meta: JSON.stringify({ message: '請提供錯誤訊息截圖' }),
+        meta: JSON.stringify({ message: '已收到問題，進行處理中' }),
       },
     ],
   })
