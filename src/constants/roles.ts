@@ -1,5 +1,0 @@
-export const ROLE_CODES = {
-  ADMIN: 'ADMIN',
-  AUDITOR: 'AUDITOR',
-  SUPPORT: 'SUPPORT',
-}
