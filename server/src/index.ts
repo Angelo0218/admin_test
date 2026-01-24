@@ -4,6 +4,7 @@ import { logger } from 'hono/logger'
 import { env } from './config/env'
 import { errorHandler } from './middlewares/error'
 import { requestIdMiddleware } from './middlewares/request-id'
+import { securityHeaders } from './middlewares/security-headers'
 import { seedDefaults } from './models/seed'
 import { auditRoutes } from './routes/audit'
 import { authRoutes } from './routes/auth'
@@ -16,6 +17,7 @@ import { isOriginAllowed, resolveCorsOrigin } from './utils/cors'
 const app = new Hono()
 
 app.use('*', requestIdMiddleware)
+app.use('*', securityHeaders)
 app.use('*', async (c, next) => {
   const origin = c.req.header('Origin')
   if (origin && !isOriginAllowed(origin, env.corsOrigin)) {
