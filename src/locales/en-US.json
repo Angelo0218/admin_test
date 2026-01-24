@@ -258,7 +258,7 @@
     "forbidden": "Request rejected",
     "notFound": "Requested resource not found",
     "serverError": "Server error",
-    "unknown": "【{code}】: Unknown error",
+    "unknown": "Unknown error (code: {code})",
     "back": "Back",
     "backHome": "Home"
   },
