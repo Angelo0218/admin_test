@@ -1,10 +1,18 @@
+import { env } from '../config/env'
 import { prisma } from '../db/client'
+import { hashPassword } from '../utils/password'
 
 export async function seedDefaults() {
+  if (!env.enableSeed) {
+    return { skipped: true }
+  }
   const userCount = await prisma.user.count()
   if (userCount > 0) {
-    return
+    return { skipped: true }
   }
+
+  const defaultPasswordHash = await hashPassword('123456')
+  const noPassHash = await hashPassword('nopass')
 
   const adminRole = await prisma.role.upsert({
     where: { code: 'ADMIN' },
@@ -27,7 +35,7 @@ export async function seedDefaults() {
   const admin = await prisma.user.create({
     data: {
       username: 'admin',
-      passwordHash: '123456',
+      passwordHash: defaultPasswordHash,
       displayName: '管理員',
       roles: {
         create: [{ roleId: adminRole.id }],
@@ -38,7 +46,7 @@ export async function seedDefaults() {
   const support = await prisma.user.create({
     data: {
       username: 'support',
-      passwordHash: '123456',
+      passwordHash: defaultPasswordHash,
       displayName: '客服',
       roles: {
         create: [{ roleId: supportRole.id }],
@@ -49,7 +57,7 @@ export async function seedDefaults() {
   const auditor = await prisma.user.create({
     data: {
       username: 'auditor',
-      passwordHash: '123456',
+      passwordHash: defaultPasswordHash,
       displayName: '審核員 A',
       roles: {
         create: [{ roleId: auditorRole.id }],
@@ -60,7 +68,7 @@ export async function seedDefaults() {
   const applicant1 = await prisma.user.create({
     data: {
       username: 'user1',
-      passwordHash: 'nopass',
+      passwordHash: noPassHash,
       displayName: 'Wang XiaoMing',
     },
   })
@@ -68,7 +76,7 @@ export async function seedDefaults() {
   const applicant2 = await prisma.user.create({
     data: {
       username: 'user2',
-      passwordHash: 'nopass',
+      passwordHash: noPassHash,
       displayName: 'Chen YuLing',
     },
   })
@@ -267,6 +275,8 @@ export async function seedDefaults() {
       },
     ],
   })
+
+  return { skipped: false }
 }
 
 export async function seedDemoData() {
