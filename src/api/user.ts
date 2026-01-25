@@ -12,9 +12,5 @@ export default {
   /** @param {Record<string, any>} data */
   create: data => request.post('/users', data),
   /** @param {string | number} id @param {Record<string, any>} data */
-  disable: (id, data) => request.post(`/users/${id}/disable`, data),
-  /** @param {string | number} id */
-  enable: id => request.post(`/users/${id}/enable`),
-  /** @param {string | number} id @param {Record<string, any>} data */
   remove: (id, data) => request.post(`/users/${id}/delete`, data),
 }

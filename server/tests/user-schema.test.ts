@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { userCreateSchema, userDeleteSchema } from '../src/schemas/user'
+import { userCreateSchema, userDeleteSchema, userListQuerySchema } from '../src/schemas/user'
 
 describe('user schemas', () => {
   it('accepts valid staff account payload', () => {
@@ -27,5 +27,10 @@ describe('user schemas', () => {
   it('requires admin password for deletion', () => {
     expect(userDeleteSchema.safeParse({ adminPassword: 'Aa123456' }).success).toBe(true)
     expect(userDeleteSchema.safeParse({}).success).toBe(false)
+  })
+
+  it('does not accept status in list query', () => {
+    const result = userListQuerySchema.safeParse({ status: 'ACTIVE' })
+    expect(result.success).toBe(false)
   })
 })

@@ -4,8 +4,6 @@ import { createAuditLog } from '../models/audit'
 import {
   createUserAccount,
   deleteUserAccount,
-  disableUser,
-  enableUser,
   findUserById,
   listUsers,
   mapUserResponse,
@@ -18,14 +16,9 @@ function ensureAdmin(role: string) {
 }
 
 interface UserListQuery {
-  status?: string
   keyword?: string
   page: number
   pageSize: number
-}
-
-interface UserDisablePayload {
-  reason: string
 }
 
 interface UserCreatePayload {
@@ -75,40 +68,6 @@ export async function getUserById(c: AppContext) {
   }
   const data = mapUserResponse(user)
   return ok(c, data)
-}
-
-export async function disableUserAccount(c: AppContext) {
-  const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
-    return fail(c, 403, 'forbidden', 403)
-  }
-  const { id } = c.get('validatedParams') as IdParams
-  const payload = c.get('validatedBody') as UserDisablePayload
-  const user = await disableUser({ id, reason: payload.reason })
-  await createAuditLog({
-    actorId: auth.userId,
-    action: 'USER_DISABLE',
-    targetType: 'USER',
-    targetId: id,
-    meta: { reason: payload.reason },
-  })
-  return ok(c, { id: user.id, status: user.status })
-}
-
-export async function enableUserAccount(c: AppContext) {
-  const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
-    return fail(c, 403, 'forbidden', 403)
-  }
-  const { id } = c.get('validatedParams') as IdParams
-  const user = await enableUser({ id })
-  await createAuditLog({
-    actorId: auth.userId,
-    action: 'USER_ENABLE',
-    targetType: 'USER',
-    targetId: id,
-  })
-  return ok(c, { id: user.id, status: user.status })
 }
 
 export async function createUserAccountHandler(c: AppContext) {

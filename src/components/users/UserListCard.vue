@@ -4,9 +4,6 @@
       <div class="text-14 font-600">
         {{ row.username || '-' }}
       </div>
-      <NTag :type="statusType(row.status)">
-        {{ statusLabel(row.status) }}
-      </NTag>
     </div>
     <div class="grid mt-10 gap-6 text-12">
       <div class="flex items-center justify-between gap-8">
@@ -23,22 +20,6 @@
       </div>
     </div>
     <div class="mt-10 flex flex-wrap justify-end gap-8">
-      <NButton
-        v-if="row.status === 'ACTIVE'"
-        size="small"
-        type="error"
-        @click="onDisable(row)"
-      >
-        {{ t('users.actions.disable') }}
-      </NButton>
-      <NButton
-        v-else
-        size="small"
-        type="success"
-        @click="onEnable(row)"
-      >
-        {{ t('users.actions.enable') }}
-      </NButton>
       <NButton size="small" type="error" @click="onDelete(row)">
         {{ t('users.actions.delete') }}
       </NButton>
@@ -47,7 +28,7 @@
 </template>
 
 <script setup>
-import { NButton, NTag } from 'naive-ui'
+import { NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 
 defineProps({
@@ -59,27 +40,11 @@ defineProps({
     type: Object,
     required: true,
   },
-  statusLabel: {
-    type: Function,
-    required: true,
-  },
-  statusType: {
-    type: Function,
-    required: true,
-  },
   roleNames: {
     type: Function,
     required: true,
   },
   formatTime: {
-    type: Function,
-    required: true,
-  },
-  onDisable: {
-    type: Function,
-    required: true,
-  },
-  onEnable: {
     type: Function,
     required: true,
   },

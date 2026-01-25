@@ -170,12 +170,7 @@
       "username": "帳號",
       "displayName": "名稱",
       "roles": "身分",
-      "createdAt": "建立時間",
-      "status": "狀態"
-    },
-    "status": {
-      "ACTIVE": "啟用",
-      "DISABLED": "停用"
+      "createdAt": "建立時間"
     },
     "list": {
       "searchPlaceholder": "搜尋帳號或名稱",
@@ -183,8 +178,6 @@
     },
     "actions": {
       "create": "新增客服/審查員",
-      "disable": "停用",
-      "enable": "啟用",
       "delete": "刪除"
     },
     "create": {
@@ -206,17 +199,6 @@
       "missing": "請輸入帳號、密碼、名稱與身分",
       "success": "帳號新增完成",
       "failed": "新增失敗"
-    },
-    "disable": {
-      "title": "停用帳號",
-      "reasonLabel": "原因",
-      "reasonRequired": "請輸入原因",
-      "success": "已停用",
-      "failed": "停用失敗"
-    },
-    "enable": {
-      "success": "已啟用",
-      "failed": "啟用失敗"
     },
     "delete": {
       "title": "刪除帳號",

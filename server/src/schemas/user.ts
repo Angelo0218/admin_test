@@ -1,21 +1,14 @@
 import { z } from 'zod'
 import { isCreatableRoleCode } from '../constants/roles'
 
-const statusEnum = z.enum(['ACTIVE', 'DISABLED'])
-
 const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 })
 
 export const userListQuerySchema = paginationSchema.extend({
-  status: statusEnum.optional(),
   keyword: z.string().optional(),
-})
-
-export const userDisableSchema = z.object({
-  reason: z.string().min(1),
-})
+}).strict()
 
 export const userCreateSchema = z.object({
   username: z.string().min(3),

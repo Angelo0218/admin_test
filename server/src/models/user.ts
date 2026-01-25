@@ -4,19 +4,9 @@ import { prisma } from '../db/client'
 import { hashPassword } from '../utils/password'
 
 export interface UserListParams {
-  status?: string
   keyword?: string
   page: number
   pageSize: number
-}
-
-export interface UserDisableParams {
-  id: string
-  reason: string
-}
-
-export interface UserEnableParams {
-  id: string
 }
 
 export interface UserCreateParams {
@@ -84,20 +74,14 @@ export function mapUserResponse(user: NonNullable<Awaited<ReturnType<typeof find
 }
 
 export function buildUserWhere({
-  status,
   keyword,
   staffOnly = true,
 }: {
-  status?: string
   keyword?: string
   staffOnly?: boolean
 } = {}): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput = {
-    status: { not: 'DELETED' },
-  }
-
-  if (status && status !== 'DELETED') {
-    where.status = status
+    status: 'ACTIVE',
   }
 
   if (keyword) {
@@ -121,8 +105,8 @@ export function buildUserDeleteData() {
   }
 }
 
-export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
-  const where = buildUserWhere({ status, keyword, staffOnly: true })
+export async function listUsers({ keyword, page, pageSize }: UserListParams) {
+  const where = buildUserWhere({ keyword, staffOnly: true })
 
   const skip = (page - 1) * pageSize
   const [items, total] = await prisma.$transaction([
@@ -173,25 +157,5 @@ export async function deleteUserAccount(id: string) {
   return prisma.user.update({
     where: { id },
     data: buildUserDeleteData(),
-  })
-}
-
-export async function disableUser({ id, reason }: UserDisableParams) {
-  return prisma.user.update({
-    where: { id },
-    data: {
-      status: 'DISABLED',
-      disabledReason: reason,
-    },
-  })
-}
-
-export async function enableUser({ id }: UserEnableParams) {
-  return prisma.user.update({
-    where: { id },
-    data: {
-      status: 'ACTIVE',
-      disabledReason: null,
-    },
   })
 }

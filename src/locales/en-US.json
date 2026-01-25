@@ -170,12 +170,7 @@
       "username": "Account",
       "displayName": "Name",
       "roles": "Roles",
-      "createdAt": "Created At",
-      "status": "Status"
-    },
-    "status": {
-      "ACTIVE": "Active",
-      "DISABLED": "Disabled"
+      "createdAt": "Created At"
     },
     "list": {
       "searchPlaceholder": "Search account or name",
@@ -183,8 +178,6 @@
     },
     "actions": {
       "create": "New Support/Auditor",
-      "disable": "Disable",
-      "enable": "Enable",
       "delete": "Delete"
     },
     "create": {
@@ -206,17 +199,6 @@
       "missing": "Please enter account, password, name, and role",
       "success": "Account created",
       "failed": "Create failed"
-    },
-    "disable": {
-      "title": "Disable Account",
-      "reasonLabel": "Reason",
-      "reasonRequired": "Please enter a reason",
-      "success": "Account disabled",
-      "failed": "Disable failed"
-    },
-    "enable": {
-      "success": "Account enabled",
-      "failed": "Enable failed"
     },
     "delete": {
       "title": "Delete Account",

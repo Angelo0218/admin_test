@@ -22,7 +22,7 @@ export async function login(c: AppContext) {
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return fail(c, 401, 'invalid credentials', 401)
   }
-  if (user.status === 'DISABLED' || user.status === 'DELETED') {
+  if (user.status !== 'ACTIVE') {
     return fail(c, 403, 'user disabled', 403)
   }
 
