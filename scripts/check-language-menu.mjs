@@ -5,7 +5,7 @@ const root = process.cwd()
 const userAvatarPath = path.join(root, 'src/layouts/components/UserAvatar.vue')
 const normalHeaderPath = path.join(root, 'src/layouts/normal/header/index.vue')
 const fullHeaderPath = path.join(root, 'src/layouts/full/header/index.vue')
-const componentsIndexPath = path.join(root, 'src/layouts/components/index.js')
+const componentsIndexPath = path.join(root, 'src/layouts/components/index.ts')
 
 const languageSelectPath = path.join(root, 'src/layouts/components/LanguageSelect.vue')
 

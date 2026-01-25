@@ -1,7 +1,15 @@
 <template>
-  <div class="wh-full flex-col bg-[url(@/assets/images/login_bg.webp)] bg-cover">
+  <div class="relative wh-full flex-col bg-[url(@/assets/images/login_bg.webp)] bg-cover">
     <div
-      class="m-auto max-w-700 min-w-345 f-c-c rounded-8 auto-bg bg-opacity-20 bg-cover p-12 card-shadow"
+      class="pointer-events-none absolute inset-0 transition-colors duration-300"
+      :class="isDark ? 'bg-black/35' : 'bg-transparent'"
+    />
+    <div class="absolute right-16 top-16 z-10 flex items-center gap-12">
+      <LanguageSelect />
+      <ToggleTheme />
+    </div>
+    <div
+      class="relative z-10 m-auto max-w-700 min-w-345 f-c-c rounded-8 auto-bg bg-opacity-20 bg-cover p-12 card-shadow"
     >
       <div class="hidden w-380 px-20 py-35 md:block">
         <img src="@/assets/images/login_banner.webp" class="w-full" alt="login_banner">
@@ -62,8 +70,10 @@
 </template>
 
 <script setup>
-import { useStorage } from '@vueuse/core'
+import { useDark, useStorage } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
+import { ToggleTheme } from '@/components'
+import LanguageSelect from '@/layouts/components/LanguageSelect.vue'
 import { useAuthStore } from '@/store'
 import { lStorage } from '@/utils'
 import api from './api'
@@ -72,6 +82,7 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const isDark = useDark()
 const title = import.meta.env.VITE_TITLE
 
 const loginInfo = ref({

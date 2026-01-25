@@ -1,14 +1,14 @@
 <template>
   <footer class="f-c-c text-14 text-gray-500">
     <p>
-      Copyright (c) 2023
+      Copyright (c) 2026
       <a
-        href="https://github.com/zclzone"
+        href="https://google.com"
         target="__blank"
         class="transition"
         hover="decoration-underline color-primary"
       >
-        Ronnie Zhang
+        demo
       </a>
     </p>
   </footer>

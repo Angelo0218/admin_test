@@ -4,6 +4,10 @@ export default antfu({
   unocss: true,
   formatters: true,
   stylistic: true,
+  ignores: [
+    'dist/**',
+    'test-results/**',
+  ],
   rules: {
     'n/prefer-global/process': 'off',
     'no-undef': 'error',
