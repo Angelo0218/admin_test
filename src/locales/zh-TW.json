@@ -179,32 +179,38 @@
     },
     "list": {
       "searchPlaceholder": "搜尋帳號或名稱",
-      "fetchFailed": "取得帳號列表失敗"
+      "fetchFailed": "載入帳號清單失敗"
     },
     "actions": {
-      "create": "新增帳號",
+      "create": "新增客服/審查員",
       "disable": "停用",
       "enable": "啟用",
       "delete": "刪除"
     },
     "create": {
-      "title": "新增客服/審查員",
+      "title": "新增客服/審查員帳號",
       "usernameLabel": "帳號",
       "usernamePlaceholder": "請輸入帳號",
+      "usernameRequired": "請輸入帳號",
+      "usernameMin": "帳號至少 3 碼",
       "passwordLabel": "密碼",
       "passwordPlaceholder": "請輸入密碼",
+      "passwordRequired": "請輸入密碼",
+      "passwordMin": "密碼至少 6 碼",
       "displayNameLabel": "名稱",
       "displayNamePlaceholder": "請輸入名稱",
+      "displayNameRequired": "請輸入名稱",
       "roleLabel": "身分",
       "rolePlaceholder": "請選擇身分",
+      "roleRequired": "請選擇身分",
       "missing": "請輸入帳號、密碼、名稱與身分",
-      "success": "新增成功",
+      "success": "帳號新增完成",
       "failed": "新增失敗"
     },
     "disable": {
       "title": "停用帳號",
       "reasonLabel": "原因",
-      "reasonRequired": "請填寫原因",
+      "reasonRequired": "請輸入原因",
       "success": "已停用",
       "failed": "停用失敗"
     },

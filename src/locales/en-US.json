@@ -182,21 +182,27 @@
       "fetchFailed": "Failed to load accounts"
     },
     "actions": {
-      "create": "New Staff",
+      "create": "New Support/Auditor",
       "disable": "Disable",
       "enable": "Enable",
       "delete": "Delete"
     },
     "create": {
-      "title": "Create Staff Account",
+      "title": "Create Support/Auditor Account",
       "usernameLabel": "Account",
       "usernamePlaceholder": "Enter account",
+      "usernameRequired": "Please enter account",
+      "usernameMin": "Account must be at least 3 characters",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter password",
+      "passwordRequired": "Please enter password",
+      "passwordMin": "Password must be at least 6 characters",
       "displayNameLabel": "Name",
       "displayNamePlaceholder": "Enter name",
+      "displayNameRequired": "Please enter name",
       "roleLabel": "Role",
       "rolePlaceholder": "Select role",
+      "roleRequired": "Please select role",
       "missing": "Please enter account, password, name, and role",
       "success": "Account created",
       "failed": "Create failed"

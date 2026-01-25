@@ -40,6 +40,7 @@
 
     <MeModal ref="createModalRef">
       <UserCreateForm
+        ref="createFormRef"
         :state="createState"
         :role-options="roleOptions"
         @update-field="handleCreateFieldUpdate"
@@ -90,6 +91,7 @@ const statusOptions = computed(() => [
 const [createModalRef, createLoading] = useModal()
 const [disableModalRef, disableLoading] = useModal()
 const [deleteModalRef, deleteLoading] = useModal()
+const createFormRef = ref(null)
 const { roleOptions } = useStaffRoleOptions({ t })
 const createState = reactive({
   username: '',
@@ -245,6 +247,7 @@ function openCreate() {
   createState.password = ''
   createState.displayName = ''
   createState.roleCode = 'SUPPORT'
+  createFormRef.value?.resetValidation?.()
   createModalRef.value?.open({
     title: t('users.create.title'),
     okText: t('common.create'),
@@ -253,10 +256,9 @@ function openCreate() {
 }
 
 async function handleCreate() {
-  if (!createState.username || !createState.password || !createState.displayName || !createState.roleCode) {
-    $message.warning(t('users.create.missing'))
+  const isValid = await createFormRef.value?.validate?.()
+  if (!isValid)
     return false
-  }
   try {
     createLoading.value = true
     await api.create({
