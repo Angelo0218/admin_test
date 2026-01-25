@@ -25,7 +25,7 @@
               {{ row.action || '-' }}
             </div>
             <div class="text-12 opacity-60">
-              {{ formatTime(row.createdAt) }}
+              {{ formatDateTime(row.createdAt) }}
             </div>
           </div>
           <div class="grid mt-10 gap-6 text-12">
@@ -50,32 +50,18 @@
 
 <script setup>
 import { useWindowSize } from '@vueuse/core'
-import dayjs from 'dayjs'
 import { NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/audit'
 import { CommonPage, ResponsiveTable } from '@/components'
+import { useListPage } from '@/composables/useListPage'
+import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const loading = ref(false)
 const rows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
-const pagination = reactive({
-  page: 1,
-  pageSize: 20,
-  itemCount: 0,
-  onChange: (page) => {
-    pagination.page = page
-    fetchList()
-  },
-  onUpdatePageSize: (pageSize) => {
-    pagination.pageSize = pageSize
-    pagination.page = 1
-    fetchList()
-  },
-})
-
 const filters = reactive({
   action: '',
   targetType: '',
@@ -91,7 +77,7 @@ const baseColumns = computed(() => [
     title: t('audit.labels.time'),
     key: 'createdAt',
     width: 140,
-    render: row => formatTime(row.createdAt),
+    render: row => formatDateTime(row.createdAt),
   },
 ])
 
@@ -105,10 +91,7 @@ const narrowColumnKeys = new Set(['action', 'actorName', 'targetType', 'createdA
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
-
-function formatTime(value) {
-  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
-}
+const { pagination } = useListPage({ filters, fetchList })
 
 function buildQuery() {
   return {

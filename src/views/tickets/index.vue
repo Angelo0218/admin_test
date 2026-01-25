@@ -31,7 +31,7 @@
           :status-label="statusLabel"
           :status-type="statusType"
           :category-label="categoryLabel"
-          :format-time="formatTime"
+          :format-time="formatDateTime"
           :on-view="handleView"
         />
       </template>
@@ -49,7 +49,6 @@
 
 <script setup>
 import { useWindowSize } from '@vueuse/core'
-import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/ticket'
@@ -58,6 +57,8 @@ import TicketCreateForm from '@/components/tickets/TicketCreateForm.vue'
 import TicketListCard from '@/components/tickets/TicketListCard.vue'
 import TicketListFilters from '@/components/tickets/TicketListFilters.vue'
 import { useModal } from '@/composables'
+import { useListPage } from '@/composables/useListPage'
+import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -65,21 +66,6 @@ const loading = ref(false)
 const rows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
-const pagination = reactive({
-  page: 1,
-  pageSize: 20,
-  itemCount: 0,
-  onChange: (page) => {
-    pagination.page = page
-    fetchList()
-  },
-  onUpdatePageSize: (pageSize) => {
-    pagination.pageSize = pageSize
-    pagination.page = 1
-    fetchList()
-  },
-})
-
 const filters = reactive({
   status: null,
   category: null,
@@ -107,6 +93,7 @@ const createState = reactive({
   tags: '',
   internalNote: '',
 })
+const { pagination } = useListPage({ filters, fetchList, watchFilters: false })
 
 const baseColumns = computed(() => [
   { title: t('tickets.labels.id'), key: 'id', width: 160, ellipsis: true },
@@ -135,7 +122,7 @@ const baseColumns = computed(() => [
     title: t('tickets.labels.createdAt'),
     key: 'createdAt',
     width: 140,
-    render: row => formatTime(row.createdAt),
+    render: row => formatDateTime(row.createdAt),
   },
   {
     title: t('common.actions'),
@@ -184,17 +171,13 @@ function categoryLabel(category) {
 }
 
 function statusType(status) {
-  return status === 'WAITING'
-    ? 'warning'
-    : status === 'IN_PROGRESS'
-      ? 'info'
-      : status === 'CLOSED'
-        ? 'success'
-        : 'default'
-}
-
-function formatTime(value) {
-  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
+  if (status === 'WAITING')
+    return 'warning'
+  if (status === 'IN_PROGRESS')
+    return 'info'
+  if (status === 'CLOSED')
+    return 'success'
+  return 'default'
 }
 
 function buildQuery() {

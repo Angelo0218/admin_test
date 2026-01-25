@@ -42,7 +42,7 @@
             </div>
             <div class="flex items-center justify-between gap-8">
               <span class="opacity-60">{{ fieldLabels.handledAt }}</span>
-              <span class="text-right">{{ formatTime(row.handledAt) }}</span>
+              <span class="text-right">{{ formatDateTime(row.handledAt) }}</span>
             </div>
           </div>
           <div class="mt-10 flex justify-end gap-8">
@@ -62,11 +62,12 @@
 
 <script setup>
 import { useWindowSize } from '@vueuse/core'
-import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
 import { CommonPage, ResponsiveTable } from '@/components'
+import { useListPage } from '@/composables/useListPage'
+import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -74,21 +75,6 @@ const loading = ref(false)
 const rows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
-const pagination = reactive({
-  page: 1,
-  pageSize: 20,
-  itemCount: 0,
-  onChange: (page) => {
-    pagination.page = page
-    fetchList()
-  },
-  onUpdatePageSize: (pageSize) => {
-    pagination.pageSize = pageSize
-    pagination.page = 1
-    fetchList()
-  },
-})
-
 const filters = reactive({
   status: null,
   keyword: '',
@@ -121,7 +107,7 @@ const baseColumns = computed(() => [
     title: t('kyc.columns.handledAt'),
     key: 'handledAt',
     width: 140,
-    render: row => formatTime(row.handledAt),
+    render: row => formatDateTime(row.handledAt),
   },
   {
     title: t('common.actions'),
@@ -153,6 +139,7 @@ const narrowColumnKeys = new Set(['applicationId', 'applicantName', 'status', 'r
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
+const { pagination } = useListPage({ filters, fetchList })
 
 function statusLabel(status) {
   const key = `kyc.appealStatus.${status}`
@@ -162,10 +149,6 @@ function statusLabel(status) {
 
 function statusType(status) {
   return status === 'PENDING' ? 'warning' : status === 'APPROVED' ? 'success' : 'error'
-}
-
-function formatTime(value) {
-  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
 }
 
 function buildQuery() {

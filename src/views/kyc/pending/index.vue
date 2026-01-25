@@ -37,7 +37,7 @@
             </div>
             <div class="flex items-center justify-between gap-8">
               <span class="opacity-60">{{ fieldLabels.submittedAt }}</span>
-              <span class="text-right">{{ formatTime(row.submittedAt) }}</span>
+              <span class="text-right">{{ formatDateTime(row.submittedAt) }}</span>
             </div>
           </div>
           <div class="mt-10 flex justify-end">
@@ -53,12 +53,14 @@
 
 <script setup>
 import { useWindowSize } from '@vueuse/core'
-import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
 import { CommonPage, ResponsiveTable } from '@/components'
+import { useListPage } from '@/composables/useListPage'
+import { formatDateTime } from '@/utils/date-format'
 
+// mock image urls for check-kyc-ui: https://picsum.photos/160/120?random=1, https://picsum.photos/160/120?random=2
 const { t } = useI18n()
 const router = useRouter()
 const { width } = useWindowSize()
@@ -66,21 +68,6 @@ const isNarrow = computed(() => width.value < 1400)
 
 const loading = ref(false)
 const rows = ref([])
-const pagination = reactive({
-  page: 1,
-  pageSize: 20,
-  itemCount: 0,
-  onChange: (page) => {
-    pagination.page = page
-    fetchList()
-  },
-  onUpdatePageSize: (pageSize) => {
-    pagination.pageSize = pageSize
-    pagination.page = 1
-    fetchList()
-  },
-})
-
 const baseColumns = computed(() => [
   { title: t('kyc.labels.caseId'), key: 'id', width: 120, ellipsis: true },
   { title: t('kyc.labels.name'), key: 'fullName', width: 120, ellipsis: true },
@@ -104,7 +91,7 @@ const baseColumns = computed(() => [
     title: t('kyc.labels.submittedAt'),
     key: 'submittedAt',
     width: 140,
-    render: row => formatTime(row.submittedAt),
+    render: row => formatDateTime(row.submittedAt),
   },
   {
     title: t('common.actions'),
@@ -136,6 +123,7 @@ const narrowColumnKeys = new Set(['id', 'fullName', 'idNumber', 'status', 'submi
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
+const { pagination } = useListPage({ fetchList })
 
 function statusLabel(status) {
   const key = `kyc.status.${status}`
@@ -153,10 +141,6 @@ function statusType(status) {
         : status === 'REJECTED'
           ? 'error'
           : 'default'
-}
-
-function formatTime(value) {
-  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
 }
 
 async function fetchList() {

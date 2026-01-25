@@ -25,7 +25,7 @@
           :status-label="statusLabel"
           :status-type="statusType"
           :role-names="roleNames"
-          :format-time="formatTime"
+          :format-time="formatDateTime"
           :on-disable="openDisable"
           :on-enable="handleEnable"
           :on-reset="openReset"
@@ -45,7 +45,6 @@
 
 <script setup>
 import { useWindowSize } from '@vueuse/core'
-import dayjs from 'dayjs'
 import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/user'
@@ -55,27 +54,14 @@ import UserListCard from '@/components/users/UserListCard.vue'
 import UserListFilters from '@/components/users/UserListFilters.vue'
 import UserResetForm from '@/components/users/UserResetForm.vue'
 import { useModal } from '@/composables'
+import { useListPage } from '@/composables/useListPage'
+import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const loading = ref(false)
 const rows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
-const pagination = reactive({
-  page: 1,
-  pageSize: 20,
-  itemCount: 0,
-  onChange: (page) => {
-    pagination.page = page
-    fetchList()
-  },
-  onUpdatePageSize: (pageSize) => {
-    pagination.pageSize = pageSize
-    pagination.page = 1
-    fetchList()
-  },
-})
-
 const filters = reactive({
   status: null,
   keyword: '',
@@ -96,6 +82,7 @@ const resetState = reactive({
   id: '',
   password: '',
 })
+const { pagination } = useListPage({ filters, fetchList })
 
 const baseColumns = computed(() => [
   { title: t('users.labels.id'), key: 'id', width: 160, ellipsis: true },
@@ -123,7 +110,7 @@ const baseColumns = computed(() => [
     title: t('users.labels.createdAt'),
     key: 'createdAt',
     width: 140,
-    render: row => formatTime(row.createdAt),
+    render: row => formatDateTime(row.createdAt),
   },
   {
     title: t('common.actions'),
@@ -204,10 +191,6 @@ function roleNames(roles) {
 
 function statusType(status) {
   return status === 'ACTIVE' ? 'success' : 'error'
-}
-
-function formatTime(value) {
-  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
 }
 
 function buildQuery() {
