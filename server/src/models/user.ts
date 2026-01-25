@@ -112,6 +112,13 @@ export function buildUserWhere({
   return where
 }
 
+export function buildUserDeleteData() {
+  return {
+    status: 'DELETED',
+    disabledReason: 'deleted',
+  }
+}
+
 export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
   const where = buildUserWhere({ status, keyword, staffOnly: true })
 
