@@ -24,6 +24,13 @@ export interface UserResetPasswordParams {
   password: string
 }
 
+export interface UserCreateParams {
+  username: string
+  password: string
+  displayName: string
+  roleCode: string
+}
+
 const STAFF_ROLE_CODES = [ROLE_CODES.ADMIN, ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR]
 
 export async function findUserByUsername(username: string) {
@@ -151,6 +158,27 @@ export async function listUsers({ status, keyword, page, pageSize }: UserListPar
     pageSize,
     total,
   }
+}
+
+export async function createUserAccount({ username, password, displayName, roleCode }: UserCreateParams) {
+  const passwordHash = await hashPassword(password)
+  return prisma.user.create({
+    data: {
+      username,
+      passwordHash,
+      displayName,
+      roles: {
+        create: [{ role: { connect: { code: roleCode } } }],
+      },
+    },
+  })
+}
+
+export async function deleteUserAccount(id: string) {
+  return prisma.user.update({
+    where: { id },
+    data: buildUserDeleteData(),
+  })
 }
 
 export async function disableUser({ id, reason }: UserDisableParams) {
