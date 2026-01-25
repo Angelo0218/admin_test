@@ -19,11 +19,6 @@ export interface UserEnableParams {
   id: string
 }
 
-export interface UserResetPasswordParams {
-  id: string
-  password: string
-}
-
 export interface UserCreateParams {
   username: string
   password: string
@@ -197,16 +192,6 @@ export async function enableUser({ id }: UserEnableParams) {
     data: {
       status: 'ACTIVE',
       disabledReason: null,
-    },
-  })
-}
-
-export async function resetUserPassword({ id, password }: UserResetPasswordParams) {
-  const passwordHash = await hashPassword(password)
-  return prisma.user.update({
-    where: { id },
-    data: {
-      passwordHash,
     },
   })
 }

@@ -17,10 +17,6 @@ export const userDisableSchema = z.object({
   reason: z.string().min(1),
 })
 
-export const userResetPasswordSchema = z.object({
-  password: z.string().min(1).optional(),
-})
-
 export const userCreateSchema = z.object({
   username: z.string().min(3),
   password: z.string().min(6),
