@@ -3,7 +3,7 @@ import type { AppContext } from '../types/context'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { env } from '../config/env'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../models/auth'
-import { findUserById, findUserByUsername, mapUserResponse } from '../models/user'
+import { canLoginWithStatus, findUserById, findUserByUsername, mapUserResponse } from '../models/user'
 import { verifyPassword } from '../utils/password'
 import { fail, ok } from '../utils/response'
 
@@ -22,8 +22,8 @@ export async function login(c: AppContext) {
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return fail(c, 401, 'invalid credentials', 401)
   }
-  if (user.status !== 'ACTIVE') {
-    return fail(c, 403, 'user disabled', 403)
+  if (!canLoginWithStatus(user.status)) {
+    return fail(c, 403, 'user deleted', 403)
   }
 
   const roles = user.roles.map(item => item.role)

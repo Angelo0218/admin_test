@@ -63,7 +63,6 @@ export function mapUserResponse(user: NonNullable<Awaited<ReturnType<typeof find
     id: user.id,
     username: user.username,
     status: user.status,
-    disabledReason: user.disabledReason || undefined,
     profile: {
       avatar: user.avatar || '',
       nickName: user.displayName,
@@ -81,7 +80,7 @@ export function buildUserWhere({
   staffOnly?: boolean
 } = {}): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput = {
-    status: 'ACTIVE',
+    status: { not: 'DELETED' },
   }
 
   if (keyword) {
@@ -101,8 +100,11 @@ export function buildUserWhere({
 export function buildUserDeleteData() {
   return {
     status: 'DELETED',
-    disabledReason: 'deleted',
   }
+}
+
+export function canLoginWithStatus(status?: string) {
+  return status !== 'DELETED'
 }
 
 export async function listUsers({ keyword, page, pageSize }: UserListParams) {
