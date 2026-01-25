@@ -8,7 +8,7 @@ function createRouteItem(route) {
   const originPath = isExternal(route.path) ? route.path : undefined
   return {
     code: route.name,
-    name: meta.title || route.name,
+    name: route.name,
     titleKey: meta.titleKey,
     icon: meta.icon,
     order: meta.order ?? 0,

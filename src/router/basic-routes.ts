@@ -1,10 +1,11 @@
+import { routeGroups } from './route-groups'
+
 export const basicRoutes = [
   {
     name: 'Login',
     path: '/login',
     component: () => import('@/views/login/index.vue'),
     meta: {
-      title: '登入',
       titleKey: 'menu.login',
       layout: 'empty',
       show: false,
@@ -24,7 +25,6 @@ export const basicRoutes = [
     path: '/kyc',
     redirect: '/kyc/pending',
     meta: {
-      title: 'KYC 審核',
       titleKey: 'menu.Kyc',
       layout: 'normal',
       icon: 'i-fe:shield',
@@ -38,7 +38,6 @@ export const basicRoutes = [
     path: '/kyc/pending',
     component: () => import('@/views/kyc/pending/index.vue'),
     meta: {
-      title: '待審核列表',
       titleKey: 'menu.KycPending',
       layout: 'normal',
       keepAlive: true,
@@ -53,7 +52,6 @@ export const basicRoutes = [
     path: '/kyc/appeals',
     component: () => import('@/views/kyc/appeals/index.vue'),
     meta: {
-      title: '申訴列表',
       titleKey: 'menu.KycAppeals',
       layout: 'normal',
       keepAlive: true,
@@ -68,7 +66,6 @@ export const basicRoutes = [
     path: '/kyc/detail/:id',
     component: () => import('@/views/kyc/detail/index.vue'),
     meta: {
-      title: '審核詳情',
       titleKey: 'menu.KycDetail',
       layout: 'normal',
       keepAlive: false,
@@ -83,7 +80,6 @@ export const basicRoutes = [
     path: '/tickets',
     component: () => import('@/views/tickets/index.vue'),
     meta: {
-      title: '工單列表',
       titleKey: 'menu.TicketList',
       layout: 'normal',
       keepAlive: true,
@@ -91,14 +87,7 @@ export const basicRoutes = [
       show: true,
       roles: ['ADMIN', 'SUPPORT'],
       parentKey: 'Tickets',
-      group: {
-        code: 'Tickets',
-        titleKey: 'menu.Tickets',
-        icon: 'i-fe:message-square',
-        order: 2,
-        show: true,
-        roles: ['ADMIN', 'SUPPORT'],
-      },
+      group: routeGroups.Tickets,
     },
   },
   {
@@ -106,7 +95,6 @@ export const basicRoutes = [
     path: '/tickets/:id',
     component: () => import('@/views/tickets/detail/index.vue'),
     meta: {
-      title: '工單詳情',
       titleKey: 'menu.TicketDetail',
       layout: 'normal',
       keepAlive: false,
@@ -114,14 +102,7 @@ export const basicRoutes = [
       show: false,
       roles: ['ADMIN', 'SUPPORT'],
       parentKey: 'Tickets',
-      group: {
-        code: 'Tickets',
-        titleKey: 'menu.Tickets',
-        icon: 'i-fe:message-square',
-        order: 2,
-        show: true,
-        roles: ['ADMIN', 'SUPPORT'],
-      },
+      group: routeGroups.Tickets,
     },
   },
   {
@@ -129,7 +110,6 @@ export const basicRoutes = [
     path: '/users',
     component: () => import('@/views/users/index.vue'),
     meta: {
-      title: '用戶管理',
       titleKey: 'menu.Users',
       layout: 'normal',
       keepAlive: true,
@@ -144,7 +124,6 @@ export const basicRoutes = [
     path: '/audit',
     component: () => import('@/views/audit/index.vue'),
     meta: {
-      title: '審計記錄',
       titleKey: 'menu.Audit',
       layout: 'normal',
       keepAlive: true,
@@ -159,7 +138,7 @@ export const basicRoutes = [
     path: '/403',
     component: () => import('@/views/error-page/403.vue'),
     meta: {
-      title: '403',
+      titleKey: 'errors.403Title',
       layout: 'empty',
       show: false,
     },
@@ -169,7 +148,7 @@ export const basicRoutes = [
     path: '/404',
     component: () => import('@/views/error-page/404.vue'),
     meta: {
-      title: '404',
+      titleKey: 'errors.404Title',
       layout: 'empty',
       show: false,
     },
