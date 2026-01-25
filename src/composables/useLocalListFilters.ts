@@ -29,10 +29,10 @@ function matchIncludes(filterValue, values) {
 
 /**
  * @typedef {object} FilterRule
- * @property {string} key
- * @property {'equals'|'includes'} type
- * @property {(row: any) => any} [getter]
- * @property {Array<(row: any) => any>} [getters]
+ * @property {string} key Filter key mapped to the filters object.
+ * @property {'equals'|'includes'} type Matching strategy for the rule.
+ * @property {(row: any) => any} [getter] Single value selector for row comparison.
+ * @property {Array<(row: any) => any>} [getters] Multiple value selectors for includes matching.
  */
 
 /**
