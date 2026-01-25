@@ -7,7 +7,7 @@ describe('buildUserWhere', () => {
     const where = buildUserWhere()
 
     expect(where).toMatchObject({
-      status: 'ACTIVE',
+      status: { not: 'DELETED' },
       roles: {
         some: {
           role: {
@@ -24,7 +24,7 @@ describe('buildUserWhere', () => {
     const where = buildUserWhere({ staffOnly: false })
 
     expect(where).toMatchObject({
-      status: 'ACTIVE',
+      status: { not: 'DELETED' },
       roles: {
         none: {
           role: {
