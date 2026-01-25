@@ -17,8 +17,9 @@ export interface AuditCreateParams {
   meta?: unknown
 }
 
-export async function listAuditLogs({ action, targetType, keyword, page, pageSize }: AuditListParams) {
+export function buildAuditWhere({ action, targetType, keyword }: Pick<AuditListParams, 'action' | 'targetType' | 'keyword'> = {}) {
   const where: Prisma.AuditLogWhereInput = {}
+
   if (action) {
     where.action = action
   }
@@ -29,8 +30,15 @@ export async function listAuditLogs({ action, targetType, keyword, page, pageSiz
     where.OR = [
       { targetId: { contains: keyword } },
       { action: { contains: keyword } },
+      { actor: { displayName: { contains: keyword } } },
     ]
   }
+
+  return where
+}
+
+export async function listAuditLogs({ action, targetType, keyword, page, pageSize }: AuditListParams) {
+  const where = buildAuditWhere({ action, targetType, keyword })
 
   const skip = (page - 1) * pageSize
   const [items, total] = await prisma.$transaction([
