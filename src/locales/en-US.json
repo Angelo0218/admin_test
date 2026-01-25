@@ -34,7 +34,7 @@
     "Tickets": "Tickets",
     "TicketList": "Ticket List",
     "TicketDetail": "Ticket Detail",
-    "Users": "Users",
+    "Users": "Account Management",
     "Audit": "Audit Logs"
   },
   "roles": {
@@ -166,8 +166,8 @@
   },
   "users": {
     "labels": {
-      "id": "User ID",
-      "username": "Username",
+      "id": "Account ID",
+      "username": "Account",
       "displayName": "Name",
       "roles": "Roles",
       "createdAt": "Created At",
@@ -178,31 +178,47 @@
       "DISABLED": "Disabled"
     },
     "list": {
-      "searchPlaceholder": "Search username or name",
-      "fetchFailed": "Failed to load users"
+      "searchPlaceholder": "Search account or name",
+      "fetchFailed": "Failed to load accounts"
     },
     "actions": {
+      "create": "New Staff",
       "disable": "Disable",
       "enable": "Enable",
-      "resetPassword": "Reset Password"
+      "delete": "Delete"
+    },
+    "create": {
+      "title": "Create Staff Account",
+      "usernameLabel": "Account",
+      "usernamePlaceholder": "Enter account",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "displayNameLabel": "Name",
+      "displayNamePlaceholder": "Enter name",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select role",
+      "missing": "Please enter account, password, name, and role",
+      "success": "Account created",
+      "failed": "Create failed"
     },
     "disable": {
-      "title": "Disable User",
+      "title": "Disable Account",
       "reasonLabel": "Reason",
       "reasonRequired": "Please enter a reason",
-      "success": "User disabled",
+      "success": "Account disabled",
       "failed": "Disable failed"
     },
     "enable": {
-      "success": "User enabled",
+      "success": "Account enabled",
       "failed": "Enable failed"
     },
-    "reset": {
-      "title": "Reset Password",
-      "passwordLabel": "New Password",
-      "passwordPlaceholder": "Default 123456",
-      "success": "Password updated",
-      "failed": "Reset failed"
+    "delete": {
+      "title": "Delete Account",
+      "adminPasswordLabel": "Admin Password",
+      "adminPasswordPlaceholder": "Enter admin password",
+      "adminPasswordRequired": "Please enter admin password",
+      "success": "Account deleted",
+      "failed": "Delete failed"
     }
   },
   "audit": {

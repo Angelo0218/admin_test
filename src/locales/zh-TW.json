@@ -34,13 +34,13 @@
     "Tickets": "工單",
     "TicketList": "工單列表",
     "TicketDetail": "工單詳情",
-    "Users": "使用者",
+    "Users": "帳號管理",
     "Audit": "稽核紀錄"
   },
   "roles": {
     "ADMIN": "管理員",
     "SUPPORT": "客服",
-    "AUDITOR": "審核員"
+    "AUDITOR": "審查員"
   },
   "kyc": {
     "labels": {
@@ -166,10 +166,10 @@
   },
   "users": {
     "labels": {
-      "id": "使用者 ID",
+      "id": "帳號 ID",
       "username": "帳號",
       "displayName": "名稱",
-      "roles": "角色",
+      "roles": "身分",
       "createdAt": "建立時間",
       "status": "狀態"
     },
@@ -179,15 +179,30 @@
     },
     "list": {
       "searchPlaceholder": "搜尋帳號或名稱",
-      "fetchFailed": "取得使用者列表失敗"
+      "fetchFailed": "取得帳號列表失敗"
     },
     "actions": {
+      "create": "新增帳號",
       "disable": "停用",
       "enable": "啟用",
-      "resetPassword": "重設密碼"
+      "delete": "刪除"
+    },
+    "create": {
+      "title": "新增客服/審查員",
+      "usernameLabel": "帳號",
+      "usernamePlaceholder": "請輸入帳號",
+      "passwordLabel": "密碼",
+      "passwordPlaceholder": "請輸入密碼",
+      "displayNameLabel": "名稱",
+      "displayNamePlaceholder": "請輸入名稱",
+      "roleLabel": "身分",
+      "rolePlaceholder": "請選擇身分",
+      "missing": "請輸入帳號、密碼、名稱與身分",
+      "success": "新增成功",
+      "failed": "新增失敗"
     },
     "disable": {
-      "title": "停用使用者",
+      "title": "停用帳號",
       "reasonLabel": "原因",
       "reasonRequired": "請填寫原因",
       "success": "已停用",
@@ -197,12 +212,13 @@
       "success": "已啟用",
       "failed": "啟用失敗"
     },
-    "reset": {
-      "title": "重設密碼",
-      "passwordLabel": "新密碼",
-      "passwordPlaceholder": "預設 123456",
-      "success": "密碼已更新",
-      "failed": "重設失敗"
+    "delete": {
+      "title": "刪除帳號",
+      "adminPasswordLabel": "管理員密碼",
+      "adminPasswordPlaceholder": "請輸入管理員密碼",
+      "adminPasswordRequired": "請輸入管理員密碼",
+      "success": "已刪除",
+      "failed": "刪除失敗"
     }
   },
   "audit": {

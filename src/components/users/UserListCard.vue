@@ -39,8 +39,8 @@
       >
         {{ t('users.actions.enable') }}
       </NButton>
-      <NButton size="small" @click="onReset(row)">
-        {{ t('users.actions.resetPassword') }}
+      <NButton size="small" type="error" @click="onDelete(row)">
+        {{ t('users.actions.delete') }}
       </NButton>
     </div>
   </div>
@@ -83,7 +83,7 @@ defineProps({
     type: Function,
     required: true,
   },
-  onReset: {
+  onDelete: {
     type: Function,
     required: true,
   },
