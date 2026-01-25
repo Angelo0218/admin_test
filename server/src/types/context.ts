@@ -6,6 +6,7 @@ export type AppContext = Context<{
     user?: AuthPayload
     validatedBody?: unknown
     validatedParams?: unknown
+    validatedQuery?: unknown
     requestId?: string
   }
 }>
