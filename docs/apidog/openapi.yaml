@@ -22,7 +22,15 @@ paths:
               admin:
                 value:
                   username: admin
-                  password: '123456'
+                  password: Aa123456
+              support:
+                value:
+                  username: support
+                  password: Aa123456
+              auditor:
+                value:
+                  username: auditor
+                  password: Aa123456
       responses:
         '200':
           description: ok
@@ -91,26 +99,6 @@ paths:
     get:
       tags: [user]
       summary: List users
-      parameters:
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [ACTIVE, DISABLED]
-        - name: keyword
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            minimum: 1
       responses:
         '200':
           description: ok
@@ -264,26 +252,6 @@ paths:
     get:
       tags: [kyc]
       summary: List KYC applications
-      parameters:
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [PENDING, NEED_MORE, PASSED, REJECTED]
-        - name: keyword
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            minimum: 1
       responses:
         '200':
           description: ok
@@ -374,26 +342,6 @@ paths:
     get:
       tags: [kyc]
       summary: List appeals
-      parameters:
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [PENDING, APPROVED, REJECTED]
-        - name: keyword
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            minimum: 1
       responses:
         '200':
           description: ok
@@ -428,30 +376,6 @@ paths:
     get:
       tags: [ticket]
       summary: List tickets
-      parameters:
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [WAITING, IN_PROGRESS, CLOSED]
-        - name: category
-          in: query
-          schema:
-            type: string
-        - name: keyword
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            minimum: 1
       responses:
         '200':
           description: ok
@@ -565,29 +489,6 @@ paths:
     get:
       tags: [audit]
       summary: List audit logs
-      parameters:
-        - name: action
-          in: query
-          schema:
-            type: string
-        - name: targetType
-          in: query
-          schema:
-            type: string
-        - name: keyword
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            minimum: 1
       responses:
         '200':
           description: ok

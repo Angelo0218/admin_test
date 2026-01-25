@@ -2,7 +2,7 @@ import type { APIRequestContext } from '@playwright/test'
 
 export const apiBase = process.env.API_BASE || 'http://localhost:8085/api/v1'
 
-export async function login(request: APIRequestContext, username = 'admin', password = '123456') {
+export async function login(request: APIRequestContext, username = 'admin', password = 'Aa123456') {
   const res = await request.post(`${apiBase}/auth/login`, {
     data: { username, password },
   })

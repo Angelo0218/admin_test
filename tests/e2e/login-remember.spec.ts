@@ -25,7 +25,7 @@ test('remember me stores only username', async ({ page }) => {
 
   const inputs = page.locator('input')
   await inputs.nth(0).fill('admin')
-  await inputs.nth(1).fill('123456')
+  await inputs.nth(1).fill('Aa123456')
   await inputs.nth(1).press('Enter')
 
   await page.waitForFunction(() => {

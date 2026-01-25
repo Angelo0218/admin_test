@@ -5,7 +5,7 @@ describe('user schemas', () => {
   it('accepts valid staff account payload', () => {
     const result = userCreateSchema.safeParse({
       username: 'support_01',
-      password: '123456',
+      password: 'Aa123456',
       displayName: 'Support One',
       roleCode: 'SUPPORT',
     })
@@ -16,7 +16,7 @@ describe('user schemas', () => {
   it('rejects admin role for staff creation', () => {
     const result = userCreateSchema.safeParse({
       username: 'admin_02',
-      password: '123456',
+      password: 'Aa123456',
       displayName: 'Admin Two',
       roleCode: 'ADMIN',
     })
@@ -25,7 +25,7 @@ describe('user schemas', () => {
   })
 
   it('requires admin password for deletion', () => {
-    expect(userDeleteSchema.safeParse({ adminPassword: '123456' }).success).toBe(true)
+    expect(userDeleteSchema.safeParse({ adminPassword: 'Aa123456' }).success).toBe(true)
     expect(userDeleteSchema.safeParse({}).success).toBe(false)
   })
 })

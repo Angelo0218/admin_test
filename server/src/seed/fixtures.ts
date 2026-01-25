@@ -5,9 +5,7 @@ export const seedRoles = [
 ]
 
 export const seedUsers = [
-  { username: 'admin', displayName: 'Admin', roleCode: 'ADMIN', password: '123456' },
-  { username: 'support', displayName: 'Support', roleCode: 'SUPPORT', password: '123456' },
-  { username: 'auditor', displayName: 'Auditor', roleCode: 'AUDITOR', password: '123456' },
+  { username: 'admin', displayName: 'Admin', roleCode: 'ADMIN', password: 'Aa123456' },
   { username: 'user1', displayName: 'Wang XiaoMing', roleCode: null, password: 'nopass' },
   { username: 'user2', displayName: 'Chen YuLing', roleCode: null, password: 'nopass' },
 ]
@@ -40,7 +38,7 @@ export const seedKycApplications = [
     ],
     review: {
       action: 'NEED_MORE',
-      reviewerKey: 'auditor',
+      reviewerKey: 'admin',
       comment: 'Need clearer documentation',
     },
   },
@@ -58,7 +56,7 @@ export const seedKycApplications = [
     ],
     review: {
       action: 'REJECTED',
-      reviewerKey: 'auditor',
+      reviewerKey: 'admin',
       comment: 'Information mismatch',
     },
   },
@@ -125,17 +123,17 @@ export const seedTickets = [
 export const seedTicketMessages = [
   {
     ticketIndex: 0,
-    senderKey: 'support',
+    senderKey: 'admin',
     message: 'We received your report and will respond soon.',
   },
   {
     ticketIndex: 1,
-    senderKey: 'support',
+    senderKey: 'admin',
     message: 'Thanks for reaching out. We will update you shortly.',
   },
   {
     ticketIndex: 2,
-    senderKey: 'support',
+    senderKey: 'admin',
     message: 'Your request has been resolved. Let us know if you need more help.',
   },
 ]
@@ -149,14 +147,14 @@ export const seedAuditLogs = [
     meta: { comment: 'Approved' },
   },
   {
-    actorKey: 'auditor',
+    actorKey: 'admin',
     action: 'KYC_REJECT',
     targetType: 'KYC_APPLICATION',
     targetKey: 'KYC_1003',
     meta: { comment: 'Information mismatch' },
   },
   {
-    actorKey: 'support',
+    actorKey: 'admin',
     action: 'TICKET_REPLY',
     targetType: 'TICKET',
     targetKeyFromTicketIndex: 0,
