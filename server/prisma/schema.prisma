@@ -14,7 +14,6 @@ model User {
   displayName    String
   avatar         String?
   status         String          @default("ACTIVE")
-  disabledReason String?
   roles          UserRole[]
   kycApplications KycApplication[] @relation("Applicant")
   kycReviews     KycReview[]     @relation("Reviewer")
