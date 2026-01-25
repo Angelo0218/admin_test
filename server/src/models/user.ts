@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client'
+import { ROLE_CODES } from '../constants/roles'
 import { prisma } from '../db/client'
 import { hashPassword } from '../utils/password'
 
@@ -22,6 +23,8 @@ export interface UserResetPasswordParams {
   id: string
   password: string
 }
+
+const STAFF_ROLE_CODES = [ROLE_CODES.ADMIN, ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR]
 
 export async function findUserByUsername(username: string) {
   return prisma.user.findUnique({
@@ -78,17 +81,39 @@ export function mapUserResponse(user: NonNullable<Awaited<ReturnType<typeof find
   }
 }
 
-export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
-  const where: Prisma.UserWhereInput = {}
-  if (status) {
+export function buildUserWhere({
+  status,
+  keyword,
+  staffOnly = true,
+}: {
+  status?: string
+  keyword?: string
+  staffOnly?: boolean
+} = {}): Prisma.UserWhereInput {
+  const where: Prisma.UserWhereInput = {
+    status: { not: 'DELETED' },
+  }
+
+  if (status && status !== 'DELETED') {
     where.status = status
   }
+
   if (keyword) {
     where.OR = [
       { username: { contains: keyword } },
       { displayName: { contains: keyword } },
     ]
   }
+
+  where.roles = staffOnly
+    ? { some: { role: { code: { in: STAFF_ROLE_CODES } } } }
+    : { none: { role: { code: { in: STAFF_ROLE_CODES } } } }
+
+  return where
+}
+
+export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
+  const where = buildUserWhere({ status, keyword, staffOnly: true })
 
   const skip = (page - 1) * pageSize
   const [items, total] = await prisma.$transaction([
