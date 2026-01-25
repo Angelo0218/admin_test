@@ -5,7 +5,6 @@ export type AppContext = Context<{
   Variables: {
     user?: AuthPayload
     validatedBody?: unknown
-    validatedQuery?: unknown
     validatedParams?: unknown
     requestId?: string
   }

@@ -1,21 +1,4 @@
-import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
-
-export interface TicketListParams {
-  status?: string
-  category?: string
-  keyword?: string
-  page: number
-  pageSize: number
-}
-
-export interface TicketCreateParams {
-  requesterId: string
-  subject: string
-  category: string
-  tags?: string[]
-  internalNote?: string
-}
 
 export interface TicketMessageParams {
   ticketId: string
@@ -54,34 +37,13 @@ function parseTags(raw?: string | null) {
   }
 }
 
-export async function listTickets({ status, category, keyword, page, pageSize }: TicketListParams) {
-  const where: Prisma.TicketWhereInput = {}
-  if (status) {
-    where.status = status
-  }
-  if (category) {
-    where.category = category
-  }
-  if (keyword) {
-    where.OR = [
-      { subject: { contains: keyword } },
-      { requester: { is: { displayName: { contains: keyword } } } },
-    ]
-  }
-
-  const skip = (page - 1) * pageSize
-  const [items, total] = await prisma.$transaction([
-    prisma.ticket.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        requester: { select: { displayName: true } },
-      },
-    }),
-    prisma.ticket.count({ where }),
-  ])
+export async function listTickets() {
+  const items = await prisma.ticket.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      requester: { select: { displayName: true } },
+    },
+  })
 
   return {
     items: items.map(item => ({
@@ -93,9 +55,9 @@ export async function listTickets({ status, category, keyword, page, pageSize }:
       requesterName: item.requester?.displayName || '',
       createdAt: item.createdAt.toISOString(),
     })),
-    page,
-    pageSize,
-    total,
+    page: 1,
+    pageSize: items.length,
+    total: items.length,
   }
 }
 
@@ -141,32 +103,6 @@ export async function getTicketDetail(id: string) {
       message: message.message,
       createdAt: message.createdAt.toISOString(),
     })),
-  }
-}
-
-export async function createTicket({ requesterId, subject, category, tags, internalNote }: TicketCreateParams) {
-  const requester = await prisma.user.findUnique({
-    where: { id: requesterId },
-    select: { id: true },
-  })
-  if (!requester) {
-    return null
-  }
-  const ticket = await prisma.ticket.create({
-    data: {
-      requesterId,
-      subject,
-      category,
-      tags: serializeTags(tags),
-      internalNote: internalNote || undefined,
-      status: 'WAITING',
-    },
-  })
-
-  return {
-    id: ticket.id,
-    status: ticket.status,
-    createdAt: ticket.createdAt.toISOString(),
   }
 }
 

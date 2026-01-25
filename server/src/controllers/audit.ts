@@ -7,20 +7,11 @@ function ensureAdmin(role: string) {
   return role === 'ADMIN'
 }
 
-interface AuditListQuery {
-  action?: string
-  targetType?: string
-  keyword?: string
-  page: number
-  pageSize: number
-}
-
 export async function listAuditRecords(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
-  const query = c.get('validatedQuery') as AuditListQuery
-  const data = await listAuditLogs(query)
+  const data = await listAuditLogs()
   return ok(c, data)
 }

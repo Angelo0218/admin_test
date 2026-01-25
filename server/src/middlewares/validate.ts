@@ -24,18 +24,6 @@ export function validateJson<T extends z.ZodTypeAny>(schema: T) {
   })
 }
 
-export function validateQuery<T extends z.ZodTypeAny>(schema: T) {
-  return createMiddleware(async (c, next) => {
-    const query = c.req.query()
-    const result = schema.safeParse(query)
-    if (!result.success) {
-      return c.json({ code: 400, message: formatError(result.error), data: null }, 400)
-    }
-    c.set('validatedQuery', result.data)
-    await next()
-  })
-}
-
 export function validateParams<T extends z.ZodTypeAny>(schema: T) {
   return createMiddleware(async (c, next) => {
     const params = c.req.param()

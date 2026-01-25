@@ -20,13 +20,6 @@ function ensureAdmin(role: string) {
   return role === 'ADMIN'
 }
 
-interface KycListQuery {
-  status?: string
-  keyword?: string
-  page: number
-  pageSize: number
-}
-
 interface KycCreatePayload {
   userId: string
   fullName: string
@@ -39,13 +32,6 @@ interface KycCreatePayload {
 interface KycReviewPayload {
   action: 'PASSED' | 'REJECTED' | 'NEED_MORE'
   comment?: string
-}
-
-interface KycAppealListQuery {
-  status?: string
-  keyword?: string
-  page: number
-  pageSize: number
 }
 
 interface KycAppealCreatePayload {
@@ -66,8 +52,7 @@ export async function listKycApplications(c: AppContext) {
   if (!ensureKycRole(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
-  const query = c.get('validatedQuery') as KycListQuery
-  const data = await listApplications(query)
+  const data = await listApplications()
   return ok(c, data)
 }
 
@@ -138,8 +123,7 @@ export async function listKycAppeals(c: AppContext) {
   if (!ensureKycRole(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
-  const query = c.get('validatedQuery') as KycAppealListQuery
-  const data = await listAppeals(query)
+  const data = await listAppeals()
   return ok(c, data)
 }
 

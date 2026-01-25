@@ -1,16 +1,8 @@
-import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
 
 interface KycDocumentInput {
   type: string
   url: string
-}
-
-export interface KycListParams {
-  status?: string
-  keyword?: string
-  page: number
-  pageSize: number
 }
 
 export interface KycCreateParams {
@@ -29,13 +21,6 @@ export interface KycReviewParams {
   reviewerId: string
 }
 
-export interface KycAppealListParams {
-  status?: string
-  keyword?: string
-  page: number
-  pageSize: number
-}
-
 export interface KycAppealCreateParams {
   applicationId: string
   reason: string
@@ -48,31 +33,13 @@ export interface KycAppealResolveParams {
   handledById: string
 }
 
-export async function listApplications({ status, keyword, page, pageSize }: KycListParams) {
-  const where: Prisma.KycApplicationWhereInput = {}
-  if (status) {
-    where.status = status
-  }
-  if (keyword) {
-    where.OR = [
-      { fullName: { contains: keyword } },
-      { idNumber: { contains: keyword } },
-    ]
-  }
-
-  const skip = (page - 1) * pageSize
-  const [items, total] = await prisma.$transaction([
-    prisma.kycApplication.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { submittedAt: 'desc' },
-      include: {
-        user: { select: { displayName: true } },
-      },
-    }),
-    prisma.kycApplication.count({ where }),
-  ])
+export async function listApplications() {
+  const items = await prisma.kycApplication.findMany({
+    orderBy: { submittedAt: 'desc' },
+    include: {
+      user: { select: { displayName: true } },
+    },
+  })
 
   return {
     items: items.map(item => ({
@@ -85,9 +52,9 @@ export async function listApplications({ status, keyword, page, pageSize }: KycL
       applicantName: item.user?.displayName || '',
       submittedAt: item.submittedAt.toISOString(),
     })),
-    page,
-    pageSize,
-    total,
+    page: 1,
+    pageSize: items.length,
+    total: items.length,
   }
 }
 
@@ -224,41 +191,16 @@ export async function reviewApplication({ id, action, comment, reviewerId }: Kyc
   }
 }
 
-export async function listAppeals({ status, keyword, page, pageSize }: KycAppealListParams) {
-  const where: Prisma.KycAppealWhereInput = {}
-  if (status) {
-    where.status = status
-  }
-  if (keyword) {
-    where.OR = [
-      { reason: { contains: keyword } },
-      {
-        application: {
-          OR: [
-            { fullName: { contains: keyword } },
-            { idNumber: { contains: keyword } },
-          ],
-        },
+export async function listAppeals() {
+  const items = await prisma.kycAppeal.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      application: {
+        select: { id: true, fullName: true, idNumber: true, status: true },
       },
-    ]
-  }
-
-  const skip = (page - 1) * pageSize
-  const [items, total] = await prisma.$transaction([
-    prisma.kycAppeal.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        application: {
-          select: { id: true, fullName: true, idNumber: true, status: true },
-        },
-        handledBy: { select: { displayName: true } },
-      },
-    }),
-    prisma.kycAppeal.count({ where }),
-  ])
+      handledBy: { select: { displayName: true } },
+    },
+  })
 
   return {
     items: items.map(item => ({
@@ -274,9 +216,9 @@ export async function listAppeals({ status, keyword, page, pageSize }: KycAppeal
       handledAt: item.handledAt ? item.handledAt.toISOString() : undefined,
       createdAt: item.createdAt.toISOString(),
     })),
-    page,
-    pageSize,
-    total,
+    page: 1,
+    pageSize: items.length,
+    total: items.length,
   }
 }
 
