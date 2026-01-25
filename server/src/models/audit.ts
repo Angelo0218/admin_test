@@ -37,7 +37,10 @@ export function buildAuditWhere({ action, targetType, keyword }: Pick<AuditListP
   return where
 }
 
-export async function listAuditLogs({ action, targetType, keyword, page, pageSize }: AuditListParams) {
+export async function listAuditLogs(params: Partial<AuditListParams> = {}) {
+  const { action, targetType, keyword } = params
+  const page = Number.isFinite(params.page) && Number(params.page) > 0 ? Number(params.page) : 1
+  const pageSize = Number.isFinite(params.pageSize) && Number(params.pageSize) > 0 ? Number(params.pageSize) : 20
   const where = buildAuditWhere({ action, targetType, keyword })
 
   const skip = (page - 1) * pageSize
