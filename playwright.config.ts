@@ -5,6 +5,7 @@ const BACKEND_PORT = Number(process.env.BACKEND_PORT || 8085)
 
 export default defineConfig({
   testDir: './tests',
+  testMatch: ['**/*.spec.ts'],
   timeout: 60_000,
   expect: {
     timeout: 10_000,
@@ -18,13 +19,21 @@ export default defineConfig({
       command: 'bun src/index.ts',
       cwd: './server',
       port: BACKEND_PORT,
-      reuseExistingServer: true,
+      reuseExistingServer: false,
+      env: {
+        ENABLE_SEED: '1',
+        DISABLE_RATE_LIMIT: '1',
+        JWT_SECRET: 'test-secret',
+        CORS_ORIGIN: `http://localhost:${FRONTEND_PORT}`,
+        DATABASE_URL: 'file:./test.db',
+        RESET_DB: '1',
+      },
       timeout: 120_000,
     },
     {
       command: 'npm run dev -- --host',
       port: FRONTEND_PORT,
-      reuseExistingServer: true,
+      reuseExistingServer: false,
       timeout: 120_000,
     },
   ],

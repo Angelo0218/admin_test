@@ -12,6 +12,7 @@ import { kycRoutes } from './routes/kyc'
 import { roleRoutes } from './routes/role'
 import { ticketRoutes } from './routes/ticket'
 import { userRoutes } from './routes/user'
+import { seedReset } from './scripts/seed-reset'
 import { isOriginAllowed, resolveCorsOrigin } from './utils/cors'
 
 const app = new Hono()
@@ -44,7 +45,12 @@ app.route('/api/v1', auditRoutes)
 app.route('/api/v1', roleRoutes)
 
 async function start() {
-  await seedDefaults()
+  if (env.resetDatabase) {
+    await seedReset()
+  }
+  else {
+    await seedDefaults()
+  }
   const bun = globalThis.Bun
   if (!bun) {
     throw new Error('Bun runtime is required to start the server.')
