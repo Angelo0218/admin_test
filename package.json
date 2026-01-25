@@ -59,6 +59,7 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-router-warn": "^2.0.0",
     "vite-plugin-vue-devtools": "^8.0.5",
+    "vitest": "^4.0.18",
     "vue3-intro-step": "^1.0.5"
   },
   "simple-git-hooks": {

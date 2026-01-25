@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client'
+import { ROLE_CODES } from '../constants/roles'
 import { prisma } from '../db/client'
 import { hashPassword } from '../utils/password'
 
@@ -18,10 +19,14 @@ export interface UserEnableParams {
   id: string
 }
 
-export interface UserResetPasswordParams {
-  id: string
+export interface UserCreateParams {
+  username: string
   password: string
+  displayName: string
+  roleCode: string
 }
+
+const STAFF_ROLE_CODES = [ROLE_CODES.ADMIN, ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR]
 
 export async function findUserByUsername(username: string) {
   return prisma.user.findUnique({
@@ -78,17 +83,46 @@ export function mapUserResponse(user: NonNullable<Awaited<ReturnType<typeof find
   }
 }
 
-export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
-  const where: Prisma.UserWhereInput = {}
-  if (status) {
+export function buildUserWhere({
+  status,
+  keyword,
+  staffOnly = true,
+}: {
+  status?: string
+  keyword?: string
+  staffOnly?: boolean
+} = {}): Prisma.UserWhereInput {
+  const where: Prisma.UserWhereInput = {
+    status: { not: 'DELETED' },
+  }
+
+  if (status && status !== 'DELETED') {
     where.status = status
   }
+
   if (keyword) {
     where.OR = [
       { username: { contains: keyword } },
       { displayName: { contains: keyword } },
     ]
   }
+
+  where.roles = staffOnly
+    ? { some: { role: { code: { in: STAFF_ROLE_CODES } } } }
+    : { none: { role: { code: { in: STAFF_ROLE_CODES } } } }
+
+  return where
+}
+
+export function buildUserDeleteData() {
+  return {
+    status: 'DELETED',
+    disabledReason: 'deleted',
+  }
+}
+
+export async function listUsers({ status, keyword, page, pageSize }: UserListParams) {
+  const where = buildUserWhere({ status, keyword, staffOnly: true })
 
   const skip = (page - 1) * pageSize
   const [items, total] = await prisma.$transaction([
@@ -121,6 +155,27 @@ export async function listUsers({ status, keyword, page, pageSize }: UserListPar
   }
 }
 
+export async function createUserAccount({ username, password, displayName, roleCode }: UserCreateParams) {
+  const passwordHash = await hashPassword(password)
+  return prisma.user.create({
+    data: {
+      username,
+      passwordHash,
+      displayName,
+      roles: {
+        create: [{ role: { connect: { code: roleCode } } }],
+      },
+    },
+  })
+}
+
+export async function deleteUserAccount(id: string) {
+  return prisma.user.update({
+    where: { id },
+    data: buildUserDeleteData(),
+  })
+}
+
 export async function disableUser({ id, reason }: UserDisableParams) {
   return prisma.user.update({
     where: { id },
@@ -137,16 +192,6 @@ export async function enableUser({ id }: UserEnableParams) {
     data: {
       status: 'ACTIVE',
       disabledReason: null,
-    },
-  })
-}
-
-export async function resetUserPassword({ id, password }: UserResetPasswordParams) {
-  const passwordHash = await hashPassword(password)
-  return prisma.user.update({
-    where: { id },
-    data: {
-      passwordHash,
     },
   })
 }

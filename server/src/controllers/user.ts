@@ -2,13 +2,15 @@ import type { AuthPayload } from '../middlewares/auth'
 import type { AppContext } from '../types/context'
 import { createAuditLog } from '../models/audit'
 import {
+  createUserAccount,
+  deleteUserAccount,
   disableUser,
   enableUser,
   findUserById,
   listUsers,
   mapUserResponse,
-  resetUserPassword,
 } from '../models/user'
+import { verifyPassword } from '../utils/password'
 import { fail, ok } from '../utils/response'
 
 function ensureAdmin(role: string) {
@@ -26,8 +28,15 @@ interface UserDisablePayload {
   reason: string
 }
 
-interface UserResetPasswordPayload {
-  password?: string
+interface UserCreatePayload {
+  username: string
+  password: string
+  displayName: string
+  roleCode: string
+}
+
+interface UserDeletePayload {
+  adminPassword: string
 }
 
 interface IdParams {
@@ -102,20 +111,44 @@ export async function enableUserAccount(c: AppContext) {
   return ok(c, { id: user.id, status: user.status })
 }
 
-export async function resetUserPasswordHandler(c: AppContext) {
+export async function createUserAccountHandler(c: AppContext) {
+  const auth = c.get('user') as AuthPayload
+  if (!ensureAdmin(auth.role)) {
+    return fail(c, 403, 'forbidden', 403)
+  }
+  const payload = c.get('validatedBody') as UserCreatePayload
+  const user = await createUserAccount(payload)
+  await createAuditLog({
+    actorId: auth.userId,
+    action: 'USER_CREATE',
+    targetType: 'USER',
+    targetId: user.id,
+    meta: { roleCode: payload.roleCode },
+  })
+  return ok(c, { id: user.id })
+}
+
+export async function deleteUserAccountHandler(c: AppContext) {
   const auth = c.get('user') as AuthPayload
   if (!ensureAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
-  const payload = c.get('validatedBody') as UserResetPasswordPayload
-  const password = payload.password || '123456'
-  await resetUserPassword({ id, password })
+  const payload = c.get('validatedBody') as UserDeletePayload
+  const admin = await findUserById(auth.userId)
+  if (!admin) {
+    return fail(c, 404, 'user not found', 404)
+  }
+  const isValid = await verifyPassword(payload.adminPassword, admin.passwordHash)
+  if (!isValid) {
+    return fail(c, 401, 'invalid admin password', 401)
+  }
+  const user = await deleteUserAccount(id)
   await createAuditLog({
     actorId: auth.userId,
-    action: 'USER_RESET_PASSWORD',
+    action: 'USER_DELETE',
     targetType: 'USER',
     targetId: id,
   })
-  return ok(c, { id })
+  return ok(c, { id: user.id, status: user.status })
 }

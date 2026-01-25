@@ -3,13 +3,13 @@ import { ROLE_CODES } from '../src/constants/roles'
 import { buildUserWhere } from '../src/models/user'
 
 describe('buildUserWhere', () => {
-  it('excludes staff roles by default', () => {
+  it('defaults to staff-only and excludes deleted', () => {
     const where = buildUserWhere()
 
     expect(where).toMatchObject({
       status: { not: 'DELETED' },
       roles: {
-        none: {
+        some: {
           role: {
             code: {
               in: [ROLE_CODES.ADMIN, ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR],
@@ -20,13 +20,13 @@ describe('buildUserWhere', () => {
     })
   })
 
-  it('includes staff roles when staffOnly is true', () => {
-    const where = buildUserWhere({ staffOnly: true })
+  it('can exclude staff when staffOnly is false', () => {
+    const where = buildUserWhere({ staffOnly: false })
 
     expect(where).toMatchObject({
       status: { not: 'DELETED' },
       roles: {
-        some: {
+        none: {
           role: {
             code: {
               in: [ROLE_CODES.ADMIN, ROLE_CODES.SUPPORT, ROLE_CODES.AUDITOR],

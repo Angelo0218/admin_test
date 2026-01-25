@@ -1,9 +1,14 @@
 <template>
   <CommonPage>
     <template #action>
-      <NButton type="primary" @click="handleRefresh">
-        {{ t('common.refresh') }}
-      </NButton>
+      <NSpace>
+        <NButton type="primary" @click="openCreate">
+          {{ t('users.actions.create') }}
+        </NButton>
+        <NButton @click="handleRefresh">
+          {{ t('common.refresh') }}
+        </NButton>
+      </NSpace>
     </template>
 
     <UserListFilters
@@ -28,33 +33,43 @@
           :format-time="formatDateTime"
           :on-disable="openDisable"
           :on-enable="handleEnable"
-          :on-reset="openReset"
+          :on-delete="openDelete"
         />
       </template>
     </ResponsiveTable>
+
+    <MeModal ref="createModalRef">
+      <UserCreateForm
+        :state="createState"
+        :role-options="roleOptions"
+        @update-field="handleCreateFieldUpdate"
+      />
+    </MeModal>
 
     <MeModal ref="disableModalRef">
       <UserDisableForm :state="disableState" @update-field="handleDisableFieldUpdate" />
     </MeModal>
 
-    <MeModal ref="resetModalRef">
-      <UserResetForm :state="resetState" @update-field="handleResetFieldUpdate" />
+    <MeModal ref="deleteModalRef">
+      <UserDeleteForm :state="deleteState" @update-field="handleDeleteFieldUpdate" />
     </MeModal>
   </CommonPage>
 </template>
 
 <script setup>
 import { useWindowSize } from '@vueuse/core'
-import { NButton, NTag } from 'naive-ui'
+import { NButton, NSpace, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/user'
 import { CommonPage, MeModal, ResponsiveTable } from '@/components'
+import UserCreateForm from '@/components/users/UserCreateForm.vue'
+import UserDeleteForm from '@/components/users/UserDeleteForm.vue'
 import UserDisableForm from '@/components/users/UserDisableForm.vue'
 import UserListCard from '@/components/users/UserListCard.vue'
 import UserListFilters from '@/components/users/UserListFilters.vue'
-import UserResetForm from '@/components/users/UserResetForm.vue'
 import { useModal } from '@/composables'
 import { useListPage } from '@/composables/useListPage'
+import { useStaffRoleOptions } from '@/composables/useStaffRoleOptions'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
@@ -72,15 +87,23 @@ const statusOptions = computed(() => [
   { label: t('users.status.DISABLED'), value: 'DISABLED' },
 ])
 
+const [createModalRef, createLoading] = useModal()
 const [disableModalRef, disableLoading] = useModal()
-const [resetModalRef, resetLoading] = useModal()
+const [deleteModalRef, deleteLoading] = useModal()
+const { roleOptions } = useStaffRoleOptions({ t })
+const createState = reactive({
+  username: '',
+  password: '',
+  displayName: '',
+  roleCode: 'SUPPORT',
+})
 const disableState = reactive({
   id: '',
   reason: '',
 })
-const resetState = reactive({
+const deleteState = reactive({
   id: '',
-  password: '',
+  adminPassword: '',
 })
 const { pagination } = useListPage({ filters, fetchList })
 
@@ -151,9 +174,10 @@ const baseColumns = computed(() => [
           {
             size: 'small',
             class: 'ml-8',
-            onClick: () => openReset(row),
+            type: 'error',
+            onClick: () => openDelete(row),
           },
-          { default: () => t('users.actions.resetPassword') },
+          { default: () => t('users.actions.delete') },
         ),
       )
       return h('div', { class: 'flex flex-wrap justify-end gap-6' }, actions)
@@ -216,6 +240,44 @@ async function fetchList() {
   loading.value = false
 }
 
+function openCreate() {
+  createState.username = ''
+  createState.password = ''
+  createState.displayName = ''
+  createState.roleCode = 'SUPPORT'
+  createModalRef.value?.open({
+    title: t('users.create.title'),
+    okText: t('common.create'),
+    onOk: handleCreate,
+  })
+}
+
+async function handleCreate() {
+  if (!createState.username || !createState.password || !createState.displayName || !createState.roleCode) {
+    $message.warning(t('users.create.missing'))
+    return false
+  }
+  try {
+    createLoading.value = true
+    await api.create({
+      username: createState.username,
+      password: createState.password,
+      displayName: createState.displayName,
+      roleCode: createState.roleCode,
+    })
+    $message.success(t('users.create.success'))
+    await fetchList()
+  }
+  catch (error) {
+    console.error(error)
+    $message.error(t('users.create.failed'))
+    return false
+  }
+  finally {
+    createLoading.value = false
+  }
+}
+
 function openDisable(row) {
   disableState.id = row.id
   disableState.reason = ''
@@ -260,29 +322,34 @@ async function handleEnable(row) {
   loading.value = false
 }
 
-function openReset(row) {
-  resetState.id = row.id
-  resetState.password = ''
-  resetModalRef.value?.open({
-    title: `${t('users.reset.title')} - ${row.username}`,
-    okText: t('common.confirm'),
-    onOk: handleReset,
+function openDelete(row) {
+  deleteState.id = row.id
+  deleteState.adminPassword = ''
+  deleteModalRef.value?.open({
+    title: `${t('users.delete.title')} - ${row.username}`,
+    okText: t('users.actions.delete'),
+    onOk: handleDelete,
   })
 }
 
-async function handleReset() {
+async function handleDelete() {
+  if (!deleteState.adminPassword) {
+    $message.warning(t('users.delete.adminPasswordRequired'))
+    return false
+  }
   try {
-    resetLoading.value = true
-    await api.resetPassword(resetState.id, { password: resetState.password || undefined })
-    $message.success(t('users.reset.success'))
+    deleteLoading.value = true
+    await api.remove(deleteState.id, { adminPassword: deleteState.adminPassword })
+    $message.success(t('users.delete.success'))
+    await fetchList()
   }
   catch (error) {
     console.error(error)
-    $message.error(t('users.reset.failed'))
+    $message.error(t('users.delete.failed'))
     return false
   }
   finally {
-    resetLoading.value = false
+    deleteLoading.value = false
   }
 }
 
@@ -298,8 +365,12 @@ function handleDisableFieldUpdate({ key, value }) {
   disableState[key] = value
 }
 
-function handleResetFieldUpdate({ key, value }) {
-  resetState[key] = value
+function handleCreateFieldUpdate({ key, value }) {
+  createState[key] = value
+}
+
+function handleDeleteFieldUpdate({ key, value }) {
+  deleteState[key] = value
 }
 
 fetchList()
