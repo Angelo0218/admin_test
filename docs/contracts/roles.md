@@ -1,12 +1,12 @@
-# Roles Contract
+# 角色合約
 
-## Role Codes
+## 角色代碼
 
-- `ADMIN`: �޲z���A�֦�����޲z�v���C
-- `AUDITOR`: �f�֭��A�t�d KYC �f�֬y�{�C
-- `SUPPORT`: �ȪA�A�t�d�u��B�z�P�^�СC
+- `ADMIN`: 管理者，擁有最高管理權限。
+- `AUDITOR`: 稽核員，負責 KYC 稽核流程。
+- `SUPPORT`: 客服人員，負責用戶協助與回覆。
 
-## �P�B�W�h
+## 注意事項
 
-- �e��ݨ���X�����@�P�C
-- ����X�վ�ɻݦP�B��s��ݻP�e�ݱ`�ƻP���ҳW�h�C
+- 請依實際需求分配角色。
+- 角色權限請依據系統設計與安全需求進行調整。
