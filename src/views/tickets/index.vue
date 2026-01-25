@@ -2,27 +2,25 @@
   <CommonPage>
     <template #action>
       <n-space>
-        <NButton type="primary" @click="openCreate">
-          {{ t('tickets.list.create') }}
-        </NButton>
         <NButton @click="handleRefresh">
           {{ t('common.refresh') }}
         </NButton>
       </n-space>
     </template>
 
-    <TicketListFilters
+    <AutoListFilters
+      :rows="allRows"
       :filters="filters"
-      :status-options="statusOptions"
-      :category-options="categoryOptions"
-      @update-filter="handleFilterUpdate"
+      :fields="filterFields"
+      @update:filters="handleFiltersUpdate"
     />
 
     <ResponsiveTable
       :columns="columns"
-      :data="rows"
+      :data="pagedRows"
       :loading="loading"
       :pagination="pagination"
+      remote
     >
       <template #card="{ row }">
         <TicketListCard
@@ -36,14 +34,6 @@
         />
       </template>
     </ResponsiveTable>
-
-    <MeModal ref="createModalRef">
-      <TicketCreateForm
-        :state="createState"
-        :category-options="categoryOptions"
-        @update-field="handleCreateFieldUpdate"
-      />
-    </MeModal>
   </CommonPage>
 </template>
 
@@ -52,18 +42,14 @@ import { useWindowSize } from '@vueuse/core'
 import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/ticket'
-import { CommonPage, MeModal, ResponsiveTable } from '@/components'
-import TicketCreateForm from '@/components/tickets/TicketCreateForm.vue'
+import { AutoListFilters, CommonPage, ResponsiveTable } from '@/components'
 import TicketListCard from '@/components/tickets/TicketListCard.vue'
-import TicketListFilters from '@/components/tickets/TicketListFilters.vue'
-import { useModal } from '@/composables'
-import { useListPage } from '@/composables/useListPage'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const router = useRouter()
 const loading = ref(false)
-const rows = ref([])
+const allRows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
 const filters = reactive({
@@ -84,16 +70,42 @@ const categoryOptions = computed(() => [
   { label: t('tickets.category.TICKET'), value: 'TICKET' },
   { label: t('tickets.category.OTHER'), value: 'OTHER' },
 ])
+const filterFields = computed(() => [
+  {
+    key: 'status',
+    type: 'select',
+    options: statusOptions.value,
+    placeholder: t('common.status'),
+    class: 'w-full sm:w-160',
+  },
+  {
+    key: 'category',
+    type: 'select',
+    options: categoryOptions.value,
+    placeholder: t('tickets.labels.category'),
+    class: 'w-full sm:w-180',
+  },
+  {
+    key: 'keyword',
+    type: 'keyword',
+    keys: ['subject', 'requesterName'],
+    placeholder: t('tickets.list.searchPlaceholder'),
+    class: 'w-full sm:w-220',
+  },
+])
 
-const [createModalRef, createLoading] = useModal()
-const createState = reactive({
-  requesterId: '',
-  subject: '',
-  category: 'ACCOUNT',
-  tags: '',
-  internalNote: '',
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  onChange: (nextPage) => {
+    pagination.page = nextPage
+  },
+  onUpdatePageSize: (nextPageSize) => {
+    pagination.pageSize = nextPageSize
+    pagination.page = 1
+  },
 })
-const { pagination } = useListPage({ filters, fetchList, watchFilters: false })
 
 const baseColumns = computed(() => [
   { title: t('tickets.labels.id'), key: 'id', width: 160, ellipsis: true },
@@ -180,22 +192,54 @@ function statusType(status) {
   return 'default'
 }
 
-function buildQuery() {
-  return {
-    status: filters.status || undefined,
-    category: filters.category || undefined,
-    keyword: filters.keyword || undefined,
-    page: pagination.page,
-    pageSize: pagination.pageSize,
-  }
+function normalize(value) {
+  if (!value)
+    return ''
+  return String(value).trim().toLowerCase()
 }
+
+const filteredRows = computed(() => {
+  const statusNeedle = filters.status
+  const categoryNeedle = filters.category
+  const keywordNeedle = normalize(filters.keyword)
+
+  return allRows.value.filter((row) => {
+    if (statusNeedle && row.status !== statusNeedle)
+      return false
+    if (categoryNeedle && row.category !== categoryNeedle)
+      return false
+    if (keywordNeedle) {
+      const subject = normalize(row.subject)
+      const requesterName = normalize(row.requesterName)
+      if (!subject.includes(keywordNeedle) && !requesterName.includes(keywordNeedle))
+        return false
+    }
+    return true
+  })
+})
+
+const pagedRows = computed(() => {
+  const start = (pagination.page - 1) * pagination.pageSize
+  return filteredRows.value.slice(start, start + pagination.pageSize)
+})
+
+watch(
+  filters,
+  () => {
+    pagination.page = 1
+  },
+  { deep: true },
+)
+
+watchEffect(() => {
+  pagination.itemCount = filteredRows.value.length
+})
 
 async function fetchList() {
   try {
     loading.value = true
-    const { data } = await api.list(buildQuery())
-    rows.value = data?.items || []
-    pagination.itemCount = data?.total || 0
+    const { data } = await api.list()
+    allRows.value = data?.items || []
   }
   catch (error) {
     console.error(error)
@@ -204,56 +248,12 @@ async function fetchList() {
   loading.value = false
 }
 
-function openCreate() {
-  createState.requesterId = ''
-  createState.subject = ''
-  createState.category = 'ACCOUNT'
-  createState.tags = ''
-  createState.internalNote = ''
-  createModalRef.value?.open({
-    title: t('tickets.create.title'),
-    okText: t('common.create'),
-    onOk: handleCreate,
-  })
-}
-
-async function handleCreate() {
-  if (!createState.requesterId || !createState.subject) {
-    $message.warning(t('tickets.create.missing'))
-    return false
-  }
-  try {
-    createLoading.value = true
-    await api.create({
-      requesterId: createState.requesterId,
-      subject: createState.subject,
-      category: createState.category,
-      tags: createState.tags ? createState.tags.split(',').map(item => item.trim()).filter(Boolean) : [],
-      internalNote: createState.internalNote || undefined,
-    })
-    $message.success(t('tickets.create.success'))
-    await fetchList()
-  }
-  catch (error) {
-    console.error(error)
-    $message.error(t('tickets.create.failed'))
-    return false
-  }
-  finally {
-    createLoading.value = false
-  }
-}
-
 function handleRefresh() {
   fetchList()
 }
 
-function handleFilterUpdate({ key, value }) {
-  filters[key] = value
-}
-
-function handleCreateFieldUpdate({ key, value }) {
-  createState[key] = value
+function handleFiltersUpdate(nextFilters) {
+  Object.assign(filters, nextFilters)
 }
 
 function handleView(row) {

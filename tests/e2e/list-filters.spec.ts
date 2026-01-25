@@ -54,7 +54,7 @@ test('filters tickets list on the client without extra requests', async ({ page 
 
   await page.goto('/#/login')
   await page.locator('input').first().fill('admin')
-  await page.locator('input[type="password"]').fill('123456')
+  await page.locator('input[type="password"]').fill('Aa123456')
   await page.locator('button').first().click()
   await page.waitForURL('**/tickets')
   await page.waitForResponse(response => response.url().includes('/api/v1/tickets'))

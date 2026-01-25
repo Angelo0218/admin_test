@@ -6,16 +6,19 @@
       </NButton>
     </template>
 
-    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
-      <n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('common.status')" class="w-full sm:w-180" />
-      <n-input v-model:value="filters.keyword" :placeholder="t('kyc.list.appealSearchPlaceholder')" class="w-full sm:w-220" />
-    </div>
+    <AutoListFilters
+      :rows="allRows"
+      :filters="filters"
+      :fields="filterFields"
+      @update:filters="handleFiltersUpdate"
+    />
 
     <ResponsiveTable
       :columns="columns"
-      :data="rows"
+      :data="pagedRows"
       :loading="loading"
       :pagination="pagination"
+      remote
     >
       <template #card="{ row }">
         <div class="card-border rounded-8 auto-bg p-12">
@@ -65,14 +68,13 @@ import { useWindowSize } from '@vueuse/core'
 import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
-import { CommonPage, ResponsiveTable } from '@/components'
-import { useListPage } from '@/composables/useListPage'
+import { AutoListFilters, CommonPage, ResponsiveTable } from '@/components'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const router = useRouter()
 const loading = ref(false)
-const rows = ref([])
+const allRows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
 const filters = reactive({
@@ -84,6 +86,22 @@ const statusOptions = computed(() => [
   { label: t('kyc.appealStatus.PENDING'), value: 'PENDING' },
   { label: t('kyc.appealStatus.APPROVED'), value: 'APPROVED' },
   { label: t('kyc.appealStatus.REJECTED'), value: 'REJECTED' },
+])
+const filterFields = computed(() => [
+  {
+    key: 'status',
+    type: 'select',
+    options: statusOptions.value,
+    placeholder: t('common.status'),
+    class: 'w-full sm:w-180',
+  },
+  {
+    key: 'keyword',
+    type: 'keyword',
+    keys: ['applicantName', 'idNumber', 'reason'],
+    placeholder: t('kyc.list.appealSearchPlaceholder'),
+    class: 'w-full sm:w-220',
+  },
 ])
 
 const baseColumns = computed(() => [
@@ -139,7 +157,18 @@ const narrowColumnKeys = new Set(['applicationId', 'applicantName', 'status', 'r
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
-const { pagination } = useListPage({ filters, fetchList })
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  onChange: (nextPage) => {
+    pagination.page = nextPage
+  },
+  onUpdatePageSize: (nextPageSize) => {
+    pagination.pageSize = nextPageSize
+    pagination.page = 1
+  },
+})
 
 function statusLabel(status) {
   const key = `kyc.appealStatus.${status}`
@@ -151,21 +180,55 @@ function statusType(status) {
   return status === 'PENDING' ? 'warning' : status === 'APPROVED' ? 'success' : 'error'
 }
 
-function buildQuery() {
-  return {
-    status: filters.status || undefined,
-    keyword: filters.keyword || undefined,
-    page: pagination.page,
-    pageSize: pagination.pageSize,
-  }
+function normalize(value) {
+  if (!value)
+    return ''
+  return String(value).trim().toLowerCase()
 }
+
+const filteredRows = computed(() => {
+  const statusNeedle = filters.status
+  const keywordNeedle = normalize(filters.keyword)
+
+  return allRows.value.filter((row) => {
+    if (statusNeedle && row.status !== statusNeedle)
+      return false
+    if (keywordNeedle) {
+      const applicantName = normalize(row.applicantName)
+      const idNumber = normalize(row.idNumber)
+      const reason = normalize(row.reason)
+      if (!applicantName.includes(keywordNeedle)
+        && !idNumber.includes(keywordNeedle)
+        && !reason.includes(keywordNeedle)) {
+        return false
+      }
+    }
+    return true
+  })
+})
+
+const pagedRows = computed(() => {
+  const start = (pagination.page - 1) * pagination.pageSize
+  return filteredRows.value.slice(start, start + pagination.pageSize)
+})
+
+watch(
+  filters,
+  () => {
+    pagination.page = 1
+  },
+  { deep: true },
+)
+
+watchEffect(() => {
+  pagination.itemCount = filteredRows.value.length
+})
 
 async function fetchList() {
   try {
     loading.value = true
-    const { data } = await api.listAppeals(buildQuery())
-    rows.value = data?.items || []
-    pagination.itemCount = data?.total || 0
+    const { data } = await api.listAppeals()
+    allRows.value = data?.items || []
   }
   catch (error) {
     console.error(error)
@@ -176,6 +239,10 @@ async function fetchList() {
 
 function handleRefresh() {
   fetchList()
+}
+
+function handleFiltersUpdate(nextFilters) {
+  Object.assign(filters, nextFilters)
 }
 
 fetchList()

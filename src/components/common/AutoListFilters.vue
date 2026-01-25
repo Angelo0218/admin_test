@@ -4,31 +4,39 @@
       <n-select
         v-if="field.type === 'select'"
         :value="filters[field.key]"
-        :options="optionsMap[field.key]"
+        :options="selectOptions[field.key]"
         :placeholder="field.placeholder"
         :class="field.class || 'w-full sm:w-180'"
         filterable
         clearable
         @update:value="value => setFilter(field.key, value)"
       />
-      <n-auto-complete
+      <KeywordAutoComplete
         v-else-if="field.type === 'keyword'"
-        v-model:value="keywordInput"
-        :options="optionsMap[field.key]"
+        :value="filters[field.key] || ''"
+        :rows="rowsValue"
+        :fields="resolveKeywordFields(field)"
         :placeholder="field.placeholder"
         :class="field.class || 'w-full sm:w-220'"
+        @update:value="value => setFilter(field.key, value)"
+      />
+      <NDatePicker
+        v-else-if="field.type === 'daterange'"
+        :value="filters[field.key]"
+        :type="field.pickerType || 'datetimerange'"
+        :placeholder="field.placeholder"
+        :class="field.class || 'w-full sm:w-260'"
         clearable
-        @select="handleKeywordSelect"
-        @keyup.enter="applyKeyword()"
+        @update:value="value => setFilter(field.key, value)"
       />
     </template>
   </ListFilters>
 </template>
 
 <script setup>
-import { computed, unref } from 'vue'
-import { ListFilters } from '@/components'
-import { useListKeywordFilter } from '@/composables'
+import { NDatePicker } from 'naive-ui'
+import { computed } from 'vue'
+import { KeywordAutoComplete, ListFilters } from '@/components'
 
 const props = defineProps({
   rows: {
@@ -45,6 +53,7 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['update:filters'])
+const rowsValue = computed(() => (Array.isArray(props.rows) ? props.rows : props.rows?.value || []))
 
 function resolveGetters(field) {
   if (Array.isArray(field.getters) && field.getters.length) {
@@ -57,18 +66,6 @@ function resolveGetters(field) {
 }
 
 const filters = computed(() => props.filters)
-const keywordField = computed(() => props.fields.find(item => item.type === 'keyword'))
-const keywordKey = computed(() => keywordField.value?.key || 'keyword')
-const { keywordInput, applyKeyword, handleKeywordSelect } = useListKeywordFilter(
-  key => props.filters?.[key],
-  (key, value) => {
-    emit('update:filters', {
-      ...props.filters,
-      [key]: value,
-    })
-  },
-  unref(keywordKey),
-)
 
 function setFilter(key, value) {
   emit('update:filters', {
@@ -109,16 +106,34 @@ function buildOptions(rows, getters, query, minQueryLength = 0, labelFormatter) 
   return labeled.sort((a, b) => String(a.label).localeCompare(String(b.label)))
 }
 
-const optionsMap = computed(() => {
+function resolveKeywordFields(field) {
+  if (Array.isArray(field.getters) && field.getters.length) {
+    return field.getters.map(getter => (row) => {
+      try {
+        return getter(row)
+      }
+      catch {
+        return undefined
+      }
+    })
+  }
+  if (Array.isArray(field.keys) && field.keys.length) {
+    return field.keys
+  }
+  return [field.key]
+}
+
+const selectOptions = computed(() => {
   const result = {}
   props.fields.forEach((field) => {
     const getters = resolveGetters(field)
-    if (field.type === 'keyword') {
-      const minQueryLength = field.minQueryLength ?? 1
-      result[field.key] = buildOptions(props.rows, getters, keywordInput.value, minQueryLength)
-    }
-    else if (field.type === 'select') {
-      result[field.key] = buildOptions(props.rows, getters, '', 0, field.labelFormatter)
+    if (field.type === 'select') {
+      if (Array.isArray(field.options)) {
+        result[field.key] = field.options
+      }
+      else {
+        result[field.key] = buildOptions(props.rows, getters, '', 0, field.labelFormatter)
+      }
     }
   })
   return result

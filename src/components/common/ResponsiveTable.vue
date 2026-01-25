@@ -6,6 +6,7 @@
       :data="data"
       :loading="loading"
       :pagination="pagination || false"
+      :remote="remote"
       striped
     />
 
@@ -59,6 +60,10 @@ const props = defineProps({
   pagination: {
     type: Object,
     default: null,
+  },
+  remote: {
+    type: Boolean,
+    default: false,
   },
   rowKey: {
     type: [String, Function],

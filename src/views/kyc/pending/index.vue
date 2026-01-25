@@ -8,9 +8,10 @@
 
     <ResponsiveTable
       :columns="columns"
-      :data="rows"
+      :data="pagedRows"
       :loading="loading"
       :pagination="pagination"
+      remote
     >
       <template #card="{ row }">
         <div class="card-border rounded-8 auto-bg p-12">
@@ -57,7 +58,6 @@ import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
 import { CommonPage, ResponsiveTable } from '@/components'
-import { useListPage } from '@/composables/useListPage'
 import { formatDateTime } from '@/utils/date-format'
 
 // mock image urls for check-kyc-ui: https://picsum.photos/160/120?random=1, https://picsum.photos/160/120?random=2
@@ -67,7 +67,7 @@ const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
 
 const loading = ref(false)
-const rows = ref([])
+const allRows = ref([])
 const baseColumns = computed(() => [
   { title: t('kyc.labels.caseId'), key: 'id', width: 120, ellipsis: true },
   { title: t('kyc.labels.name'), key: 'fullName', width: 120, ellipsis: true },
@@ -123,7 +123,29 @@ const narrowColumnKeys = new Set(['id', 'fullName', 'idNumber', 'status', 'submi
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
-const { pagination } = useListPage({ fetchList })
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  onChange: (nextPage) => {
+    pagination.page = nextPage
+  },
+  onUpdatePageSize: (nextPageSize) => {
+    pagination.pageSize = nextPageSize
+    pagination.page = 1
+  },
+})
+
+const pendingRows = computed(() => allRows.value.filter(row => row.status === 'PENDING'))
+
+const pagedRows = computed(() => {
+  const start = (pagination.page - 1) * pagination.pageSize
+  return pendingRows.value.slice(start, start + pagination.pageSize)
+})
+
+watchEffect(() => {
+  pagination.itemCount = pendingRows.value.length
+})
 
 function statusLabel(status) {
   const key = `kyc.status.${status}`
@@ -146,13 +168,8 @@ function statusType(status) {
 async function fetchList() {
   try {
     loading.value = true
-    const { data } = await api.list({
-      status: 'PENDING',
-      page: pagination.page,
-      pageSize: pagination.pageSize,
-    })
-    rows.value = data?.items || []
-    pagination.itemCount = data?.total || 0
+    const { data } = await api.list()
+    allRows.value = data?.items || []
   }
   catch (error) {
     console.error(error)

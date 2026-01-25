@@ -6,17 +6,19 @@
       </NButton>
     </template>
 
-    <div class="grid mb-16 gap-12 sm:flex sm:flex-wrap sm:items-center">
-      <n-input v-model:value="filters.action" :placeholder="t('audit.list.actionPlaceholder')" class="w-full sm:w-180" />
-      <n-input v-model:value="filters.targetType" :placeholder="t('audit.list.targetTypePlaceholder')" class="w-full sm:w-180" />
-      <n-input v-model:value="filters.keyword" :placeholder="t('audit.list.keywordPlaceholder')" class="w-full sm:w-220" />
-    </div>
+    <AutoListFilters
+      :rows="allRows"
+      :filters="filters"
+      :fields="filterFields"
+      @update:filters="handleFiltersUpdate"
+    />
 
     <ResponsiveTable
       :columns="columns"
-      :data="rows"
+      :data="pagedRows"
       :loading="loading"
       :pagination="pagination"
+      remote
     >
       <template #card="{ row }">
         <div class="card-border rounded-8 auto-bg p-12">
@@ -53,20 +55,34 @@ import { useWindowSize } from '@vueuse/core'
 import { NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/audit'
-import { CommonPage, ResponsiveTable } from '@/components'
-import { useListPage } from '@/composables/useListPage'
+import { AutoListFilters, CommonPage, ResponsiveTable } from '@/components'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const loading = ref(false)
-const rows = ref([])
+const allRows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
 const filters = reactive({
-  action: '',
-  targetType: '',
   keyword: '',
+  timeRange: null,
 })
+const filterFields = computed(() => [
+  {
+    key: 'keyword',
+    type: 'keyword',
+    keys: ['action', 'actorName', 'targetType', 'targetId'],
+    placeholder: t('audit.list.keywordPlaceholder'),
+    class: 'w-full sm:w-360',
+  },
+  {
+    key: 'timeRange',
+    type: 'daterange',
+    pickerType: 'datetimerange',
+    placeholder: t('audit.labels.time'),
+    class: 'w-full sm:w-260',
+  },
+])
 
 const baseColumns = computed(() => [
   { title: t('audit.labels.action'), key: 'action', width: 140, ellipsis: true },
@@ -91,24 +107,78 @@ const narrowColumnKeys = new Set(['action', 'actorName', 'targetType', 'createdA
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
-const { pagination } = useListPage({ filters, fetchList })
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  onChange: (nextPage) => {
+    pagination.page = nextPage
+  },
+  onUpdatePageSize: (nextPageSize) => {
+    pagination.pageSize = nextPageSize
+    pagination.page = 1
+  },
+})
 
-function buildQuery() {
-  return {
-    action: filters.action || undefined,
-    targetType: filters.targetType || undefined,
-    keyword: filters.keyword || undefined,
-    page: pagination.page,
-    pageSize: pagination.pageSize,
-  }
+function normalize(value) {
+  if (!value)
+    return ''
+  return String(value).trim().toLowerCase()
 }
+
+const filteredRows = computed(() => {
+  const keywordNeedle = normalize(filters.keyword)
+  const range = filters.timeRange
+  const hasRange = Array.isArray(range) && range.length === 2
+  const rangeStart = hasRange ? Number(range[0]) : null
+  const rangeEnd = hasRange ? Number(range[1]) : null
+
+  return allRows.value.filter((row) => {
+    if (keywordNeedle) {
+      const matches = [
+        normalize(row.action),
+        normalize(row.actorName),
+        normalize(row.targetType),
+        normalize(row.targetId),
+      ].some(value => value.includes(keywordNeedle))
+      if (!matches)
+        return false
+    }
+    if (hasRange) {
+      const rowTime = Number(new Date(row.createdAt))
+      if (!Number.isFinite(rowTime))
+        return false
+      if (Number.isFinite(rangeStart) && rowTime < rangeStart)
+        return false
+      if (Number.isFinite(rangeEnd) && rowTime > rangeEnd)
+        return false
+    }
+    return true
+  })
+})
+
+const pagedRows = computed(() => {
+  const start = (pagination.page - 1) * pagination.pageSize
+  return filteredRows.value.slice(start, start + pagination.pageSize)
+})
+
+watch(
+  filters,
+  () => {
+    pagination.page = 1
+  },
+  { deep: true },
+)
+
+watchEffect(() => {
+  pagination.itemCount = filteredRows.value.length
+})
 
 async function fetchList() {
   try {
     loading.value = true
-    const { data } = await api.list(buildQuery())
-    rows.value = data?.items || []
-    pagination.itemCount = data?.total || 0
+    const { data } = await api.list()
+    allRows.value = data?.items || []
   }
   catch (error) {
     console.error(error)
@@ -119,6 +189,10 @@ async function fetchList() {
 
 function handleRefresh() {
   fetchList()
+}
+
+function handleFiltersUpdate(nextFilters) {
+  Object.assign(filters, nextFilters)
 }
 
 fetchList()
