@@ -44,3 +44,7 @@ export async function updateRolePermissions(c: AppContext) {
     updated: true,
   })
 }
+
+export async function getPermissionTree(c: AppContext) {
+  return ok(c, [])
+}
