@@ -22,13 +22,6 @@ test('JWT_SECRET is required in production', async () => {
   delete process.env.JWT_SECRET
   delete process.env.CI
 
-  let error
-  try {
-    await import(`../src/config/env?test=${Date.now()}`)
-  }
-  catch (err) {
-    error = err
-  }
-
-  expect(error).toBeTruthy()
+  const { resolveEnv } = await import(`../src/config/env?test=${Date.now()}`)
+  expect(() => resolveEnv()).toThrow()
 })

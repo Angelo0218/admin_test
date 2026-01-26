@@ -1,12 +1,10 @@
-function resolveEnv() {
+export function resolveEnv() {
   const envSource = globalThis.process?.env ?? globalThis.Bun?.env ?? {}
   const nodeEnv = envSource.NODE_ENV ?? 'development'
-  const isTest = nodeEnv === 'test'
-  const isCi = envSource.CI === 'true' || envSource.CI === '1'
-  const isProduction = nodeEnv === 'production' || (!isTest && isCi)
+  const isProduction = nodeEnv === 'production'
 
   if (isProduction && !envSource.JWT_SECRET) {
-    throw new Error('JWT_SECRET is required in production/CI')
+    throw new Error('JWT_SECRET is required in production')
   }
 
   return {
@@ -24,8 +22,6 @@ function resolveEnv() {
 }
 
 type Env = ReturnType<typeof resolveEnv>
-
-void resolveEnv()
 
 export const env: Env = new Proxy({} as Env, {
   get(_target, prop: keyof Env) {
