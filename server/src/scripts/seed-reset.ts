@@ -17,10 +17,21 @@ export function resolveDatabasePath(databaseUrl: string | undefined, baseDir: st
     return null
   }
   const normalized = trimmed.replace(/^\/+/, '')
-  const candidate = path.isAbsolute(normalized)
-    ? normalized
+  const isWindowsBase = path.win32.isAbsolute(baseDir)
+  const usesPosixSeparators = isWindowsBase && baseDir.includes('/')
+  const normalizeWindowsSeparators = (value: string) =>
+    usesPosixSeparators ? value.replace(/\\/g, '/') : value
+  const isAbsolute = path.isAbsolute(normalized) || path.win32.isAbsolute(normalized)
+  if (isAbsolute) {
+    const absolutePath = path.win32.isAbsolute(normalized)
+      ? path.win32.normalize(normalized)
+      : path.normalize(normalized)
+    return normalizeWindowsSeparators(absolutePath)
+  }
+  const resolved = isWindowsBase
+    ? path.win32.resolve(baseDir, normalized)
     : path.resolve(baseDir, normalized)
-  return candidate
+  return normalizeWindowsSeparators(resolved)
 }
 
 function getPrismaDir() {

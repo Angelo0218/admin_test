@@ -1,7 +1,9 @@
 function resolveEnv() {
   const envSource = globalThis.process?.env ?? globalThis.Bun?.env ?? {}
   const nodeEnv = envSource.NODE_ENV ?? 'development'
-  const isProduction = nodeEnv === 'production' || envSource.CI === 'true' || envSource.CI === '1'
+  const isTest = nodeEnv === 'test'
+  const isCi = envSource.CI === 'true' || envSource.CI === '1'
+  const isProduction = nodeEnv === 'production' || (!isTest && isCi)
 
   if (isProduction && !envSource.JWT_SECRET) {
     throw new Error('JWT_SECRET is required in production/CI')
