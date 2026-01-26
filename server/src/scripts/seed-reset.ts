@@ -12,7 +12,11 @@ export function resolveDatabasePath(databaseUrl: string | undefined, baseDir: st
   if (!raw) {
     return null
   }
-  const normalized = raw.replace(/^\/+/, '')
+  const trimmed = raw.split('?')[0]?.split('#')[0] ?? ''
+  if (!trimmed) {
+    return null
+  }
+  const normalized = trimmed.replace(/^\/+/, '')
   const candidate = path.isAbsolute(normalized)
     ? normalized
     : path.resolve(baseDir, normalized)

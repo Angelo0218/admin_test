@@ -25,7 +25,7 @@ export default defineConfig({
         DISABLE_RATE_LIMIT: '1',
         JWT_SECRET: 'test-secret',
         CORS_ORIGIN: `http://localhost:${FRONTEND_PORT}`,
-        DATABASE_URL: 'file:./test.db',
+        DATABASE_URL: 'file:./test.db?connection_limit=1',
         RESET_DB: '1',
       },
       timeout: 120_000,

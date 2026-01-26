@@ -16,5 +16,5 @@ export async function ensureSqlitePragmas() {
     return
   }
   await prisma.$queryRawUnsafe('PRAGMA journal_mode = WAL')
-  await prisma.$queryRawUnsafe('PRAGMA busy_timeout = 5000')
+  await prisma.$queryRawUnsafe('PRAGMA busy_timeout = 15000')
 }

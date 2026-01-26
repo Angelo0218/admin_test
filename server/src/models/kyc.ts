@@ -195,6 +195,9 @@ export async function reviewApplication({ id, action, comment, reviewerId }: Kyc
       status: application.status,
       reviewedAt: application.updatedAt.toISOString(),
     }
+  }, {
+    maxWait: 20_000,
+    timeout: 20_000,
   })
 
   if (!result || 'error' in result) {
