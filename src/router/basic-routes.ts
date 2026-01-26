@@ -40,6 +40,7 @@ export const basicRoutes = [
     meta: {
       titleKey: 'menu.KycPending',
       layout: 'normal',
+      icon: 'i-fe:clock',
       keepAlive: true,
       order: 1,
       show: true,
@@ -54,6 +55,7 @@ export const basicRoutes = [
     meta: {
       titleKey: 'menu.KycAppeals',
       layout: 'normal',
+      icon: 'i-fe:alert-triangle',
       keepAlive: true,
       order: 2,
       show: true,
@@ -82,6 +84,7 @@ export const basicRoutes = [
     meta: {
       titleKey: 'menu.TicketList',
       layout: 'normal',
+      icon: 'i-fe:message-square',
       keepAlive: true,
       order: 1,
       show: true,
