@@ -39,7 +39,7 @@ export async function seedReset() {
   const prismaDir = getPrismaDir()
   const serverDir = path.resolve(prismaDir, '..')
   const databaseUrl = process.env.DATABASE_URL || ''
-  const databasePath = resolveDatabasePath(databaseUrl, serverDir)
+  const databasePath = resolveDatabasePath(databaseUrl, prismaDir)
   if (!databasePath) {
     throw new Error('DATABASE_URL must be a file: url')
   }

@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { env } from './config/env'
+import { ensureSqlitePragmas } from './db/client'
 import { errorHandler } from './middlewares/error'
 import { requestIdMiddleware } from './middlewares/request-id'
 import { securityHeaders } from './middlewares/security-headers'
@@ -51,6 +52,7 @@ async function start() {
   else {
     await seedDefaults()
   }
+  await ensureSqlitePragmas()
   const bun = globalThis.Bun
   if (!bun) {
     throw new Error('Bun runtime is required to start the server.')

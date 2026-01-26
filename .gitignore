@@ -7,4 +7,6 @@ server/dev.db
 .worktrees
 server/prisma/dev.db
 server/prisma/test.db
+server/prisma/test.db-shm
+server/prisma/test.db-wal
 test-results
