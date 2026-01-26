@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client'
-import { env } from '../config/env'
+
+function resolveDatabaseUrl() {
+  const envSource = {
+    ...(globalThis.Bun?.env ?? {}),
+    ...(globalThis.process?.env ?? {}),
+  }
+  return envSource.DATABASE_URL ?? 'file:./dev.db'
+}
+
+const databaseUrl = resolveDatabaseUrl()
 
 export const prisma = new PrismaClient({
-  datasourceUrl: env.databaseUrl,
+  datasourceUrl: databaseUrl,
 })
 
 let sqliteConfigured = false
@@ -12,7 +21,7 @@ export async function ensureSqlitePragmas() {
     return
   }
   sqliteConfigured = true
-  if (!env.databaseUrl.startsWith('file:')) {
+  if (!databaseUrl.startsWith('file:')) {
     return
   }
   await prisma.$queryRawUnsafe('PRAGMA journal_mode = WAL')
