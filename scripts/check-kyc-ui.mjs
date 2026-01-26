@@ -3,10 +3,12 @@ import path from 'node:path'
 
 const root = process.cwd()
 const routesPath = path.join(root, 'src/router/basic-routes.ts')
+const routeGroupsPath = path.join(root, 'src/router/route-groups.ts')
 const pendingPath = path.join(root, 'src/views/kyc/pending/index.vue')
 
-const [routesContent, pendingContent] = await Promise.all([
+const [routesContent, groupsContent, pendingContent] = await Promise.all([
   readFile(routesPath, 'utf8'),
+  readFile(routeGroupsPath, 'utf8'),
   readFile(pendingPath, 'utf8'),
 ])
 
@@ -30,6 +32,7 @@ if (!hasRouteIcon(routesContent, 'Kyc'))
   missingIcons.push('Kyc')
 
 const hasTicketsGroupIcon = /group:\s*\{[\s\S]*?code:\s*'Tickets'[\s\S]*?icon:/.test(routesContent)
+  || /Tickets:\s*\{[\s\S]*?code:\s*'Tickets'[\s\S]*?icon:/.test(groupsContent)
 if (!hasTicketsGroupIcon)
   missingIcons.push('Tickets')
 
