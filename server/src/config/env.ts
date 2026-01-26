@@ -1,8 +1,5 @@
 function resolveEnv() {
-  const envSource = {
-    ...(globalThis.Bun?.env ?? {}),
-    ...(globalThis.process?.env ?? {}),
-  }
+  const envSource = globalThis.process?.env ?? globalThis.Bun?.env ?? {}
   const nodeEnv = envSource.NODE_ENV ?? 'development'
   const isProduction = nodeEnv === 'production' || envSource.CI === 'true' || envSource.CI === '1'
 
