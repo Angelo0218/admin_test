@@ -5,8 +5,6 @@ import { hashPassword } from '../utils/password'
 
 export interface UserListParams {
   keyword?: string
-  page: number
-  pageSize: number
 }
 
 export interface UserCreateParams {
@@ -107,24 +105,17 @@ export function canLoginWithStatus(status?: string) {
   return status !== 'DELETED'
 }
 
-export async function listUsers({ keyword, page, pageSize }: UserListParams) {
+export async function listUsers({ keyword }: UserListParams = {}) {
   const where = buildUserWhere({ keyword, staffOnly: true })
-
-  const skip = (page - 1) * pageSize
-  const [items, total] = await prisma.$transaction([
-    prisma.user.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        roles: {
-          include: { role: true },
-        },
+  const items = await prisma.user.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      roles: {
+        include: { role: true },
       },
-    }),
-    prisma.user.count({ where }),
-  ])
+    },
+  })
 
   return {
     items: items.map(item => ({
@@ -135,9 +126,6 @@ export async function listUsers({ keyword, page, pageSize }: UserListParams) {
       roles: mapRoles(item),
       createdAt: item.createdAt.toISOString(),
     })),
-    page,
-    pageSize,
-    total,
   }
 }
 

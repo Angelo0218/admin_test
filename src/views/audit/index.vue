@@ -56,6 +56,8 @@ import { NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/audit'
 import { AutoListFilters, CommonPage, ResponsiveTable } from '@/components'
+import { useColumnLabels } from '@/composables/useColumnLabels'
+import { useLocalListFilters } from '@/composables/useLocalListFilters'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
@@ -97,12 +99,7 @@ const baseColumns = computed(() => [
   },
 ])
 
-const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
-const fieldLabels = computed(() => ({
-  actorName: columnLabelMap.value.actorName,
-  targetType: columnLabelMap.value.targetType,
-  targetId: columnLabelMap.value.targetId,
-}))
+const { fieldLabels } = useColumnLabels(baseColumns, ['actorName', 'targetType', 'targetId'])
 const narrowColumnKeys = new Set(['action', 'actorName', 'targetType', 'createdAt'])
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
@@ -120,39 +117,36 @@ const pagination = reactive({
   },
 })
 
-function normalize(value) {
-  if (!value)
-    return ''
-  return String(value).trim().toLowerCase()
-}
+const keywordFilteredRows = useLocalListFilters({
+  rows: allRows,
+  filters,
+  rules: [
+    {
+      key: 'keyword',
+      type: 'includes',
+      getters: [row => row.action, row => row.actorName, row => row.targetType, row => row.targetId],
+    },
+  ],
+})
 
 const filteredRows = computed(() => {
-  const keywordNeedle = normalize(filters.keyword)
   const range = filters.timeRange
   const hasRange = Array.isArray(range) && range.length === 2
   const rangeStart = hasRange ? Number(range[0]) : null
   const rangeEnd = hasRange ? Number(range[1]) : null
 
-  return allRows.value.filter((row) => {
-    if (keywordNeedle) {
-      const matches = [
-        normalize(row.action),
-        normalize(row.actorName),
-        normalize(row.targetType),
-        normalize(row.targetId),
-      ].some(value => value.includes(keywordNeedle))
-      if (!matches)
-        return false
-    }
-    if (hasRange) {
-      const rowTime = Number(new Date(row.createdAt))
-      if (!Number.isFinite(rowTime))
-        return false
-      if (Number.isFinite(rangeStart) && rowTime < rangeStart)
-        return false
-      if (Number.isFinite(rangeEnd) && rowTime > rangeEnd)
-        return false
-    }
+  if (!hasRange) {
+    return keywordFilteredRows.value
+  }
+
+  return keywordFilteredRows.value.filter((row) => {
+    const rowTime = Number(new Date(row.createdAt))
+    if (!Number.isFinite(rowTime))
+      return false
+    if (Number.isFinite(rangeStart) && rowTime < rangeStart)
+      return false
+    if (Number.isFinite(rangeEnd) && rowTime > rangeEnd)
+      return false
     return true
   })
 })

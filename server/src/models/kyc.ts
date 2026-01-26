@@ -52,9 +52,6 @@ export async function listApplications() {
       applicantName: item.user?.displayName || '',
       submittedAt: item.submittedAt.toISOString(),
     })),
-    page: 1,
-    pageSize: items.length,
-    total: items.length,
   }
 }
 
@@ -170,25 +167,40 @@ export async function reviewApplication({ id, action, comment, reviewerId }: Kyc
   if (!isValidKycTransition(existing.status, action)) {
     return { error: 'INVALID_STATUS' }
   }
-  const application = await prisma.kycApplication.update({
-    where: { id },
-    data: {
-      status: action,
-      reviews: {
-        create: {
-          action,
-          reviewerId,
-          comment: comment || undefined,
-        },
+  const result = await prisma.$transaction(async (tx) => {
+    const updateResult = await tx.kycApplication.updateMany({
+      where: { id, status: existing.status },
+      data: { status: action },
+    })
+    if (!updateResult.count) {
+      return { error: 'INVALID_STATUS' as const }
+    }
+    await tx.kycReview.create({
+      data: {
+        applicationId: id,
+        action,
+        reviewerId,
+        comment: comment || undefined,
       },
-    },
+    })
+    const application = await tx.kycApplication.findUnique({
+      where: { id },
+      select: { id: true, status: true, updatedAt: true },
+    })
+    if (!application) {
+      return null
+    }
+    return {
+      id: application.id,
+      status: application.status,
+      reviewedAt: application.updatedAt.toISOString(),
+    }
   })
 
-  return {
-    id: application.id,
-    status: application.status,
-    reviewedAt: application.updatedAt.toISOString(),
+  if (!result || 'error' in result) {
+    return result
   }
+  return result
 }
 
 export async function listAppeals() {
@@ -216,9 +228,6 @@ export async function listAppeals() {
       handledAt: item.handledAt ? item.handledAt.toISOString() : undefined,
       createdAt: item.createdAt.toISOString(),
     })),
-    page: 1,
-    pageSize: items.length,
-    total: items.length,
   }
 }
 
@@ -273,7 +282,7 @@ export async function resolveAppeal({ id, status, decisionComment, handledById }
   }
 }
 
-// KYC 狀態轉移規則：後端為唯一準則，前端僅做提示與避免 400.
+// Allowed status transitions; invalid transitions return 400.
 const KYC_TRANSITIONS: Record<string, string[]> = {
   PENDING: ['NEED_MORE', 'PASSED', 'REJECTED'],
   NEED_MORE: ['PASSED', 'REJECTED'],

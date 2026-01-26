@@ -20,15 +20,15 @@ export async function ensureKycApplication(
 ) {
   const listRes = await request.get(`${apiBase}/kyc/applications`, {
     headers: authHeaders(token),
-    params: { status, page: 1, pageSize: 10 },
   })
   if (!listRes.ok()) {
     throw new Error(`kyc list failed: ${listRes.status()}`)
   }
   const listBody = await listRes.json()
-  const first = listBody.data?.items?.[0]
-  if (first?.id) {
-    return first
+  const items = listBody.data?.items || []
+  const match = items.find(item => item.status === status)
+  if (match?.id) {
+    return match
   }
 
   const userRes = await request.get(`${apiBase}/user/detail`, {

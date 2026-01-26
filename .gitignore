@@ -6,3 +6,5 @@ server/.env
 server/dev.db
 .worktrees
 server/prisma/dev.db
+server/prisma/test.db
+test-results

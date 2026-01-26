@@ -69,6 +69,11 @@ async function handleContextMenu(e, tagItem) {
 </script>
 
 <style scoped>
+#top-tab {
+  padding-left: 3px;
+  padding-top: 3px;
+}
+
 :deep(.n-tabs) {
   .n-tabs-tab {
     padding-left: 16px;

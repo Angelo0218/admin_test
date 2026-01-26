@@ -66,7 +66,7 @@ const summary = computed(() => ({
   createdAt: formatTime(detail.createdAt),
 }))
 
-// 狀態轉移僅做前端提示，後端仍保有嚴格檢查。
+// Use status options provided by backend to avoid invalid transitions.
 const statusOptions = computed(() => {
   if (!detail.status)
     return []

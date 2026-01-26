@@ -18,6 +18,7 @@ function resolveEnv() {
     corsOrigin: envSource.CORS_ORIGIN ?? '',
     databaseUrl: envSource.DATABASE_URL ?? 'file:./dev.db',
     enableSeed: envSource.ENABLE_SEED === 'true' || envSource.ENABLE_SEED === '1',
+    resetDatabase: envSource.RESET_DB === 'true' || envSource.RESET_DB === '1',
     debugAuth: envSource.DEBUG_AUTH === '1',
     isProduction,
   }

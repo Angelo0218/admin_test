@@ -35,7 +35,6 @@ test('tickets list should not emit i18n missing key warnings', async ({ page, re
                   createdAt: '',
                 },
               ],
-              total: 1,
             },
           }),
         })

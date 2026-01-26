@@ -1,13 +1,4 @@
-import type { Prisma } from '@prisma/client'
 import { prisma } from '../db/client'
-
-export interface AuditListParams {
-  action?: string
-  targetType?: string
-  keyword?: string
-  page: number
-  pageSize: number
-}
 
 export interface AuditCreateParams {
   actorId: string
@@ -17,45 +8,13 @@ export interface AuditCreateParams {
   meta?: unknown
 }
 
-export function buildAuditWhere({ action, targetType, keyword }: Pick<AuditListParams, 'action' | 'targetType' | 'keyword'> = {}) {
-  const where: Prisma.AuditLogWhereInput = {}
-
-  if (action) {
-    where.action = action
-  }
-  if (targetType) {
-    where.targetType = targetType
-  }
-  if (keyword) {
-    where.OR = [
-      { targetId: { contains: keyword } },
-      { action: { contains: keyword } },
-      { actor: { displayName: { contains: keyword } } },
-    ]
-  }
-
-  return where
-}
-
-export async function listAuditLogs(params: Partial<AuditListParams> = {}) {
-  const { action, targetType, keyword } = params
-  const page = Number.isFinite(params.page) && Number(params.page) > 0 ? Number(params.page) : 1
-  const pageSize = Number.isFinite(params.pageSize) && Number(params.pageSize) > 0 ? Number(params.pageSize) : 20
-  const where = buildAuditWhere({ action, targetType, keyword })
-
-  const skip = (page - 1) * pageSize
-  const [items, total] = await prisma.$transaction([
-    prisma.auditLog.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        actor: { select: { displayName: true } },
-      },
-    }),
-    prisma.auditLog.count({ where }),
-  ])
+export async function listAuditLogs() {
+  const items = await prisma.auditLog.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      actor: { select: { displayName: true } },
+    },
+  })
 
   return {
     items: items.map(item => ({
@@ -67,9 +26,6 @@ export async function listAuditLogs(params: Partial<AuditListParams> = {}) {
       meta: item.meta ? safeParseMeta(item.meta) : undefined,
       createdAt: item.createdAt.toISOString(),
     })),
-    page,
-    pageSize,
-    total,
   }
 }
 

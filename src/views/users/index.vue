@@ -18,7 +18,7 @@
 
     <ResponsiveTable
       :columns="columns"
-      :data="rows"
+      :data="pagedRows"
       :loading="loading"
       :pagination="pagination"
     >
@@ -59,13 +59,14 @@ import UserDeleteForm from '@/components/users/UserDeleteForm.vue'
 import UserListCard from '@/components/users/UserListCard.vue'
 import UserListFilters from '@/components/users/UserListFilters.vue'
 import { useModal } from '@/composables'
-import { useListPage } from '@/composables/useListPage'
+import { useColumnLabels } from '@/composables/useColumnLabels'
+import { useLocalListFilters } from '@/composables/useLocalListFilters'
 import { useStaffRoleOptions } from '@/composables/useStaffRoleOptions'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
 const loading = ref(false)
-const rows = ref([])
+const allRows = ref([])
 const { width } = useWindowSize()
 const isNarrow = computed(() => width.value < 1400)
 const filters = reactive({
@@ -86,7 +87,18 @@ const deleteState = reactive({
   id: '',
   adminPassword: '',
 })
-const { pagination } = useListPage({ filters, fetchList })
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  onChange: (nextPage) => {
+    pagination.page = nextPage
+  },
+  onUpdatePageSize: (nextPageSize) => {
+    pagination.pageSize = nextPageSize
+    pagination.page = 1
+  },
+})
 
 const baseColumns = computed(() => [
   { title: t('users.labels.id'), key: 'id', width: 160, ellipsis: true },
@@ -130,16 +142,28 @@ const baseColumns = computed(() => [
   },
 ])
 
-const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
-const fieldLabels = computed(() => ({
-  displayName: columnLabelMap.value.displayName,
-  roles: columnLabelMap.value.roles,
-  createdAt: columnLabelMap.value.createdAt,
-}))
+const { fieldLabels } = useColumnLabels(baseColumns, ['displayName', 'roles', 'createdAt'])
 const narrowColumnKeys = new Set(['username', 'displayName', 'roles', 'actions'])
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
   : baseColumns.value))
+
+const filteredRows = useLocalListFilters({
+  rows: allRows,
+  filters,
+  rules: [
+    {
+      key: 'keyword',
+      type: 'includes',
+      getters: [row => row.username, row => row.displayName],
+    },
+  ],
+})
+
+const pagedRows = computed(() => {
+  const start = (pagination.page - 1) * pagination.pageSize
+  return filteredRows.value.slice(start, start + pagination.pageSize)
+})
 
 function roleNames(roles) {
   if (!roles?.length)
@@ -152,20 +176,11 @@ function roleNames(roles) {
   return names.join(', ')
 }
 
-function buildQuery() {
-  return {
-    keyword: filters.keyword || undefined,
-    page: pagination.page,
-    pageSize: pagination.pageSize,
-  }
-}
-
 async function fetchList() {
   try {
     loading.value = true
-    const { data } = await api.list(buildQuery())
-    rows.value = data?.items || []
-    pagination.itemCount = data?.total || 0
+    const { data } = await api.list()
+    allRows.value = data?.items || []
   }
   catch (error) {
     console.error(error)
@@ -258,6 +273,18 @@ function handleCreateFieldUpdate({ key, value }) {
 function handleDeleteFieldUpdate({ key, value }) {
   deleteState[key] = value
 }
+
+watch(
+  filters,
+  () => {
+    pagination.page = 1
+  },
+  { deep: true },
+)
+
+watchEffect(() => {
+  pagination.itemCount = filteredRows.value.length
+})
 
 fetchList()
 </script>

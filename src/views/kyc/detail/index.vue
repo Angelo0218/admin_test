@@ -193,7 +193,7 @@ function appealStatusLabel(status) {
   return label === key ? status || '-' : label
 }
 
-// 狀態轉移僅供前端提示，實際規則由後端判定。
+// Only allow actions returned by backend for the current application.
 function isReviewActionAllowed(action) {
   return detail.availableActions.includes(action)
 }

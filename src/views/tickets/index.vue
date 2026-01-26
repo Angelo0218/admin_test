@@ -44,6 +44,8 @@ import { useI18n } from 'vue-i18n'
 import api from '@/api/ticket'
 import { AutoListFilters, CommonPage, ResponsiveTable } from '@/components'
 import TicketListCard from '@/components/tickets/TicketListCard.vue'
+import { useColumnLabels } from '@/composables/useColumnLabels'
+import { useLocalListFilters } from '@/composables/useLocalListFilters'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
@@ -154,13 +156,7 @@ const baseColumns = computed(() => [
   },
 ])
 
-const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
-const fieldLabels = computed(() => ({
-  subject: columnLabelMap.value.subject,
-  category: columnLabelMap.value.category,
-  requesterName: columnLabelMap.value.requesterName,
-  createdAt: columnLabelMap.value.createdAt,
-}))
+const { fieldLabels } = useColumnLabels(baseColumns, ['subject', 'category', 'requesterName', 'createdAt'])
 const narrowColumnKeys = new Set(['id', 'subject', 'status', 'requesterName', 'createdAt', 'actions'])
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
@@ -192,30 +188,18 @@ function statusType(status) {
   return 'default'
 }
 
-function normalize(value) {
-  if (!value)
-    return ''
-  return String(value).trim().toLowerCase()
-}
-
-const filteredRows = computed(() => {
-  const statusNeedle = filters.status
-  const categoryNeedle = filters.category
-  const keywordNeedle = normalize(filters.keyword)
-
-  return allRows.value.filter((row) => {
-    if (statusNeedle && row.status !== statusNeedle)
-      return false
-    if (categoryNeedle && row.category !== categoryNeedle)
-      return false
-    if (keywordNeedle) {
-      const subject = normalize(row.subject)
-      const requesterName = normalize(row.requesterName)
-      if (!subject.includes(keywordNeedle) && !requesterName.includes(keywordNeedle))
-        return false
-    }
-    return true
-  })
+const filteredRows = useLocalListFilters({
+  rows: allRows,
+  filters,
+  rules: [
+    { key: 'status', type: 'equals', getter: row => row.status },
+    { key: 'category', type: 'equals', getter: row => row.category },
+    {
+      key: 'keyword',
+      type: 'includes',
+      getters: [row => row.subject, row => row.requesterName],
+    },
+  ],
 })
 
 const pagedRows = computed(() => {

@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { seedDefaults, seedDemoData } from '../models/seed'
 
-export function resolveDatabasePath(databaseUrl: string | undefined, prismaDir: string) {
+export function resolveDatabasePath(databaseUrl: string | undefined, baseDir: string) {
   if (!databaseUrl || !databaseUrl.startsWith('file:')) {
     return null
   }
@@ -15,7 +15,7 @@ export function resolveDatabasePath(databaseUrl: string | undefined, prismaDir: 
   const normalized = raw.replace(/^\/+/, '')
   const candidate = path.isAbsolute(normalized)
     ? normalized
-    : path.resolve(prismaDir, normalized)
+    : path.resolve(baseDir, normalized)
   return candidate
 }
 
@@ -39,7 +39,7 @@ export async function seedReset() {
   const prismaDir = getPrismaDir()
   const serverDir = path.resolve(prismaDir, '..')
   const databaseUrl = process.env.DATABASE_URL || ''
-  const databasePath = resolveDatabasePath(databaseUrl, prismaDir)
+  const databasePath = resolveDatabasePath(databaseUrl, serverDir)
   if (!databasePath) {
     throw new Error('DATABASE_URL must be a file: url')
   }

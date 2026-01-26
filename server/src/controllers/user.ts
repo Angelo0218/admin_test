@@ -17,8 +17,6 @@ function ensureAdmin(role: string) {
 
 interface UserListQuery {
   keyword?: string
-  page: number
-  pageSize: number
 }
 
 interface UserCreatePayload {

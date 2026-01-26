@@ -58,6 +58,7 @@ import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
 import { CommonPage, ResponsiveTable } from '@/components'
+import { useColumnLabels } from '@/composables/useColumnLabels'
 import { formatDateTime } from '@/utils/date-format'
 
 // mock image urls for check-kyc-ui: https://picsum.photos/160/120?random=1, https://picsum.photos/160/120?random=2
@@ -112,13 +113,7 @@ const baseColumns = computed(() => [
   },
 ])
 
-const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
-const fieldLabels = computed(() => ({
-  fullName: columnLabelMap.value.fullName,
-  idNumber: columnLabelMap.value.idNumber,
-  documentType: columnLabelMap.value.documentType,
-  submittedAt: columnLabelMap.value.submittedAt,
-}))
+const { fieldLabels } = useColumnLabels(baseColumns, ['fullName', 'idNumber', 'documentType', 'submittedAt'])
 const narrowColumnKeys = new Set(['id', 'fullName', 'idNumber', 'status', 'submittedAt', 'actions'])
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))

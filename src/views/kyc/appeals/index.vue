@@ -69,6 +69,8 @@ import { NButton, NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/kyc'
 import { AutoListFilters, CommonPage, ResponsiveTable } from '@/components'
+import { useColumnLabels } from '@/composables/useColumnLabels'
+import { useLocalListFilters } from '@/composables/useLocalListFilters'
 import { formatDateTime } from '@/utils/date-format'
 
 const { t } = useI18n()
@@ -146,13 +148,7 @@ const baseColumns = computed(() => [
   },
 ])
 
-const columnLabelMap = computed(() => Object.fromEntries(baseColumns.value.map(column => [column.key, column.title])))
-const fieldLabels = computed(() => ({
-  applicantName: columnLabelMap.value.applicantName,
-  idNumber: columnLabelMap.value.idNumber,
-  reason: columnLabelMap.value.reason,
-  handledAt: columnLabelMap.value.handledAt,
-}))
+const { fieldLabels } = useColumnLabels(baseColumns, ['applicantName', 'idNumber', 'reason', 'handledAt'])
 const narrowColumnKeys = new Set(['applicationId', 'applicantName', 'status', 'reason', 'handledAt', 'actions'])
 const columns = computed(() => (isNarrow.value
   ? baseColumns.value.filter(column => narrowColumnKeys.has(column.key))
@@ -180,31 +176,17 @@ function statusType(status) {
   return status === 'PENDING' ? 'warning' : status === 'APPROVED' ? 'success' : 'error'
 }
 
-function normalize(value) {
-  if (!value)
-    return ''
-  return String(value).trim().toLowerCase()
-}
-
-const filteredRows = computed(() => {
-  const statusNeedle = filters.status
-  const keywordNeedle = normalize(filters.keyword)
-
-  return allRows.value.filter((row) => {
-    if (statusNeedle && row.status !== statusNeedle)
-      return false
-    if (keywordNeedle) {
-      const applicantName = normalize(row.applicantName)
-      const idNumber = normalize(row.idNumber)
-      const reason = normalize(row.reason)
-      if (!applicantName.includes(keywordNeedle)
-        && !idNumber.includes(keywordNeedle)
-        && !reason.includes(keywordNeedle)) {
-        return false
-      }
-    }
-    return true
-  })
+const filteredRows = useLocalListFilters({
+  rows: allRows,
+  filters,
+  rules: [
+    { key: 'status', type: 'equals', getter: row => row.status },
+    {
+      key: 'keyword',
+      type: 'includes',
+      getters: [row => row.applicantName, row => row.idNumber, row => row.reason],
+    },
+  ],
 })
 
 const pagedRows = computed(() => {

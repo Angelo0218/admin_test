@@ -55,9 +55,6 @@ export async function listTickets() {
       requesterName: item.requester?.displayName || '',
       createdAt: item.createdAt.toISOString(),
     })),
-    page: 1,
-    pageSize: items.length,
-    total: items.length,
   }
 }
 
@@ -139,10 +136,19 @@ export async function updateTicketStatus({ ticketId, status }: TicketStatusParam
   if (!isValidTicketTransition(existing.status, status)) {
     return { error: 'INVALID_STATUS' }
   }
-  const ticket = await prisma.ticket.update({
-    where: { id: ticketId },
-    data: { status },
-  })
+  const [updateResult, ticket] = await prisma.$transaction([
+    prisma.ticket.updateMany({
+      where: { id: ticketId, status: existing.status },
+      data: { status },
+    }),
+    prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { id: true, status: true, updatedAt: true },
+    }),
+  ])
+  if (!updateResult.count || !ticket) {
+    return { error: 'INVALID_STATUS' }
+  }
   return {
     id: ticket.id,
     status: ticket.status,
@@ -173,7 +179,7 @@ export async function updateTicketMeta({ ticketId, tags, internalNote }: TicketM
   }
 }
 
-// 工單狀態轉移規則：後端為唯一準則，前端僅做提示與避免 400.
+// Allowed status transitions; invalid transitions return 400.
 const TICKET_TRANSITIONS: Record<string, string[]> = {
   WAITING: ['IN_PROGRESS'],
   IN_PROGRESS: ['CLOSED'],

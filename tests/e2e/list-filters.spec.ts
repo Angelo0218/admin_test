@@ -40,7 +40,7 @@ test('filters tickets list on the client without extra requests', async ({ page 
         contentType: 'application/json',
         body: JSON.stringify({
           code: 0,
-          data: { items: [], total: 0 },
+          data: { items: [] },
         }),
       })
     }
