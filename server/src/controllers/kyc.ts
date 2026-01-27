@@ -11,13 +11,10 @@ import {
   reviewApplication,
 } from '../models/kyc'
 import { fail, ok } from '../utils/response'
+import { isAdmin } from '../utils/role'
 
 function ensureKycRole(role: string) {
   return role === 'ADMIN' || role === 'AUDITOR'
-}
-
-function ensureAdmin(role: string) {
-  return role === 'ADMIN'
 }
 
 interface KycCreatePayload {
@@ -58,7 +55,7 @@ export async function listKycApplications(c: AppContext) {
 
 export async function createKycApplication(c: AppContext) {
   const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
+  if (!isAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const payload = c.get('validatedBody') as KycCreatePayload
@@ -129,7 +126,7 @@ export async function listKycAppeals(c: AppContext) {
 
 export async function createKycAppeal(c: AppContext) {
   const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
+  if (!isAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams

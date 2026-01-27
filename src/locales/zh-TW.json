@@ -232,7 +232,13 @@
     "missing": "請輸入帳號與密碼",
     "loading": "登入中...",
     "redirecting": "登入成功，重新導向中...",
-    "success": "登入成功"
+    "success": "登入成功",
+    "invalidCredentials": "帳號或密碼錯誤",
+    "usernameRequired": "請輸入帳號",
+    "usernameLength": "帳號長度須為 3-32 字元",
+    "usernamePattern": "帳號只能包含英文、數字、點、底線和連字號",
+    "passwordRequired": "請輸入密碼",
+    "passwordLength": "密碼長度須為 6-64 字元"
   },
   "errors": {
     "403Title": "403 禁止存取",
@@ -245,6 +251,7 @@
     "forbidden": "請求被拒絕",
     "notFound": "找不到資源",
     "serverError": "伺服器錯誤",
+    "tooManyRequests": "請求過於頻繁",
     "unknown": "未知錯誤（代碼：{code}）",
     "back": "返回",
     "backHome": "回到首頁"

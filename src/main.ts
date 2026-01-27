@@ -19,9 +19,9 @@ async function bootstrap() {
   setupStore(app)
   app.use(i18n)
   setupDirectives(app)
+  setupNaiveDiscreteApi()
   await setupRouter(app)
   app.mount('#app')
-  setupNaiveDiscreteApi()
 }
 
 bootstrap()

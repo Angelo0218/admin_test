@@ -20,30 +20,38 @@
           <img src="@/assets/images/logo.png" class="mr-12 h-50">
           {{ title }}
         </h2>
-        <n-input
-          v-model:value="loginInfo.username"
-          autofocus
-          class="mt-32 h-40 items-center"
-          :placeholder="t('login.usernamePlaceholder')"
-          :maxlength="20"
-        >
-          <template #prefix>
-            <i class="i-fe:user mr-12 opacity-20" />
-          </template>
-        </n-input>
-        <n-input
-          v-model:value="loginInfo.password"
-          class="mt-20 h-40 items-center"
-          type="password"
-          show-password-on="mousedown"
-          :placeholder="t('login.passwordPlaceholder')"
-          :maxlength="20"
-          @keydown.enter="handleLogin()"
-        >
-          <template #prefix>
-            <i class="i-fe:lock mr-12 opacity-20" />
-          </template>
-        </n-input>
+        <n-form ref="formRef" :model="loginInfo" :rules="rules">
+          <n-form-item path="username" class="mt-32">
+            <n-input
+              v-model:value="loginInfo.username"
+              autofocus
+              autocomplete="username"
+              class="h-40 items-center"
+              :placeholder="t('login.usernamePlaceholder')"
+              :maxlength="32"
+            >
+              <template #prefix>
+                <i class="i-fe:user mr-12 opacity-20" />
+              </template>
+            </n-input>
+          </n-form-item>
+          <n-form-item path="password">
+            <n-input
+              v-model:value="loginInfo.password"
+              autocomplete="current-password"
+              class="h-40 items-center"
+              type="password"
+              show-password-on="mousedown"
+              :placeholder="t('login.passwordPlaceholder')"
+              :maxlength="64"
+              @keydown.enter="handleLogin()"
+            >
+              <template #prefix>
+                <i class="i-fe:lock mr-12 opacity-20" />
+              </template>
+            </n-input>
+          </n-form-item>
+        </n-form>
 
         <n-checkbox
           class="mt-20"
@@ -73,6 +81,7 @@
 import { useDark, useStorage } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { ToggleTheme } from '@/components'
+import { useLoginRules } from '@/composables'
 import LanguageSelect from '@/layouts/components/LanguageSelect.vue'
 import { useAuthStore } from '@/store'
 import { lStorage } from '@/utils'
@@ -84,6 +93,9 @@ const router = useRouter()
 const route = useRoute()
 const isDark = useDark()
 const title = import.meta.env.VITE_TITLE
+
+const formRef = ref(null)
+const { rules } = useLoginRules({ t })
 
 const loginInfo = ref({
   username: '',
@@ -98,9 +110,13 @@ if (localLoginInfo) {
 const isRemember = useStorage('isRemember', true)
 const loading = ref(false)
 async function handleLogin() {
+  try {
+    await formRef.value?.validate()
+  }
+  catch {
+    return
+  }
   const { username, password } = loginInfo.value
-  if (!username || !password)
-    return $message.warning(t('login.missing'))
   try {
     loading.value = true
     $message.loading(t('login.loading'), { key: 'login' })

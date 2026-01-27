@@ -230,9 +230,15 @@
     "remember": "Remember me",
     "submit": "Login",
     "missing": "Please enter username and password",
+    "invalidCredentials": "Invalid username or password",
     "loading": "Logging in...",
     "redirecting": "Login success, redirecting...",
-    "success": "Login successful"
+    "success": "Login successful",
+    "usernameRequired": "Username is required",
+    "usernameLength": "Username must be 3-32 characters",
+    "usernamePattern": "Username can only contain letters, numbers, dots, underscores and hyphens",
+    "passwordRequired": "Password is required",
+    "passwordLength": "Password must be 6-64 characters"
   },
   "errors": {
     "403Title": "403 Forbidden",
@@ -245,6 +251,7 @@
     "forbidden": "Request rejected",
     "notFound": "Requested resource not found",
     "serverError": "Server error",
+    "tooManyRequests": "Too many requests",
     "unknown": "Unknown error (code: {code})",
     "back": "Back",
     "backHome": "Home"

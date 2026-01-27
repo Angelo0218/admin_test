@@ -13,7 +13,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppCard: typeof import('./components/common/AppCard.vue')['default']
-    AppPage: typeof import('./components/common/AppPage.vue')['default']
     CommonPage: typeof import('./components/common/CommonPage.vue')['default']
     LayoutSetting: typeof import('./components/common/LayoutSetting.vue')['default']
     Modal: typeof import('./components/me/modal/index.vue')['default']
@@ -51,7 +50,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TheFooter: typeof import('./components/common/TheFooter.vue')['default']
     TheLogo: typeof import('./components/common/TheLogo.vue')['default']
-    ThemeSetting: typeof import('./components/common/ThemeSetting.vue')['default']
     ToggleTheme: typeof import('./components/common/ToggleTheme.vue')['default']
   }
 }
@@ -59,7 +57,6 @@ declare module 'vue' {
 // For TSX support
 declare global {
   const AppCard: typeof import('./components/common/AppCard.vue')['default']
-  const AppPage: typeof import('./components/common/AppPage.vue')['default']
   const CommonPage: typeof import('./components/common/CommonPage.vue')['default']
   const LayoutSetting: typeof import('./components/common/LayoutSetting.vue')['default']
   const Modal: typeof import('./components/me/modal/index.vue')['default']
@@ -97,6 +94,5 @@ declare global {
   const RouterView: typeof import('vue-router')['RouterView']
   const TheFooter: typeof import('./components/common/TheFooter.vue')['default']
   const TheLogo: typeof import('./components/common/TheLogo.vue')['default']
-  const ThemeSetting: typeof import('./components/common/ThemeSetting.vue')['default']
   const ToggleTheme: typeof import('./components/common/ToggleTheme.vue')['default']
 }

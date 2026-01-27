@@ -1,12 +1,20 @@
 import { defineStore } from 'pinia'
 import { usePermissionStore, useRouterStore, useTabStore, useUserStore } from '@/store'
 
+interface TokenData {
+  accessToken: string
+}
+
+interface AuthState {
+  accessToken: string | undefined
+}
+
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
+  state: (): AuthState => ({
     accessToken: undefined,
   }),
   actions: {
-    setToken({ accessToken }) {
+    setToken({ accessToken }: TokenData) {
       this.accessToken = accessToken
     },
     resetToken() {
@@ -19,7 +27,7 @@ export const useAuthStore = defineStore('auth', {
         query: route.query,
       })
     },
-    async switchCurrentRole(data) {
+    async switchCurrentRole(data: TokenData) {
       this.resetLoginState()
       await nextTick()
       this.setToken(data)

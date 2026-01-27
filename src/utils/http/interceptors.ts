@@ -15,18 +15,23 @@ export function setupInterceptors(axiosInstance) {
       }
       const code = data?.error?.code ?? data?.code ?? status
       const needTip = config?.needTip !== false
+      const useServerMessage = config?.useServerMessage === true
+        || import.meta.env.VITE_USE_SERVER_MESSAGE === 'true'
+      const serverMessage = data?.error?.message ?? data?.message ?? statusText
       // ??? code ?????????
-      const message = resolveResError(code, data?.error?.message ?? data?.message ?? statusText, needTip)
+      const message = resolveResError(code, useServerMessage ? serverMessage : undefined, needTip)
       return Promise.reject({ code, message, error: data ?? response })
     }
     return Promise.resolve(data ?? response)
   }
 
   async function resReject(error) {
+    const useServerMessage = error?.config?.useServerMessage === true
+      || import.meta.env.VITE_USE_SERVER_MESSAGE === 'true'
     if (!error || !error.response) {
       const code = error?.code
       // ??? code ?????????
-      const message = resolveResError(code, error?.message)
+      const message = resolveResError(code, useServerMessage ? error?.message : undefined)
       return Promise.reject({ code, message, error })
     }
 
@@ -71,7 +76,8 @@ export function setupInterceptors(axiosInstance) {
     }
 
     const needTip = config?.needTip !== false
-    const message = resolveResError(code, data?.error?.message ?? data?.message ?? error.message, needTip)
+    const serverMessage = data?.error?.message ?? data?.message ?? error.message
+    const message = resolveResError(code, useServerMessage ? serverMessage : undefined, needTip)
     return Promise.reject({ code, message, error: error.response?.data || error.response })
   }
 

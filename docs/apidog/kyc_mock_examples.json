@@ -1,35 +1,23 @@
 {
   "POST /auth/login": {
-    "request": {
-      "username": "admin",
-      "password": "Aa123456"
-    },
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
-        "accessToken": "mock-access-token"
-      }
-    }
-  },
-  "POST /auth/role/toggle": {
-    "request": {
-      "role": "AUDITOR"
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWt2NzRobjEwMDAzNGlnejhlY3Q1bWhpIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2OTQzNDE5NywiZXhwIjoxNzY5NDM3Nzk3fQ.AmzW46x2PBQeEmgj1VW10X7vq1uPLSGTrlP-KxnoDTo"
+      },
+      "error": null,
+      "requestId": "0a1f1ac7-e234-468e-9fc7-e8e5d4b11664"
     },
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "accessToken": "mock-access-token-auditor"
-      }
+    "request": {
+      "password": "Aa123456",
+      "username": "admin"
     }
   },
   "GET /user/detail": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
-        "id": "U_1001",
+        "id": "cmkv74hn100034igz8ect5mhi",
         "username": "admin",
         "status": "ACTIVE",
         "profile": {
@@ -37,60 +25,215 @@
           "nickName": "Admin"
         },
         "roles": [
-          { "id": "R_1", "code": "ADMIN", "name": "管理員" },
-          { "id": "R_2", "code": "AUDITOR", "name": "審核員" }
+          {
+            "id": "cmkv74hjt00004igzz94pn6yc",
+            "code": "ADMIN",
+            "name": "Admin"
+          }
         ],
-        "currentRole": { "id": "R_1", "code": "ADMIN", "name": "管理員" }
-      }
+        "currentRole": {
+          "id": "cmkv74hjt00004igzz94pn6yc",
+          "code": "ADMIN",
+          "name": "Admin"
+        }
+      },
+      "error": null,
+      "requestId": "96097915-6e10-4beb-9b73-5f9444615cb8"
+    }
+  },
+  "GET /roles": {
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": "cmkv74hjt00004igzz94pn6yc",
+          "code": "ADMIN",
+          "name": "Admin"
+        },
+        {
+          "id": "cmkv74hk400024igzai6723e7",
+          "code": "AUDITOR",
+          "name": "Auditor"
+        },
+        {
+          "id": "cmkv74hjz00014igzb2yrlqgy",
+          "code": "SUPPORT",
+          "name": "Support"
+        }
+      ],
+      "error": null,
+      "requestId": "94301312-c528-4fd9-8d9b-61d34a301391"
+    }
+  },
+  "POST /roles/:id/permissions": {
+    "response": {
+      "success": true,
+      "data": {
+        "roleId": "cmkv74hjt00004igzz94pn6yc",
+        "permissionCodes": [
+          "DASHBOARD_VIEW",
+          "KYC_VIEW"
+        ],
+        "updated": true
+      },
+      "error": null,
+      "requestId": "c110bf7f-6928-4ac7-ad08-5918885f14dd"
+    },
+    "request": {
+      "permissionCodes": [
+        "DASHBOARD_VIEW",
+        "KYC_VIEW"
+      ]
     }
   },
   "GET /role/permissions/tree": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": [
-        {
-          "code": "Kyc",
-          "name": "KYC 審核",
-          "type": "MENU",
-          "path": "/kyc",
-          "redirect": "/kyc/pending",
-          "children": [
-            {
-              "code": "KycPending",
-              "name": "待審核列表",
-              "type": "MENU",
-              "path": "/kyc/pending",
-              "component": "/src/views/kyc/pending/index.vue"
-            },
-            {
-              "code": "KycAppeals",
-              "name": "申訴列表",
-              "type": "MENU",
-              "path": "/kyc/appeals",
-              "component": "/src/views/kyc/appeals/index.vue"
-            }
-          ]
-        }
-      ]
+
+      ],
+      "error": null,
+      "requestId": "8694c34d-4515-4160-83ad-84aefa98780b"
     }
   },
-  "POST /permission/menu/validate": {
-    "request": {
-      "path": "/kyc/pending"
-    },
+  "GET /users": {
     "response": {
-      "code": 0,
-      "message": "ok",
-      "data": true
+      "success": true,
+      "data": {
+        "items": [
+          {
+            "id": "cmkv74hn100034igz8ect5mhi",
+            "username": "admin",
+            "displayName": "Admin",
+            "status": "ACTIVE",
+            "roles": [
+              {
+                "id": "cmkv74hjt00004igzz94pn6yc",
+                "code": "ADMIN",
+                "name": "Admin"
+              }
+            ],
+            "createdAt": "2026-01-26T13:21:15.086Z"
+          }
+        ]
+      },
+      "error": null,
+      "requestId": "7c723129-24c5-49e6-b054-fe924a23881a"
+    }
+  },
+  "POST /users": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv7fp76002o4igzthwz7svy"
+      },
+      "error": null,
+      "requestId": "50c5478d-5657-472a-868b-153adabcb955"
+    },
+    "request": {
+      "username": "demo_817578622",
+      "roleCode": "AUDITOR",
+      "displayName": "Demo User",
+      "password": "Aa123456"
+    }
+  },
+  "GET /users/:id": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv7fp76002o4igzthwz7svy",
+        "username": "demo_817578622",
+        "status": "ACTIVE",
+        "profile": {
+          "avatar": "",
+          "nickName": "Demo User"
+        },
+        "roles": [
+          {
+            "id": "cmkv74hk400024igzai6723e7",
+            "code": "AUDITOR",
+            "name": "Auditor"
+          }
+        ],
+        "currentRole": {
+          "id": "cmkv74hk400024igzai6723e7",
+          "code": "AUDITOR",
+          "name": "Auditor"
+        }
+      },
+      "error": null,
+      "requestId": "8651e664-2e8b-4779-99b2-2ecd601f749b"
+    }
+  },
+  "POST /users/:id/delete": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv7fp76002o4igzthwz7svy",
+        "status": "DELETED"
+      },
+      "error": null,
+      "requestId": "71376021-f271-4306-bf48-c013e5593780"
+    },
+    "request": {
+      "adminPassword": "Aa123456"
     }
   },
   "GET /kyc/applications": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
         "items": [
+          {
+            "id": "cmkv7b8di00204igzsr8b0ou5",
+            "fullName": "Demo Applicant",
+            "idNumber": "A123456789",
+            "documentType": "ID_CARD",
+            "phone": "0912345678",
+            "status": "NEED_MORE",
+            "applicantName": "Chen YuLing",
+            "submittedAt": "2026-01-26T13:26:29.670Z"
+          },
+          {
+            "id": "cmkv79hpb00164igzppsmndu9",
+            "fullName": "Demo Applicant",
+            "idNumber": "A123456789",
+            "documentType": "ID_CARD",
+            "phone": "0912345678",
+            "status": "NEED_MORE",
+            "applicantName": "Chen YuLing",
+            "submittedAt": "2026-01-26T13:25:08.448Z"
+          },
+          {
+            "id": "KYC_1004",
+            "fullName": "Chen YuLing",
+            "idNumber": "B223456789",
+            "documentType": "ID_CARD",
+            "phone": "0987654321",
+            "status": "PASSED",
+            "applicantName": "Chen YuLing",
+            "submittedAt": "2026-01-26T13:21:15.279Z"
+          },
+          {
+            "id": "KYC_1003",
+            "fullName": "Wang XiaoMing",
+            "idNumber": "A123456789",
+            "documentType": "ID_CARD",
+            "phone": "0912345678",
+            "status": "REJECTED",
+            "applicantName": "Wang XiaoMing",
+            "submittedAt": "2026-01-26T13:21:15.273Z"
+          },
+          {
+            "id": "KYC_1002",
+            "fullName": "Chen YuLing",
+            "idNumber": "B223456789",
+            "documentType": "ID_CARD",
+            "phone": "0987654321",
+            "status": "NEED_MORE",
+            "applicantName": "Chen YuLing",
+            "submittedAt": "2026-01-26T13:21:15.268Z"
+          },
           {
             "id": "KYC_1001",
             "fullName": "Wang XiaoMing",
@@ -99,202 +242,793 @@
             "phone": "0912345678",
             "status": "PENDING",
             "applicantName": "Wang XiaoMing",
-            "submittedAt": "2024-01-10T08:30:00Z"
+            "submittedAt": "2026-01-26T13:21:15.262Z"
           }
-        ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 1
-      }
+        ]
+      },
+      "error": null,
+      "requestId": "853754da-21b1-4616-869d-6851b5a7f499"
     }
   },
-  "GET /kyc/applications/KYC_1001": {
+  "GET /kyc/applications/:id": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
         "application": {
-          "id": "KYC_1001",
-          "userId": "U_2001",
-          "applicantName": "Wang XiaoMing",
-          "fullName": "Wang XiaoMing",
+          "id": "cmkv7b8di00204igzsr8b0ou5",
+          "userId": "cmkv74hrs00054igzkp1gjnr6",
+          "applicantName": "Chen YuLing",
+          "fullName": "Demo Applicant",
           "idNumber": "A123456789",
           "documentType": "ID_CARD",
           "phone": "0912345678",
-          "status": "PENDING",
-          "submittedAt": "2024-01-10T08:30:00Z",
-          "updatedAt": "2024-01-10T08:30:00Z",
+          "status": "NEED_MORE",
+          "submittedAt": "2026-01-26T13:26:29.670Z",
+          "updatedAt": "2026-01-26T13:26:29.677Z",
           "documents": [
-            { "id": "D1", "type": "ID_FRONT", "url": "https://cdn.example.com/kyc/front.jpg" },
-            { "id": "D2", "type": "SELFIE", "url": "https://cdn.example.com/kyc/selfie.jpg" }
+            {
+              "id": "cmkv7b8di00214igzhotrvx3g",
+              "type": "ID_FRONT",
+              "url": "https://cdn.example.com/front.jpg",
+              "createdAt": "2026-01-26T13:26:29.670Z"
+            },
+            {
+              "id": "cmkv7b8di00224igzeqoxvfhq",
+              "type": "SELFIE",
+              "url": "https://cdn.example.com/selfie.jpg",
+              "createdAt": "2026-01-26T13:26:29.670Z"
+            }
           ]
         },
-        "reviews": [],
-        "appeals": []
-      }
+        "availableActions": [
+          "PASSED",
+          "REJECTED"
+        ],
+        "availableStatuses": [
+          "PASSED",
+          "REJECTED"
+        ],
+        "reviews": [
+          {
+            "id": "cmkv7b8dp00274igzg00t90v1",
+            "action": "NEED_MORE",
+            "reviewerId": "cmkv74hn100034igz8ect5mhi",
+            "reviewerName": "Admin",
+            "comment": "Need clearer selfie.",
+            "createdAt": "2026-01-26T13:26:29.678Z"
+          }
+        ],
+        "appeals": [
+          {
+            "id": "cmkv7b8dv002b4igz80sipte5",
+            "status": "APPROVED",
+            "reason": "Upload was unclear.",
+            "decisionComment": "Approved after review.",
+            "handledByName": "Admin",
+            "handledAt": "2026-01-26T13:26:29.695Z",
+            "createdAt": "2026-01-26T13:26:29.684Z"
+          }
+        ]
+      },
+      "error": null,
+      "requestId": "b17fd5eb-6bca-4f38-8f5d-05a5b50b185a"
     }
   },
-  "POST /kyc/applications/KYC_1001/review": {
-    "request": {
-      "action": "NEED_MORE",
-      "comment": "照片不清晰"
-    },
+  "POST /kyc/applications": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
-        "id": "KYC_1001",
+        "id": "cmkv7fpa2002u4igzid8njcud",
+        "status": "PENDING",
+        "submittedAt": "2026-01-26T13:29:58.202Z"
+      },
+      "error": null,
+      "requestId": "6be9c76e-e487-49b7-9be8-079f13eb52a9"
+    },
+    "request": {
+      "fullName": "Demo Applicant",
+      "idNumber": "A123456789",
+      "phone": "0912345678",
+      "documentType": "ID_CARD",
+      "documents": [
+        {
+          "type": "ID_FRONT",
+          "url": "https://cdn.example.com/front.jpg"
+        },
+        {
+          "type": "SELFIE",
+          "url": "https://cdn.example.com/selfie.jpg"
+        }
+      ],
+      "userId": "cmkv74hrs00054igzkp1gjnr6"
+    }
+  },
+  "POST /kyc/applications/:id/review": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv7fpa2002u4igzid8njcud",
         "status": "NEED_MORE",
-        "reviewedAt": "2024-01-10T09:20:00Z"
-      }
+        "reviewedAt": "2026-01-26T13:29:58.209Z"
+      },
+      "error": null,
+      "requestId": "9b8346fe-8591-405a-986b-9abc841750a9"
+    },
+    "request": {
+      "comment": "Need clearer selfie.",
+      "action": "NEED_MORE"
+    }
+  },
+  "POST /kyc/applications/:id/appeals": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv7fpah00354igz1s07ksc0",
+        "status": "PENDING",
+        "createdAt": "2026-01-26T13:29:58.217Z"
+      },
+      "error": null,
+      "requestId": "4e342eae-eaa9-4727-95c8-764b04d83ec2"
+    },
+    "request": {
+      "reason": "Upload was unclear."
     }
   },
   "GET /kyc/appeals": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
         "items": [
           {
-            "id": "APPEAL_1",
+            "id": "cmkv7fpah00354igz1s07ksc0",
+            "applicationId": "cmkv7fpa2002u4igzid8njcud",
+            "applicantName": "Demo Applicant",
+            "idNumber": "A123456789",
+            "applicationStatus": "NEED_MORE",
+            "status": "PENDING",
+            "reason": "Upload was unclear.",
+            "handledByName": "",
+            "createdAt": "2026-01-26T13:29:58.217Z"
+          },
+          {
+            "id": "cmkv7b8dv002b4igz80sipte5",
+            "applicationId": "cmkv7b8di00204igzsr8b0ou5",
+            "applicantName": "Demo Applicant",
+            "idNumber": "A123456789",
+            "applicationStatus": "NEED_MORE",
+            "status": "APPROVED",
+            "reason": "Upload was unclear.",
+            "decisionComment": "Approved after review.",
+            "handledByName": "Admin",
+            "handledAt": "2026-01-26T13:26:29.695Z",
+            "createdAt": "2026-01-26T13:26:29.684Z"
+          },
+          {
+            "id": "cmkv79hps001h4igzi6q7j4qd",
+            "applicationId": "cmkv79hpb00164igzppsmndu9",
+            "applicantName": "Demo Applicant",
+            "idNumber": "A123456789",
+            "applicationStatus": "NEED_MORE",
+            "status": "APPROVED",
+            "reason": "Upload was unclear.",
+            "decisionComment": "Approved after review.",
+            "handledByName": "Admin",
+            "handledAt": "2026-01-26T13:25:08.473Z",
+            "createdAt": "2026-01-26T13:25:08.465Z"
+          },
+          {
+            "id": "cmkv74hss000n4igzbyh1j2dg",
+            "applicationId": "KYC_1002",
+            "applicantName": "Chen YuLing",
+            "idNumber": "B223456789",
+            "applicationStatus": "NEED_MORE",
+            "status": "APPROVED",
+            "reason": "Additional documents provided",
+            "decisionComment": "Verified additional data",
+            "handledByName": "Admin",
+            "handledAt": "2026-01-26T13:21:15.289Z",
+            "createdAt": "2026-01-26T13:21:15.293Z"
+          },
+          {
+            "id": "cmkv74hsl000l4igzsi1bdcps",
             "applicationId": "KYC_1003",
             "applicantName": "Wang XiaoMing",
             "idNumber": "A123456789",
             "applicationStatus": "REJECTED",
             "status": "PENDING",
-            "reason": "請重新檢查資料",
-            "createdAt": "2024-01-12T10:20:00Z"
+            "reason": "Request re-review due to missing context",
+            "handledByName": "",
+            "createdAt": "2026-01-26T13:21:15.285Z"
           }
-        ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 1
-      }
+        ]
+      },
+      "error": null,
+      "requestId": "44f1f184-4d31-4583-ad22-fed767f1c7c5"
     }
   },
-  "POST /kyc/appeals/APPEAL_1/resolve": {
-    "request": {
-      "status": "APPROVED",
-      "decisionComment": "補件通過"
-    },
+  "POST /kyc/appeals/:id/resolve": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
-        "id": "APPEAL_1",
+        "id": "cmkv7fpah00354igz1s07ksc0",
         "status": "APPROVED",
-        "handledAt": "2024-01-12T11:00:00Z"
-      }
+        "handledAt": "2026-01-26T13:29:58.226Z"
+      },
+      "error": null,
+      "requestId": "fd46bf21-8809-4c61-9f32-22dc1c6fcc5b"
+    },
+    "request": {
+      "decisionComment": "Approved after review.",
+      "status": "APPROVED"
     }
   },
   "GET /tickets": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
         "items": [
           {
-            "id": "TICKET_1",
-            "subject": "帳號無法登入",
-            "category": "ACCOUNT",
-            "status": "WAITING",
-            "tags": ["login"],
+            "id": "cmkv74hta000t4igzjvt8jyy3",
+            "subject": "Other request",
+            "category": "OTHER",
+            "status": "CLOSED",
+            "tags": [
+              "other"
+            ],
             "requesterName": "Wang XiaoMing",
-            "createdAt": "2024-01-13T08:00:00Z"
+            "createdAt": "2026-01-26T13:21:15.310Z"
+          },
+          {
+            "id": "cmkv74ht3000r4igzwz5h6g3o",
+            "subject": "Ticket question",
+            "category": "TICKET",
+            "status": "CLOSED",
+            "tags": [
+              "login",
+              "priority-low"
+            ],
+            "requesterName": "Chen YuLing",
+            "createdAt": "2026-01-26T13:21:15.303Z"
+          },
+          {
+            "id": "cmkv74hsy000p4igzq60eqjnq",
+            "subject": "Login issues",
+            "category": "ACCOUNT",
+            "status": "IN_PROGRESS",
+            "tags": [
+              "login",
+              "priority-low"
+            ],
+            "requesterName": "Wang XiaoMing",
+            "createdAt": "2026-01-26T13:21:15.298Z"
           }
-        ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 1
-      }
+        ]
+      },
+      "error": null,
+      "requestId": "9f762611-6f1b-4b82-aebc-1006acd3d234"
     }
   },
-  "GET /tickets/TICKET_1": {
+  "GET /tickets/:id": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
         "ticket": {
-          "id": "TICKET_1",
-          "subject": "帳號無法登入",
+          "id": "cmkv74hsy000p4igzq60eqjnq",
+          "subject": "Login issues",
           "category": "ACCOUNT",
-          "status": "WAITING",
-          "tags": ["login"],
-          "internalNote": "初始待回覆",
+          "status": "IN_PROGRESS",
+          "tags": [
+            "login",
+            "priority-low"
+          ],
+          "internalNote": "Follow up in 24 hours.",
           "requesterName": "Wang XiaoMing",
-          "createdAt": "2024-01-13T08:00:00Z",
-          "updatedAt": "2024-01-13T08:00:00Z"
+          "createdAt": "2026-01-26T13:21:15.298Z",
+          "updatedAt": "2026-01-26T13:26:29.736Z"
         },
-        "messages": []
-      }
-    }
-  },
-  "POST /tickets/TICKET_1/reply": {
-    "request": {
-      "message": "您好，請提供錯誤訊息截圖"
-    },
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "id": "MSG_1"
-      }
-    }
-  },
-  "GET /users": {
-    "response": {
-      "code": 0,
-      "message": "ok",
-      "data": {
-        "items": [
-          {
-            "id": "U_2001",
-            "username": "user1",
-            "displayName": "Wang XiaoMing",
-            "status": "ACTIVE",
-            "roles": [],
-            "createdAt": "2024-01-10T08:00:00Z"
-          }
+        "availableActions": [
+          "CLOSED"
         ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 1
-      }
+        "availableStatuses": [
+          "CLOSED"
+        ],
+        "messages": [
+          {
+            "id": "cmkv74htg000u4igza83enf9f",
+            "senderId": "cmkv74hn100034igz8ect5mhi",
+            "senderName": "Admin",
+            "message": "We received your report and will respond soon.",
+            "createdAt": "2026-01-26T13:21:15.317Z"
+          },
+          {
+            "id": "cmkv7b8ez002h4igz7nm38cm4",
+            "senderId": "cmkv74hn100034igz8ect5mhi",
+            "senderName": "Admin",
+            "message": "We are reviewing your request.",
+            "createdAt": "2026-01-26T13:26:29.723Z"
+          }
+        ]
+      },
+      "error": null,
+      "requestId": "433d7067-0d90-403d-9fd7-6559ae06be83"
     }
   },
-  "POST /users/U_2001/disable": {
-    "request": {
-      "reason": "測試停用"
-    },
+  "POST /tickets/:id/reply": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
-        "id": "U_2001",
-        "status": "DISABLED"
-      }
+        "id": "cmkv7fpbd003b4igz1ejbxpwe",
+        "createdAt": "2026-01-26T13:29:58.249Z"
+      },
+      "error": null,
+      "requestId": "9574152d-e9c5-4b47-8ecf-22018014d022"
+    },
+    "request": {
+      "message": "We are reviewing your request."
+    }
+  },
+  "POST /tickets/:id/update": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv74hsy000p4igzq60eqjnq",
+        "tags": [
+          "login",
+          "priority-low"
+        ],
+        "internalNote": "Follow up in 24 hours.",
+        "updatedAt": "2026-01-26T13:29:58.255Z"
+      },
+      "error": null,
+      "requestId": "87fb54e3-7f6b-4a25-b496-26b80effda0f"
+    },
+    "request": {
+      "tags": [
+        "login",
+        "priority-low"
+      ],
+      "internalNote": "Follow up in 24 hours."
+    }
+  },
+  "POST /tickets/:id/status": {
+    "response": {
+      "success": true,
+      "data": {
+        "id": "cmkv74hsy000p4igzq60eqjnq",
+        "status": "CLOSED",
+        "updatedAt": "2026-01-26T13:29:58.263Z"
+      },
+      "error": null,
+      "requestId": "2e5a6d77-eb2f-4ee8-88b2-5e49467b95ba"
+    },
+    "request": {
+      "status": "CLOSED"
     }
   },
   "GET /audit/logs": {
     "response": {
-      "code": 0,
-      "message": "ok",
+      "success": true,
       "data": {
         "items": [
           {
-            "id": "A_1001",
+            "id": "cmkv7fpbs003h4igznznx8uql",
+            "actorName": "Admin",
+            "action": "TICKET_STATUS",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "status": "CLOSED"
+            },
+            "createdAt": "2026-01-26T13:29:58.265Z"
+          },
+          {
+            "id": "cmkv7fpbk003f4igz2pc2i1o5",
+            "actorName": "Admin",
+            "action": "TICKET_UPDATE",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "tags": [
+                "login",
+                "priority-low"
+              ],
+              "internalNote": "Follow up in 24 hours."
+            },
+            "createdAt": "2026-01-26T13:29:58.256Z"
+          },
+          {
+            "id": "cmkv7fpbf003d4igz74pk3fph",
+            "actorName": "Admin",
+            "action": "TICKET_REPLY",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "message": "We are reviewing your request."
+            },
+            "createdAt": "2026-01-26T13:29:58.251Z"
+          },
+          {
+            "id": "cmkv7fpas00394igzo0fjlkyi",
+            "actorName": "Admin",
+            "action": "KYC_APPEAL_APPROVED",
+            "targetType": "KYC_APPEAL",
+            "targetId": "cmkv7fpah00354igz1s07ksc0",
+            "meta": {
+              "status": "APPROVED",
+              "decisionComment": "Approved after review."
+            },
+            "createdAt": "2026-01-26T13:29:58.229Z"
+          },
+          {
+            "id": "cmkv7fpai00374igzx10zrkow",
+            "actorName": "Admin",
+            "action": "KYC_APPEAL_CREATE",
+            "targetType": "KYC_APPEAL",
+            "targetId": "cmkv7fpah00354igz1s07ksc0",
+            "meta": {
+              "applicationId": "cmkv7fpa2002u4igzid8njcud",
+              "reason": "Upload was unclear."
+            },
+            "createdAt": "2026-01-26T13:29:58.219Z"
+          },
+          {
+            "id": "cmkv7fpab00334igzp2bbsxlm",
+            "actorName": "Admin",
+            "action": "KYC_NEED_MORE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "cmkv7fpa2002u4igzid8njcud",
+            "meta": {
+              "action": "NEED_MORE",
+              "comment": "Need clearer selfie."
+            },
+            "createdAt": "2026-01-26T13:29:58.212Z"
+          },
+          {
+            "id": "cmkv7fpa4002y4igzey2vlt2f",
+            "actorName": "Admin",
+            "action": "KYC_CREATE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "cmkv7fpa2002u4igzid8njcud",
+            "meta": {
+              "userId": "cmkv74hrs00054igzkp1gjnr6",
+              "fullName": "Demo Applicant",
+              "idNumber": "A123456789",
+              "documentType": "ID_CARD",
+              "phone": "0912345678",
+              "documents": [
+                {
+                  "type": "ID_FRONT",
+                  "url": "https://cdn.example.com/front.jpg"
+                },
+                {
+                  "type": "SELFIE",
+                  "url": "https://cdn.example.com/selfie.jpg"
+                }
+              ]
+            },
+            "createdAt": "2026-01-26T13:29:58.204Z"
+          },
+          {
+            "id": "cmkv7fp9n002s4igz0b41jjvn",
+            "actorName": "Admin",
+            "action": "USER_DELETE",
+            "targetType": "USER",
+            "targetId": "cmkv7fp76002o4igzthwz7svy",
+            "createdAt": "2026-01-26T13:29:58.187Z"
+          },
+          {
+            "id": "cmkv7fp79002q4igz1ywo955d",
+            "actorName": "Admin",
+            "action": "USER_CREATE",
+            "targetType": "USER",
+            "targetId": "cmkv7fp76002o4igzthwz7svy",
+            "meta": {
+              "roleCode": "AUDITOR"
+            },
+            "createdAt": "2026-01-26T13:29:58.101Z"
+          },
+          {
+            "id": "cmkv7b8fd002n4igz3ka6oxne",
+            "actorName": "Admin",
+            "action": "TICKET_STATUS",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "status": "IN_PROGRESS"
+            },
+            "createdAt": "2026-01-26T13:26:29.738Z"
+          },
+          {
+            "id": "cmkv7b8f6002l4igz7vh18awn",
+            "actorName": "Admin",
+            "action": "TICKET_UPDATE",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "tags": [
+                "login",
+                "priority-low"
+              ],
+              "internalNote": "Follow up in 24 hours."
+            },
+            "createdAt": "2026-01-26T13:26:29.731Z"
+          },
+          {
+            "id": "cmkv7b8f2002j4igzzr0h60d5",
+            "actorName": "Admin",
+            "action": "TICKET_REPLY",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "message": "We are reviewing your request."
+            },
+            "createdAt": "2026-01-26T13:26:29.726Z"
+          },
+          {
+            "id": "cmkv7b8e9002f4igzjo9qjxjv",
+            "actorName": "Admin",
+            "action": "KYC_APPEAL_APPROVED",
+            "targetType": "KYC_APPEAL",
+            "targetId": "cmkv7b8dv002b4igz80sipte5",
+            "meta": {
+              "status": "APPROVED",
+              "decisionComment": "Approved after review."
+            },
+            "createdAt": "2026-01-26T13:26:29.697Z"
+          },
+          {
+            "id": "cmkv7b8dx002d4igz5lpztmtt",
+            "actorName": "Admin",
+            "action": "KYC_APPEAL_CREATE",
+            "targetType": "KYC_APPEAL",
+            "targetId": "cmkv7b8dv002b4igz80sipte5",
+            "meta": {
+              "applicationId": "cmkv7b8di00204igzsr8b0ou5",
+              "reason": "Upload was unclear."
+            },
+            "createdAt": "2026-01-26T13:26:29.686Z"
+          },
+          {
+            "id": "cmkv7b8ds00294igzcqp75g8w",
+            "actorName": "Admin",
+            "action": "KYC_NEED_MORE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "cmkv7b8di00204igzsr8b0ou5",
+            "meta": {
+              "action": "NEED_MORE",
+              "comment": "Need clearer selfie."
+            },
+            "createdAt": "2026-01-26T13:26:29.680Z"
+          },
+          {
+            "id": "cmkv7b8dk00244igzrqdvmnf1",
+            "actorName": "Admin",
+            "action": "KYC_CREATE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "cmkv7b8di00204igzsr8b0ou5",
+            "meta": {
+              "userId": "cmkv74hrs00054igzkp1gjnr6",
+              "fullName": "Demo Applicant",
+              "idNumber": "A123456789",
+              "documentType": "ID_CARD",
+              "phone": "0912345678",
+              "documents": [
+                {
+                  "type": "ID_FRONT",
+                  "url": "https://cdn.example.com/front.jpg"
+                },
+                {
+                  "type": "SELFIE",
+                  "url": "https://cdn.example.com/selfie.jpg"
+                }
+              ]
+            },
+            "createdAt": "2026-01-26T13:26:29.672Z"
+          },
+          {
+            "id": "cmkv7b8d3001y4igzri6jn54i",
+            "actorName": "Admin",
+            "action": "USER_DELETE",
+            "targetType": "USER",
+            "targetId": "cmkv7b8ag001u4igzilk790yb",
+            "createdAt": "2026-01-26T13:26:29.655Z"
+          },
+          {
+            "id": "cmkv7b8ai001w4igzfatddlva",
+            "actorName": "Admin",
+            "action": "USER_CREATE",
+            "targetType": "USER",
+            "targetId": "cmkv7b8ag001u4igzilk790yb",
+            "meta": {
+              "roleCode": "AUDITOR"
+            },
+            "createdAt": "2026-01-26T13:26:29.563Z"
+          },
+          {
+            "id": "cmkv79hr4001t4igzj0ipm06x",
+            "actorName": "Admin",
+            "action": "TICKET_STATUS",
+            "targetType": "TICKET",
+            "targetId": "cmkv74ht3000r4igzwz5h6g3o",
+            "meta": {
+              "status": "CLOSED"
+            },
+            "createdAt": "2026-01-26T13:25:08.513Z"
+          },
+          {
+            "id": "cmkv79hqu001r4igz7vtf77s2",
+            "actorName": "Admin",
+            "action": "TICKET_UPDATE",
+            "targetType": "TICKET",
+            "targetId": "cmkv74ht3000r4igzwz5h6g3o",
+            "meta": {
+              "tags": [
+                "login",
+                "priority-low"
+              ],
+              "internalNote": "Follow up in 24 hours."
+            },
+            "createdAt": "2026-01-26T13:25:08.502Z"
+          },
+          {
+            "id": "cmkv79hqn001p4igzksahayf7",
+            "actorName": "Admin",
+            "action": "TICKET_REPLY",
+            "targetType": "TICKET",
+            "targetId": "cmkv74ht3000r4igzwz5h6g3o",
+            "meta": {
+              "message": "We are reviewing your request."
+            },
+            "createdAt": "2026-01-26T13:25:08.496Z"
+          },
+          {
+            "id": "cmkv79hq3001l4igzbwzuqtyw",
+            "actorName": "Admin",
+            "action": "KYC_APPEAL_APPROVED",
+            "targetType": "KYC_APPEAL",
+            "targetId": "cmkv79hps001h4igzi6q7j4qd",
+            "meta": {
+              "status": "APPROVED",
+              "decisionComment": "Approved after review."
+            },
+            "createdAt": "2026-01-26T13:25:08.475Z"
+          },
+          {
+            "id": "cmkv79hpt001j4igzx44p0w2b",
+            "actorName": "Admin",
+            "action": "KYC_APPEAL_CREATE",
+            "targetType": "KYC_APPEAL",
+            "targetId": "cmkv79hps001h4igzi6q7j4qd",
+            "meta": {
+              "applicationId": "cmkv79hpb00164igzppsmndu9",
+              "reason": "Upload was unclear."
+            },
+            "createdAt": "2026-01-26T13:25:08.466Z"
+          },
+          {
+            "id": "cmkv79hpo001f4igzr2d2m417",
+            "actorName": "Admin",
+            "action": "KYC_NEED_MORE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "cmkv79hpb00164igzppsmndu9",
+            "meta": {
+              "action": "NEED_MORE",
+              "comment": "Need clearer selfie."
+            },
+            "createdAt": "2026-01-26T13:25:08.461Z"
+          },
+          {
+            "id": "cmkv79hpe001a4igz67shut3v",
+            "actorName": "Admin",
+            "action": "KYC_CREATE",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "cmkv79hpb00164igzppsmndu9",
+            "meta": {
+              "userId": "cmkv74hrs00054igzkp1gjnr6",
+              "fullName": "Demo Applicant",
+              "idNumber": "A123456789",
+              "documentType": "ID_CARD",
+              "phone": "0912345678",
+              "documents": [
+                {
+                  "type": "ID_FRONT",
+                  "url": "https://cdn.example.com/front.jpg"
+                },
+                {
+                  "type": "SELFIE",
+                  "url": "https://cdn.example.com/selfie.jpg"
+                }
+              ]
+            },
+            "createdAt": "2026-01-26T13:25:08.450Z"
+          },
+          {
+            "id": "cmkv79hoq00144igze6ans5wt",
+            "actorName": "Admin",
+            "action": "USER_DELETE",
+            "targetType": "USER",
+            "targetId": "cmkv79hly00104igzlzbachul",
+            "createdAt": "2026-01-26T13:25:08.427Z"
+          },
+          {
+            "id": "cmkv79hm200124igz81szmys5",
+            "actorName": "Admin",
+            "action": "USER_CREATE",
+            "targetType": "USER",
+            "targetId": "cmkv79hly00104igzlzbachul",
+            "meta": {
+              "roleCode": "AUDITOR"
+            },
+            "createdAt": "2026-01-26T13:25:08.331Z"
+          },
+          {
+            "id": "cmkv74htl000x4igz5tazzwfc",
             "actorName": "Admin",
             "action": "KYC_APPROVE",
             "targetType": "KYC_APPLICATION",
             "targetId": "KYC_1004",
-            "meta": { "comment": "資料完整" },
-            "createdAt": "2024-01-12T10:00:00Z"
+            "meta": {
+              "comment": "Approved"
+            },
+            "createdAt": "2026-01-26T13:21:15.322Z"
+          },
+          {
+            "id": "cmkv74htl000y4igzfihczyy7",
+            "actorName": "Admin",
+            "action": "KYC_REJECT",
+            "targetType": "KYC_APPLICATION",
+            "targetId": "KYC_1003",
+            "meta": {
+              "comment": "Information mismatch"
+            },
+            "createdAt": "2026-01-26T13:21:15.322Z"
+          },
+          {
+            "id": "cmkv74htl000z4igzrjbjgbts",
+            "actorName": "Admin",
+            "action": "TICKET_REPLY",
+            "targetType": "TICKET",
+            "targetId": "cmkv74hsy000p4igzq60eqjnq",
+            "meta": {
+              "message": "We received your report and will respond soon."
+            },
+            "createdAt": "2026-01-26T13:21:15.322Z"
           }
-        ],
-        "page": 1,
-        "pageSize": 20,
-        "total": 1
-      }
+        ]
+      },
+      "error": null,
+      "requestId": "7f68c1dd-0723-4e3d-b1cb-1f4085d9bc3c"
+    }
+  },
+  "POST /auth/refresh/token": {
+    "response": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWt2NzRobjEwMDAzNGlnejhlY3Q1bWhpIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2OTQzNDE5OCwiZXhwIjoxNzY5NDM3Nzk4fQ.5A5Ft4__1wx-_89j8K0UD004RcrcUY238qiLhKZj2bg"
+      },
+      "error": null,
+      "requestId": "f46c730e-29b3-4c8b-88a2-adacf03dc144"
+    }
+  },
+  "POST /auth/role/toggle": {
+    "response": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWt2NzRobjEwMDAzNGlnejhlY3Q1bWhpIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2OTQzNDE5OCwiZXhwIjoxNzY5NDM3Nzk4fQ.5A5Ft4__1wx-_89j8K0UD004RcrcUY238qiLhKZj2bg"
+      },
+      "error": null,
+      "requestId": "395e6682-a70a-4ee5-a231-1b2e253482f1"
+    },
+    "request": {
+      "role": "ADMIN"
+    }
+  },
+  "POST /auth/logout": {
+    "response": {
+      "success": true,
+      "data": true,
+      "error": null,
+      "requestId": "7cd8ab7d-9666-4d1c-ada5-d239a027dd9e"
     }
   }
 }

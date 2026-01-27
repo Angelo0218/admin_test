@@ -3,34 +3,31 @@ info:
   title: KYC Admin API
   version: 2.0.0
 servers:
+  - url: http://localhost:8085
+    description: local
   - url: https://mock.apidog.com/m1/1182812-1177228-default
     description: apidog mock default
   - url: https://mock.apidog.com/m1/1182812-1177228-1050889
     description: apidog mock server
+tags:
+  - name: auth
+  - name: user
+  - name: role
+  - name: kyc
+  - name: ticket
+  - name: audit
 paths:
   /api/v1/auth/login:
     post:
       tags: [auth]
       summary: Login
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginRequest'
-            examples:
-              admin:
-                value:
-                  username: admin
-                  password: Aa123456
-              support:
-                value:
-                  username: support
-                  password: Aa123456
-              auditor:
-                value:
-                  username: auditor
-                  password: Aa123456
       responses:
         '200':
           description: ok
@@ -38,10 +35,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseToken'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/auth/refresh/token:
+    post:
+      tags: [auth]
+      summary: Refresh token
+      security:
+        - refreshToken: []
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseToken'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/v1/auth/logout:
     post:
       tags: [auth]
       summary: Logout
+      security: []
       responses:
         '200':
           description: ok
@@ -49,28 +68,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseBoolean'
-  /api/v1/auth/refresh/token:
-    post:
-      tags: [auth]
-      summary: Refresh token
-      parameters:
-        - name: refreshToken
-          in: cookie
-          required: true
-          description: HttpOnly refresh token cookie
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseToken'
   /api/v1/auth/role/toggle:
     post:
       tags: [auth]
       summary: Toggle role
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -84,10 +87,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseToken'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/v1/user/detail:
     get:
       tags: [user]
       summary: Get current user detail
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -95,10 +104,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/v1/users:
     get:
       tags: [user]
       summary: List users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: ok
@@ -106,79 +125,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseUserList'
-  /api/v1/users/{id}:
-    get:
-      tags: [user]
-      summary: Get user by id
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseUser'
-  /api/v1/users/{id}/disable:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [user]
-      summary: Disable user
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      summary: Create user
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserDisableRequest'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseStatus'
-  /api/v1/users/{id}/enable:
-    post:
-      tags: [user]
-      summary: Enable user
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseStatus'
-  /api/v1/users/{id}/reset-password:
-    post:
-      tags: [user]
-      summary: Reset user password
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserResetPasswordRequest'
+              $ref: '#/components/schemas/UserCreateRequest'
       responses:
         '200':
           description: ok
@@ -186,10 +147,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/users/{id}:
+    get:
+      tags: [user]
+      summary: Get user by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/users/{id}/delete:
+    post:
+      tags: [user]
+      summary: Delete user
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeleteRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/roles:
     get:
       tags: [role]
       summary: List roles
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -197,16 +212,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseRoleList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/v1/roles/{id}/permissions:
     post:
       tags: [role]
       summary: Update role permissions
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -220,10 +237,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseRolePermission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/v1/role/permissions/tree:
     get:
-      tags: [permission]
+      tags: [role]
       summary: Get permission tree
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -231,27 +254,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponsePermissions'
-  /api/v1/permission/menu/validate:
-    post:
-      tags: [permission]
-      summary: Validate menu path
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PermissionValidateRequest'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseBoolean'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/v1/kyc/applications:
     get:
       tags: [kyc]
       summary: List KYC applications
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -259,9 +269,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseKycList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [kyc]
       summary: Create KYC application
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -275,16 +291,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseKycResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/kyc/applications/{id}:
     get:
       tags: [kyc]
       summary: Get KYC detail
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
           description: ok
@@ -292,16 +312,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseKycDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/kyc/applications/{id}/review:
     post:
       tags: [kyc]
       summary: Review KYC application
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -315,16 +339,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseKycResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/kyc/applications/{id}/appeals:
     post:
       tags: [kyc]
       summary: Create KYC appeal
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -338,10 +368,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseKycAppealResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/kyc/appeals:
     get:
       tags: [kyc]
       summary: List appeals
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -349,16 +387,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseKycAppealList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/v1/kyc/appeals/{id}/resolve:
     post:
       tags: [kyc]
       summary: Resolve appeal
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -371,11 +411,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseKycAppealResult'
+                $ref: '#/components/schemas/ApiResponseKycAppealResolve'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/tickets:
     get:
       tags: [ticket]
       summary: List tickets
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -383,32 +433,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseTicketList'
-    post:
-      tags: [ticket]
-      summary: Create ticket
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TicketCreateRequest'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseTicketResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/v1/tickets/{id}:
     get:
       tags: [ticket]
       summary: Get ticket detail
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
           description: ok
@@ -416,16 +452,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseTicketDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/tickets/{id}/reply:
     post:
       tags: [ticket]
       summary: Reply ticket
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -438,17 +478,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseTicketResult'
+                $ref: '#/components/schemas/ApiResponseTicketReply'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/tickets/{id}/status:
     post:
       tags: [ticket]
       summary: Update ticket status
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -461,17 +505,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseTicketResult'
+                $ref: '#/components/schemas/ApiResponseTicketStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/tickets/{id}/update:
     post:
       tags: [ticket]
       summary: Update ticket meta
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/IdParam'
       requestBody:
         required: true
         content:
@@ -484,11 +534,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseTicketResult'
+                $ref: '#/components/schemas/ApiResponseTicketUpdate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/audit/logs:
     get:
       tags: [audit]
       summary: List audit logs
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: ok
@@ -496,224 +554,332 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseAuditList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    refreshToken:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
-    ApiResponseBase:
+    ApiError:
       type: object
+      required: [code, message]
       properties:
         code:
           type: integer
-          example: 0
         message:
           type: string
-          example: ok
-      required: [code, message]
+    ApiResponseBase:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: '#/components/schemas/ApiError'
+          nullable: true
+        requestId:
+          type: string
     ApiResponseToken:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/TokenData'
-          required: [data]
     ApiResponseBoolean:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: boolean
+    ApiResponseId:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
           required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/IdResult'
     ApiResponseUser:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/User'
-          required: [data]
     ApiResponseUserList:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/UserListResponse'
+    ApiResponseUserStatus:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
           required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/StatusResult'
     ApiResponseRoleList:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: array
               items:
                 $ref: '#/components/schemas/Role'
+    ApiResponseRolePermission:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
           required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/RolePermissionResult'
     ApiResponsePermissions:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: array
               items:
                 $ref: '#/components/schemas/PermissionItem'
-          required: [data]
-    ApiResponseStatus:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/StatusResult'
-          required: [data]
-    ApiResponseId:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/IdResult'
-          required: [data]
-    ApiResponseRolePermission:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/RolePermissionResult'
-          required: [data]
     ApiResponseKycList:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/KycListResponse'
-          required: [data]
     ApiResponseKycDetail:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/KycDetailResponse'
-          required: [data]
     ApiResponseKycResult:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/KycActionResult'
-          required: [data]
     ApiResponseKycAppealList:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/KycAppealListResponse'
-          required: [data]
     ApiResponseKycAppealResult:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/KycAppealResult'
+    ApiResponseKycAppealResolve:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
           required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/KycAppealResolveResult'
     ApiResponseTicketList:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/TicketListResponse'
-          required: [data]
     ApiResponseTicketDetail:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/TicketDetailResponse'
-          required: [data]
-    ApiResponseTicketResult:
+    ApiResponseTicketReply:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
-              $ref: '#/components/schemas/IdResult'
+              $ref: '#/components/schemas/TicketReplyResult'
+    ApiResponseTicketStatus:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
           required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/TicketStatusResult'
+    ApiResponseTicketUpdate:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/TicketUpdateResult'
     ApiResponseAuditList:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data:
               $ref: '#/components/schemas/AuditListResponse'
-          required: [data]
+    ErrorResponse:
+      oneOf:
+        - $ref: '#/components/schemas/ApiErrorResponse'
+        - $ref: '#/components/schemas/LegacyErrorResponse'
+    ApiErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data, error]
+          properties:
+            data:
+              nullable: true
+            error:
+              $ref: '#/components/schemas/ApiError'
+    LegacyErrorResponse:
+      type: object
+      required: [code, message, data]
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          nullable: true
+        requestId:
+          type: string
     TokenData:
       type: object
+      required: [accessToken]
       properties:
         accessToken:
           type: string
-      required: [accessToken]
     LoginRequest:
       type: object
+      required: [username, password]
       properties:
         username:
           type: string
         password:
           type: string
-      required: [username, password]
     RoleToggleRequest:
       type: object
+      required: [role]
       properties:
         role:
           type: string
           enum: [ADMIN, SUPPORT, AUDITOR]
-      required: [role]
-    PermissionValidateRequest:
+    UserCreateRequest:
       type: object
+      required: [username, password, displayName, roleCode]
       properties:
-        path:
+        username:
           type: string
-      required: [path]
-    UserDisableRequest:
-      type: object
-      properties:
-        reason:
-          type: string
-      required: [reason]
-    UserResetPasswordRequest:
-      type: object
-      properties:
         password:
           type: string
-    RolePermissionRequest:
+        displayName:
+          type: string
+        roleCode:
+          type: string
+          enum: [ADMIN, SUPPORT, AUDITOR]
+    UserDeleteRequest:
       type: object
+      required: [adminPassword]
       properties:
-        permissionCodes:
-          type: array
-          items:
-            type: string
-      required: [permissionCodes]
+        adminPassword:
+          type: string
     User:
       type: object
+      required: [id, username, status, roles, currentRole, profile]
       properties:
         id:
           type: string
         username:
           type: string
         status:
-          type: string
-          enum: [ACTIVE, DISABLED]
-        disabledReason:
-          type: string
+          $ref: '#/components/schemas/UserStatus'
         profile:
           $ref: '#/components/schemas/Profile'
         roles:
@@ -722,23 +888,28 @@ components:
             $ref: '#/components/schemas/Role'
         currentRole:
           $ref: '#/components/schemas/Role'
-      required: [id, username, roles, currentRole, status]
+    Profile:
+      type: object
+      required: [avatar, nickName]
+      properties:
+        avatar:
+          type: string
+        nickName:
+          type: string
+    UserStatus:
+      type: string
+      enum: [ACTIVE, DELETED]
     UserListResponse:
       type: object
+      required: [items]
       properties:
         items:
           type: array
           items:
             $ref: '#/components/schemas/UserListItem'
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        total:
-          type: integer
-      required: [items, page, pageSize, total]
     UserListItem:
       type: object
+      required: [id, username, displayName, status, roles, createdAt]
       properties:
         id:
           type: string
@@ -747,8 +918,7 @@ components:
         displayName:
           type: string
         status:
-          type: string
-          enum: [ACTIVE, DISABLED]
+          $ref: '#/components/schemas/UserStatus'
         roles:
           type: array
           items:
@@ -756,16 +926,9 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, username, status, roles, createdAt]
-    Profile:
-      type: object
-      properties:
-        avatar:
-          type: string
-        nickName:
-          type: string
     Role:
       type: object
+      required: [id, code, name]
       properties:
         id:
           type: string
@@ -774,7 +937,6 @@ components:
           enum: [ADMIN, SUPPORT, AUDITOR]
         name:
           type: string
-      required: [id, code, name]
     PermissionItem:
       type: object
       properties:
@@ -784,45 +946,41 @@ components:
           type: string
         type:
           type: string
-          enum: [MENU, BUTTON]
-        icon:
-          type: string
-        order:
-          type: integer
-        enable:
-          type: boolean
-        show:
-          type: boolean
         path:
           type: string
         redirect:
           type: string
         component:
           type: string
-        layout:
-          type: string
-        keepAlive:
-          type: boolean
         children:
           type: array
           items:
             $ref: '#/components/schemas/PermissionItem'
     StatusResult:
       type: object
+      required: [id, status]
       properties:
         id:
           type: string
         status:
-          type: string
-      required: [id, status]
+          $ref: '#/components/schemas/UserStatus'
     IdResult:
       type: object
+      required: [id]
       properties:
         id:
           type: string
-      required: [id]
+    RolePermissionRequest:
+      type: object
+      required: [permissionCodes]
+      properties:
+        permissionCodes:
+          type: array
+          items:
+            type: string
     RolePermissionResult:
       type: object
+      required: [roleId, permissionCodes, updated]
       properties:
         roleId:
           type: string
@@ -832,37 +990,17 @@ components:
             type: string
         updated:
           type: boolean
-      required: [roleId, permissionCodes, updated]
     KycListResponse:
       type: object
+      required: [items]
       properties:
         items:
           type: array
           items:
             $ref: '#/components/schemas/KycApplicationListItem'
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        total:
-          type: integer
-      required: [items, page, pageSize, total]
-    KycDetailResponse:
-      type: object
-      properties:
-        application:
-          $ref: '#/components/schemas/KycApplicationDetail'
-        reviews:
-          type: array
-          items:
-            $ref: '#/components/schemas/KycReview'
-        appeals:
-          type: array
-          items:
-            $ref: '#/components/schemas/KycAppeal'
-      required: [application, reviews, appeals]
     KycApplicationListItem:
       type: object
+      required: [id, fullName, idNumber, documentType, phone, status, applicantName, submittedAt]
       properties:
         id:
           type: string
@@ -875,16 +1013,37 @@ components:
         phone:
           type: string
         status:
-          type: string
-          enum: [PENDING, NEED_MORE, PASSED, REJECTED]
+          $ref: '#/components/schemas/KycStatus'
         applicantName:
           type: string
         submittedAt:
           type: string
           format: date-time
-      required: [id, fullName, idNumber, status, submittedAt]
+    KycDetailResponse:
+      type: object
+      required: [application, availableActions, availableStatuses, reviews, appeals]
+      properties:
+        application:
+          $ref: '#/components/schemas/KycApplicationDetail'
+        availableActions:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycAction'
+        availableStatuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycAction'
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycReview'
+        appeals:
+          type: array
+          items:
+            $ref: '#/components/schemas/KycAppeal'
     KycApplicationDetail:
       type: object
+      required: [id, userId, applicantName, fullName, idNumber, documentType, phone, status, submittedAt, updatedAt, documents]
       properties:
         id:
           type: string
@@ -901,8 +1060,7 @@ components:
         phone:
           type: string
         status:
-          type: string
-          enum: [PENDING, NEED_MORE, PASSED, REJECTED]
+          $ref: '#/components/schemas/KycStatus'
         submittedAt:
           type: string
           format: date-time
@@ -913,9 +1071,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KycDocument'
-      required: [id, userId, fullName, idNumber, status, submittedAt, documents]
     KycDocument:
       type: object
+      required: [id, type, url, createdAt]
       properties:
         id:
           type: string
@@ -927,15 +1085,14 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, type, url]
     KycReview:
       type: object
+      required: [id, action, reviewerId, reviewerName, createdAt]
       properties:
         id:
           type: string
         action:
-          type: string
-          enum: [PASSED, REJECTED, NEED_MORE]
+          $ref: '#/components/schemas/KycAction'
         reviewerId:
           type: string
         reviewerName:
@@ -945,15 +1102,14 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, action, reviewerId, createdAt]
     KycAppeal:
       type: object
+      required: [id, status, createdAt]
       properties:
         id:
           type: string
         status:
-          type: string
-          enum: [PENDING, APPROVED, REJECTED]
+          $ref: '#/components/schemas/KycAppealStatus'
         reason:
           type: string
         decisionComment:
@@ -966,34 +1122,28 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, status, createdAt]
     KycActionResult:
       type: object
+      required: [id, status, reviewedAt]
       properties:
         id:
           type: string
         status:
-          type: string
+          $ref: '#/components/schemas/KycStatus'
         reviewedAt:
           type: string
           format: date-time
-      required: [id, status]
     KycAppealListResponse:
       type: object
+      required: [items]
       properties:
         items:
           type: array
           items:
             $ref: '#/components/schemas/KycAppealListItem'
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        total:
-          type: integer
-      required: [items, page, pageSize, total]
     KycAppealListItem:
       type: object
+      required: [id, applicationId, applicantName, idNumber, applicationStatus, status, createdAt]
       properties:
         id:
           type: string
@@ -1004,9 +1154,9 @@ components:
         idNumber:
           type: string
         applicationStatus:
-          type: string
+          $ref: '#/components/schemas/KycStatus'
         status:
-          type: string
+          $ref: '#/components/schemas/KycAppealStatus'
         reason:
           type: string
         decisionComment:
@@ -1019,23 +1169,31 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, applicationId, status, createdAt]
     KycAppealResult:
       type: object
+      required: [id, status, createdAt]
       properties:
         id:
           type: string
         status:
-          type: string
-        handledAt:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/KycAppealStatus'
         createdAt:
           type: string
           format: date-time
+    KycAppealResolveResult:
+      type: object
       required: [id, status]
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/KycAppealStatus'
+        handledAt:
+          type: string
+          format: date-time
     KycCreateRequest:
       type: object
+      required: [userId, fullName, idNumber, documentType, phone, documents]
       properties:
         userId:
           type: string
@@ -1051,66 +1209,60 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KycDocumentRequest'
-      required: [userId, fullName, idNumber, documentType, phone]
     KycReviewRequest:
       type: object
+      required: [action]
       properties:
         action:
-          type: string
-          enum: [PASSED, REJECTED, NEED_MORE]
+          $ref: '#/components/schemas/KycAction'
         comment:
           type: string
-      required: [action]
     KycAppealCreateRequest:
       type: object
+      required: [reason]
       properties:
         reason:
           type: string
-      required: [reason]
     KycAppealResolveRequest:
       type: object
+      required: [status]
       properties:
         status:
-          type: string
-          enum: [APPROVED, REJECTED]
+          $ref: '#/components/schemas/KycAppealResolveStatus'
         decisionComment:
           type: string
-      required: [status]
     KycDocumentRequest:
       type: object
+      required: [type, url]
       properties:
         type:
           type: string
           enum: [ID_FRONT, SELFIE]
         url:
           type: string
-      required: [type, url]
+    KycStatus:
+      type: string
+      enum: [PENDING, NEED_MORE, PASSED, REJECTED]
+    KycAction:
+      type: string
+      enum: [NEED_MORE, PASSED, REJECTED]
+    KycAppealStatus:
+      type: string
+      enum: [PENDING, APPROVED, REJECTED]
+    KycAppealResolveStatus:
+      type: string
+      enum: [APPROVED, REJECTED]
     TicketListResponse:
       type: object
+      required: [items]
       properties:
         items:
           type: array
           items:
             $ref: '#/components/schemas/TicketListItem'
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        total:
-          type: integer
-      required: [items, page, pageSize, total]
-    TicketDetailResponse:
-      type: object
-      properties:
-        ticket:
-          $ref: '#/components/schemas/TicketDetail'
-        messages:
-          type: array
-          items:
-            $ref: '#/components/schemas/TicketMessage'
-      required: [ticket, messages]
     TicketListItem:
       type: object
+      required: [id, subject, category, status, tags, requesterName, createdAt]
       properties:
         id:
           type: string
@@ -1119,8 +1271,7 @@ components:
         category:
           type: string
         status:
-          type: string
-          enum: [WAITING, IN_PROGRESS, CLOSED]
+          $ref: '#/components/schemas/TicketStatus'
         tags:
           type: array
           items:
@@ -1130,9 +1281,27 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, subject, category, status, createdAt]
+    TicketDetailResponse:
+      type: object
+      required: [ticket, availableActions, availableStatuses, messages]
+      properties:
+        ticket:
+          $ref: '#/components/schemas/TicketDetail'
+        availableActions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketStatus'
+        availableStatuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketStatus'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketMessage'
     TicketDetail:
       type: object
+      required: [id, subject, category, status, tags, requesterName, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -1141,8 +1310,7 @@ components:
         category:
           type: string
         status:
-          type: string
-          enum: [WAITING, IN_PROGRESS, CLOSED]
+          $ref: '#/components/schemas/TicketStatus'
         tags:
           type: array
           items:
@@ -1157,9 +1325,9 @@ components:
         updatedAt:
           type: string
           format: date-time
-      required: [id, subject, category, status, createdAt]
     TicketMessage:
       type: object
+      required: [id, senderId, senderName, message, createdAt]
       properties:
         id:
           type: string
@@ -1172,36 +1340,18 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, senderId, message, createdAt]
-    TicketCreateRequest:
-      type: object
-      properties:
-        requesterId:
-          type: string
-        subject:
-          type: string
-        category:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
-        internalNote:
-          type: string
-      required: [requesterId, subject, category]
     TicketReplyRequest:
       type: object
+      required: [message]
       properties:
         message:
           type: string
-      required: [message]
     TicketStatusRequest:
       type: object
+      required: [status]
       properties:
         status:
-          type: string
-          enum: [WAITING, IN_PROGRESS, CLOSED]
-      required: [status]
+          $ref: '#/components/schemas/TicketStatus'
     TicketUpdateRequest:
       type: object
       properties:
@@ -1211,22 +1361,55 @@ components:
             type: string
         internalNote:
           type: string
+    TicketReplyResult:
+      type: object
+      required: [id, createdAt]
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    TicketStatusResult:
+      type: object
+      required: [id, status, updatedAt]
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/TicketStatus'
+        updatedAt:
+          type: string
+          format: date-time
+    TicketUpdateResult:
+      type: object
+      required: [id, tags, updatedAt]
+      properties:
+        id:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        internalNote:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    TicketStatus:
+      type: string
+      enum: [WAITING, IN_PROGRESS, CLOSED]
     AuditListResponse:
       type: object
+      required: [items]
       properties:
         items:
           type: array
           items:
             $ref: '#/components/schemas/AuditLogItem'
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        total:
-          type: integer
-      required: [items, page, pageSize, total]
     AuditLogItem:
       type: object
+      required: [id, actorName, action, targetType, targetId, createdAt]
       properties:
         id:
           type: string
@@ -1243,4 +1426,3 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, action, targetType, targetId, createdAt]

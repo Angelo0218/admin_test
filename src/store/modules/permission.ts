@@ -95,10 +95,15 @@ export const usePermissionStore = defineStore('permission', {
     accessRoutes: [],
     permissions: [],
     menus: [],
+    currentRole: '',
   }),
   actions: {
-    // 靘??脤?瞈曉?蝡舀??邦銝阡?撱粹??
+    // 根據角色設定權限，若角色相同且已有權限則跳過
     setRolePermissions(role) {
+      if (role && this.currentRole === role && this.permissions.length) {
+        return
+      }
+      this.currentRole = role || ''
       this.accessRoutes = []
       this.permissions = filterTreeByRole(buildPermissionTree(), role)
       this.rebuildMenus()

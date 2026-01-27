@@ -144,6 +144,13 @@ export async function createUserAccount({ username, password, displayName, roleC
 }
 
 export async function deleteUserAccount(id: string) {
+  const existing = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true },
+  })
+  if (!existing) {
+    return null
+  }
   return prisma.user.update({
     where: { id },
     data: buildUserDeleteData(),

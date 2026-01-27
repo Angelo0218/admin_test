@@ -65,6 +65,11 @@ export async function refreshToken(c: AppContext) {
 
   try {
     const payload = verifyRefreshToken(token)
+    // 檢查用戶是否仍有效
+    const user = await findUserById(payload.userId)
+    if (!user || !canLoginWithStatus(user.status)) {
+      return fail(c, 401, 'user not available', 401)
+    }
     const accessToken = signAccessToken({
       userId: payload.userId,
       role: payload.role,
@@ -72,8 +77,7 @@ export async function refreshToken(c: AppContext) {
     })
     return ok(c, { accessToken })
   }
-  catch (error) {
-    console.warn('refresh token verify failed', error)
+  catch {
     return fail(c, 401, 'invalid refresh token', 401)
   }
 }

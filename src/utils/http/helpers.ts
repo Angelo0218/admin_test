@@ -11,7 +11,13 @@ function handleAuthExpired(content, needTip) {
   if (isConfirming || !needTip)
     return false
   isConfirming = true
-  $dialog.confirm({
+  if (!window.$dialog?.confirm) {
+    useAuthStore().logout()
+    window.$message?.error(content)
+    isConfirming = false
+    return false
+  }
+  window.$dialog.confirm({
     title: t('errors.sessionExpiredTitle'),
     type: 'info',
     content,
@@ -33,6 +39,16 @@ export function resolveResError(code, message, needTip = true) {
   const hasMessage = typeof message === 'string' && message.trim()
   switch (code) {
     case 401: {
+      if (hasMessage) {
+        const normalized = message === 'invalid credentials'
+          ? t('login.invalidCredentials')
+          : message === 'missing refresh token'
+            ? t('errors.sessionExpiredContent')
+            : message
+        if (needTip)
+          window.$message?.error(normalized)
+        return normalized
+      }
       const content = t('errors.sessionExpiredContent')
       handleAuthExpired(content, needTip)
       return content
@@ -50,6 +66,9 @@ export function resolveResError(code, message, needTip = true) {
       break
     case 404:
       message = hasMessage ? message : t('errors.notFound')
+      break
+    case 429:
+      message = hasMessage ? message : t('errors.tooManyRequests')
       break
     case 500:
       message = hasMessage ? message : t('errors.serverError')

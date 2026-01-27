@@ -10,10 +10,7 @@ import {
 } from '../models/user'
 import { verifyPassword } from '../utils/password'
 import { fail, ok } from '../utils/response'
-
-function ensureAdmin(role: string) {
-  return role === 'ADMIN'
-}
+import { isAdmin } from '../utils/role'
 
 interface UserListQuery {
   keyword?: string
@@ -46,7 +43,7 @@ export async function getCurrentUser(c: AppContext) {
 
 export async function listUserAccounts(c: AppContext) {
   const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
+  if (!isAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const query = c.get('validatedQuery') as UserListQuery
@@ -56,7 +53,7 @@ export async function listUserAccounts(c: AppContext) {
 
 export async function getUserById(c: AppContext) {
   const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
+  if (!isAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
@@ -70,7 +67,7 @@ export async function getUserById(c: AppContext) {
 
 export async function createUserAccountHandler(c: AppContext) {
   const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
+  if (!isAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const payload = c.get('validatedBody') as UserCreatePayload
@@ -87,7 +84,7 @@ export async function createUserAccountHandler(c: AppContext) {
 
 export async function deleteUserAccountHandler(c: AppContext) {
   const auth = c.get('user') as AuthPayload
-  if (!ensureAdmin(auth.role)) {
+  if (!isAdmin(auth.role)) {
     return fail(c, 403, 'forbidden', 403)
   }
   const { id } = c.get('validatedParams') as IdParams
@@ -101,6 +98,9 @@ export async function deleteUserAccountHandler(c: AppContext) {
     return fail(c, 401, 'invalid admin password', 401)
   }
   const user = await deleteUserAccount(id)
+  if (!user) {
+    return fail(c, 404, 'user not found', 404)
+  }
   await createAuditLog({
     actorId: auth.userId,
     action: 'USER_DELETE',
