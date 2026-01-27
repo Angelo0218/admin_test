@@ -4,5 +4,16 @@
       "source": "/api/v1/:path*",
       "destination": "https://chalkstony-connubially-corrina.ngrok-free.dev/api/v1/:path*"
     }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "https://www.321897.xyz" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, PATCH, DELETE, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "Access-Control-Allow-Credentials", "value": "true" }
+      ]
+    }
   ]
 }
