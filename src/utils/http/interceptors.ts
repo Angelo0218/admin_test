@@ -86,6 +86,10 @@ export function setupInterceptors(axiosInstance) {
 }
 
 function reqResolve(config) {
+  if (import.meta.env.VITE_NGROK_SKIP_WARNING === 'true') {
+    config.headers = config.headers || {}
+    config.headers['ngrok-skip-browser-warning'] = 'true'
+  }
   // needToken = false ????????token
   if (config.needToken === false) {
     return config
