@@ -3,7 +3,10 @@ import { createMiddleware } from 'hono/factory'
 
 function formatError(error: z.ZodError) {
   const first = error.errors[0]
-  return first?.message || 'invalid request'
+  if (!first)
+    return 'invalid request'
+  const path = first.path?.length ? first.path.join('.') : ''
+  return path ? `${path} ${first.message}` : first.message
 }
 
 export function validateJson<T extends z.ZodTypeAny>(schema: T) {
