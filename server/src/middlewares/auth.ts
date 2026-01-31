@@ -12,7 +12,7 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   const header = c.req.header('Authorization') || ''
   const token = header.startsWith('Bearer ') ? header.slice(7) : ''
   if (!token) {
-    return c.json({ code: 401, message: 'unauthorized', data: null }, 401)
+    return c.json({ success: false, code: 401, message: 'unauthorized', data: null }, 401)
   }
   try {
     const payload = jwt.verify(token, env.jwtSecret) as AuthPayload
@@ -20,6 +20,6 @@ export const authMiddleware = createMiddleware(async (c, next) => {
     await next()
   }
   catch {
-    return c.json({ code: 401, message: 'invalid token', data: null }, 401)
+    return c.json({ success: false, code: 401, message: 'invalid token', data: null }, 401)
   }
 })

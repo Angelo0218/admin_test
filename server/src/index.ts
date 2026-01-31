@@ -23,7 +23,7 @@ app.use('*', securityHeaders)
 app.use('*', async (c, next) => {
   const origin = c.req.header('Origin')
   if (origin && !isOriginAllowed(origin, env.corsOrigin)) {
-    return c.json({ code: 403, message: 'cors origin not allowed', data: null }, 403)
+    return c.json({ success: false, code: 403, message: 'cors origin not allowed', data: null }, 403)
   }
   await next()
 })
@@ -34,9 +34,9 @@ app.use('*', cors({
 app.use('*', logger())
 
 app.onError(errorHandler)
-app.notFound(c => c.json({ code: 404, message: 'not found', data: null }, 404))
+app.notFound(c => c.json({ success: false, code: 404, message: 'not found', data: null }, 404))
 
-app.get('/', c => c.json({ code: 0, message: 'ok', data: { service: 'kyc-api' } }))
+app.get('/', c => c.json({ success: true, code: 0, message: 'ok', data: { service: 'kyc-api' } }))
 
 app.route('/api/v1', authRoutes)
 app.route('/api/v1', userRoutes)

@@ -17,7 +17,7 @@ export function validateJson<T extends z.ZodTypeAny>(schema: T) {
     }
     const result = schema.safeParse(body)
     if (!result.success) {
-      return c.json({ code: 400, message: formatError(result.error), data: null }, 400)
+      return c.json({ success: false, code: 400, message: formatError(result.error), data: null }, 400)
     }
     c.set('validatedBody', result.data)
     await next()
@@ -29,7 +29,7 @@ export function validateParams<T extends z.ZodTypeAny>(schema: T) {
     const params = c.req.param()
     const result = schema.safeParse(params)
     if (!result.success) {
-      return c.json({ code: 400, message: formatError(result.error), data: null }, 400)
+      return c.json({ success: false, code: 400, message: formatError(result.error), data: null }, 400)
     }
     c.set('validatedParams', result.data)
     await next()
@@ -41,7 +41,7 @@ export function validateQuery<T extends z.ZodTypeAny>(schema: T) {
     const query = c.req.query()
     const result = schema.safeParse(query)
     if (!result.success) {
-      return c.json({ code: 400, message: formatError(result.error), data: null }, 400)
+      return c.json({ success: false, code: 400, message: formatError(result.error), data: null }, 400)
     }
     c.set('validatedQuery', result.data)
     await next()

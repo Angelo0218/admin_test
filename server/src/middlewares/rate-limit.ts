@@ -39,7 +39,7 @@ export function createRateLimiter(options: RateLimitOptions): MiddlewareHandler 
     hits.set(key, entry)
 
     if (entry.count > options.max) {
-      return c.json({ code: 429, message: 'too many requests', data: null }, 429)
+      return c.json({ success: false, code: 429, message: 'too many requests', data: null }, 429)
     }
 
     await next()
