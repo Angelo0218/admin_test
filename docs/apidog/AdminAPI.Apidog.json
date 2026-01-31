@@ -17529,8 +17529,14 @@
               "moduleId": 1056142,
               "contentType": "json",
               "jsonSchema": {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "$ref": "#/definitions/12569125",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/12569126"
+                  },
+                  {
+                    "$ref": "#/definitions/12569127"
+                  }
+                ],
                 "definitions": {
                   "12557515": {
                     "type": "object",
@@ -19563,7 +19569,8 @@
                       "requestId"
                     ]
                   }
-                }
+                },
+                "$schema": "http://json-schema.org/draft-07/schema#"
               },
               "itemSchema": {
                 "type": "object",
@@ -19582,8 +19589,14 @@
               "moduleId": 1056142,
               "contentType": "json",
               "jsonSchema": {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "$ref": "#/definitions/12569125",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/12569126"
+                  },
+                  {
+                    "$ref": "#/definitions/12569127"
+                  }
+                ],
                 "definitions": {
                   "12557515": {
                     "type": "object",
@@ -21616,7 +21629,8 @@
                       "requestId"
                     ]
                   }
-                }
+                },
+                "$schema": "http://json-schema.org/draft-07/schema#"
               },
               "itemSchema": {
                 "type": "object",
@@ -21635,8 +21649,14 @@
               "moduleId": 1056142,
               "contentType": "json",
               "jsonSchema": {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "$ref": "#/definitions/12569125",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/12569126"
+                  },
+                  {
+                    "$ref": "#/definitions/12569127"
+                  }
+                ],
                 "definitions": {
                   "12557515": {
                     "type": "object",
@@ -23669,7 +23689,8 @@
                       "requestId"
                     ]
                   }
-                }
+                },
+                "$schema": "http://json-schema.org/draft-07/schema#"
               },
               "itemSchema": {
                 "type": "object",
@@ -23688,8 +23709,14 @@
               "moduleId": 1056142,
               "contentType": "json",
               "jsonSchema": {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "$ref": "#/definitions/12569125",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/12569126"
+                  },
+                  {
+                    "$ref": "#/definitions/12569127"
+                  }
+                ],
                 "definitions": {
                   "12557515": {
                     "type": "object",
@@ -25722,7 +25749,8 @@
                       "requestId"
                     ]
                   }
-                }
+                },
+                "$schema": "http://json-schema.org/draft-07/schema#"
               },
               "itemSchema": {
                 "type": "object",
@@ -25741,8 +25769,14 @@
               "moduleId": 1056142,
               "contentType": "json",
               "jsonSchema": {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "$ref": "#/definitions/12569125",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/12569126"
+                  },
+                  {
+                    "$ref": "#/definitions/12569127"
+                  }
+                ],
                 "definitions": {
                   "12557515": {
                     "type": "object",
@@ -27775,7 +27809,8 @@
                       "requestId"
                     ]
                   }
-                }
+                },
+                "$schema": "http://json-schema.org/draft-07/schema#"
               },
               "itemSchema": {
                 "type": "object",
@@ -27794,8 +27829,14 @@
               "moduleId": 1056142,
               "contentType": "json",
               "jsonSchema": {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "$ref": "#/definitions/12569125",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/12569126"
+                  },
+                  {
+                    "$ref": "#/definitions/12569127"
+                  }
+                ],
                 "definitions": {
                   "12557515": {
                     "type": "object",
@@ -29828,7 +29869,8 @@
                       "requestId"
                     ]
                   }
-                }
+                },
+                "$schema": "http://json-schema.org/draft-07/schema#"
               },
               "itemSchema": {
                 "type": "object",
