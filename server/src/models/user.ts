@@ -156,3 +156,10 @@ export async function deleteUserAccount(id: string) {
     data: buildUserDeleteData(),
   })
 }
+
+export async function updateUserPassword(id: string, passwordHash: string) {
+  return prisma.user.update({
+    where: { id },
+    data: { passwordHash },
+  })
+}

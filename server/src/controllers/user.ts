@@ -7,8 +7,9 @@ import {
   findUserById,
   listUsers,
   mapUserResponse,
+  updateUserPassword,
 } from '../models/user'
-import { verifyPassword } from '../utils/password'
+import { hashPassword, verifyPassword } from '../utils/password'
 import { fail, ok } from '../utils/response'
 import { isAdmin } from '../utils/role'
 
@@ -25,6 +26,11 @@ interface UserCreatePayload {
 
 interface UserDeletePayload {
   adminPassword: string
+}
+
+interface UserPasswordChangePayload {
+  currentPassword: string
+  newPassword: string
 }
 
 interface IdParams {
@@ -108,4 +114,26 @@ export async function deleteUserAccountHandler(c: AppContext) {
     targetId: id,
   })
   return ok(c, { id: user.id, status: user.status })
+}
+
+export async function changePasswordHandler(c: AppContext) {
+  const auth = c.get('user') as AuthPayload
+  const payload = c.get('validatedBody') as UserPasswordChangePayload
+  const user = await findUserById(auth.userId)
+  if (!user) {
+    return fail(c, 404, 'user not found', 404)
+  }
+  const isValid = await verifyPassword(payload.currentPassword, user.passwordHash)
+  if (!isValid) {
+    return fail(c, 401, 'invalid current password', 401)
+  }
+  const passwordHash = await hashPassword(payload.newPassword)
+  await updateUserPassword(user.id, passwordHash)
+  await createAuditLog({
+    actorId: auth.userId,
+    action: 'USER_PASSWORD_CHANGE',
+    targetType: 'USER',
+    targetId: user.id,
+  })
+  return ok(c, true)
 }

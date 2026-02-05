@@ -16,6 +16,11 @@ export const userDeleteSchema = z.object({
   adminPassword: z.string().min(1),
 })
 
+export const userPasswordChangeSchema = z.object({
+  currentPassword: z.string().min(6).max(64),
+  newPassword: z.string().min(6).max(64),
+})
+
 export const idParamSchema = z.object({
   id: z.string().min(1),
 })
